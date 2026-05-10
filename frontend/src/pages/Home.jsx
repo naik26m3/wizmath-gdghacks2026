@@ -4,7 +4,7 @@ import AuthButton from '@/components/wizmath/AuthButton';
 
 function Crest() {
   return (
-    <div style={{ width:320, maxWidth:'80%', margin:'0 auto 12px', filter:'drop-shadow(0 18px 40px rgba(0,0,0,.7)) drop-shadow(0 0 30px rgba(67,226,210,.15))' }}>
+    <div style={{ width:320, maxWidth:'80%', margin:'0 auto 4px', filter:'drop-shadow(0 18px 40px rgba(0,0,0,.7)) drop-shadow(0 0 30px rgba(67,226,210,.15))' }}>
       <svg viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg" style={{ width:'100%', height:'auto', display:'block' }}>
         <defs>
           <linearGradient id="hxGold" x1="0" y1="0" x2="0" y2="1">
@@ -80,7 +80,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ fontFamily:'Manrope,system-ui,sans-serif', background:'#010A13', color:'#d7e4f1', minHeight:'100vh', display:'flex', flexDirection:'column', overflow:'hidden' }}>
+    <div style={{ fontFamily:'Manrope,system-ui,sans-serif', background:'#010A13', color:'#d7e4f1', height:'100vh', display:'flex', flexDirection:'column', overflow:'hidden' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
         .wiz-font-bebas { font-family:'Bebas Neue',sans-serif; }
@@ -91,7 +91,7 @@ export default function Home() {
         .home-brand-mark::before { content:'';position:absolute;inset:0;z-index:1;background:radial-gradient(circle at 50% 50%,#43e2d2 0 20%,transparent 22%);filter:drop-shadow(0 0 6px #43e2d2); }
         .home-gbtn { --c:10px;background:transparent;border:1px solid rgba(240,191,92,.5);color:#f0bf5c;padding:10px 18px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;clip-path:polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));transition:background .2s,color .2s; }
         .home-gbtn:hover { background:#f0bf5c;color:#1a1100; }
-        .home-cta { --c:16px;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:14px;padding:22px 64px;min-width:380px;background:linear-gradient(180deg,#ffdea4,#f0bf5c 45%,#c89b3c);color:#1a1100;border:none;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:22px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c));box-shadow:0 18px 50px -10px rgba(240,191,92,.35),0 0 60px -10px rgba(67,226,210,.25);transition:transform .15s,box-shadow .25s,filter .2s; }
+        .home-cta { --c:16px;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:14px;padding:18px 56px;min-width:360px;background:linear-gradient(180deg,#ffdea4,#f0bf5c 45%,#c89b3c);color:#1a1100;border:none;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:20px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c));box-shadow:0 18px 50px -10px rgba(240,191,92,.35),0 0 60px -10px rgba(67,226,210,.25);transition:transform .15s,box-shadow .25s,filter .2s; }
         .home-cta:hover { transform:translateY(-2px);filter:brightness(1.08);box-shadow:0 24px 60px -10px rgba(240,191,92,.55),0 0 80px -10px rgba(67,226,210,.45); }
         .home-cta-frame { --c:18px;position:relative;padding:2px;background:linear-gradient(180deg,rgba(240,191,92,.6),rgba(67,226,210,.4));clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c)); }
         .home-avatar { width:30px;height:30px;margin-left:-8px;border:1.5px solid #f0bf5c;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
@@ -103,7 +103,7 @@ export default function Home() {
       <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:0, background:'radial-gradient(900px 540px at 50% -10%,rgba(240,191,92,.05),transparent 60%),radial-gradient(800px 600px at 100% 100%,rgba(67,226,210,.04),transparent 65%),#010A13' }}/>
       <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:1, opacity:.07, backgroundImage:'repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0 1px,transparent 1px 3px)', mixBlendMode:'overlay' }}/>
 
-      <div style={{ position:'relative', zIndex:2, display:'flex', flexDirection:'column', minHeight:'100vh' }}>
+      <div style={{ position:'relative', zIndex:2, display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden' }}>
         {/* Nav */}
         <nav style={{ display:'flex', alignItems:'center', gap:24, padding:'22px 36px', borderBottom:'1px solid rgba(200,155,60,.10)' }}>
           <div style={{ display:'flex', alignItems:'center', gap:14 }}>
@@ -121,7 +121,7 @@ export default function Home() {
         </nav>
 
         {/* Hero */}
-        <section style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 24px 32px', textAlign:'center', maxWidth:1200, margin:'0 auto', width:'100%' }}>
+        <section style={{ flex:1, minHeight:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'12px 24px 16px', textAlign:'center', maxWidth:1200, margin:'0 auto', width:'100%', overflow:'hidden' }}>
           <Crest />
 
           <div style={{ display:'inline-flex', alignItems:'center', gap:14, color:'#f0bf5c', marginBottom:10, fontFamily:'Space Grotesk,sans-serif', fontSize:12, fontWeight:500, letterSpacing:'.12em', textTransform:'uppercase' }}>
@@ -137,7 +137,7 @@ export default function Home() {
             <em style={{ fontStyle:'normal', background:'linear-gradient(180deg,#ffdea4 0%,#f0bf5c 50%,#c89b3c 100%)', WebkitBackgroundClip:'text', backgroundClip:'text', WebkitTextFillColor:'transparent' }}>Wield It Like Magic.</em>
           </h1>
 
-          <p style={{ maxWidth:620, margin:'0 auto 20px', fontFamily:'Manrope,sans-serif', fontSize:16, lineHeight:'24px', color:'#d2c5b1' }}>
+          <p style={{ maxWidth:620, margin:'0 auto 14px', fontFamily:'Manrope,sans-serif', fontSize:16, lineHeight:'24px', color:'#d2c5b1' }}>
             A spellbound path through arithmetic, algebra, geometry and beyond — forged for curious young minds and stubborn old ones. Each problem is a riddle. Each lesson, a rite.
           </p>
 
@@ -148,7 +148,7 @@ export default function Home() {
             <div style={{ color:'#d2c5b1', fontFamily:'Space Grotesk,sans-serif', fontSize:12, letterSpacing:'.22em', textTransform:'uppercase' }}>~ takes about two minutes ~</div>
           </div>
 
-          <div style={{ marginTop:24, display:'flex', alignItems:'center', justifyContent:'center', gap:18, flexWrap:'wrap', color:'#d2c5b1', fontFamily:'Space Grotesk,sans-serif', fontSize:13, letterSpacing:'.14em', textTransform:'uppercase' }}>
+          <div style={{ marginTop:14, display:'flex', alignItems:'center', justifyContent:'center', gap:18, flexWrap:'wrap', color:'#d2c5b1', fontFamily:'Space Grotesk,sans-serif', fontSize:13, letterSpacing:'.14em', textTransform:'uppercase' }}>
             <div style={{ display:'flex' }}>
               {[
                 'radial-gradient(circle at 35% 35%,#ffdea4,#c89b3c)',

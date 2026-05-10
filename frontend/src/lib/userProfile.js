@@ -19,7 +19,7 @@ export async function ensureUserProfile(authUser) {
     displayName: authUser.displayName ?? 'Explorer',
     photoURL: authUser.photoURL ?? null,
     xp: 0,
-    level: 1,
+    level: 0,
     avatarEmoji,
     equippedHat: null,
     badges: [],

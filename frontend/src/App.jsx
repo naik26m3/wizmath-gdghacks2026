@@ -17,11 +17,11 @@ import Leaderboard from '@/pages/Leaderboard';
 import Play from '@/pages/Play';
 import SignInModal from '@/components/wizmath/SignInModal';
 
-// Old /signin URL → bounce to home and open the modal so existing links keep working.
+// Old /signin URL → bounce to /activities and open the modal so existing links keep working.
 function SignInRedirect() {
   const { openSignInModal } = useAuth();
   useEffect(() => { openSignInModal(); }, [openSignInModal]);
-  return <Navigate to="/" replace />;
+  return <Navigate to="/activities" replace />;
 }
 
 const AuthenticatedApp = () => {

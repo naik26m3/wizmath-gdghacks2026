@@ -108,15 +108,30 @@ export async function recordActivityView(activityId, userId) {
   if (!activityId || !userId) return { firstView: false };
   const ref = doc(db, COLLECTION, activityId);
   const snap = await getDoc(ref);
-  if (!snap.exists()) return { firstView: false };
+  if (!snap.exists()) {
+    console.warn('[recordActivityView] activity not found:', activityId);
+    return { firstView: false };
+  }
   const data = snap.data();
   const viewedBy = Array.isArray(data.viewedBy) ? data.viewedBy : [];
-  if (viewedBy.includes(userId)) return { firstView: false };
-  await updateDoc(ref, {
-    viewedBy: arrayUnion(userId),
-    views: increment(1),
-  });
-  return { firstView: true };
+  if (viewedBy.includes(userId)) {
+    console.log('[recordActivityView] already viewed by this user, skipping');
+    return { firstView: false };
+  }
+  try {
+    await updateDoc(ref, {
+      viewedBy: arrayUnion(userId),
+      views: increment(1),
+    });
+    console.log('[recordActivityView] view recorded ✓');
+    return { firstView: true };
+  } catch (err) {
+    console.error('[recordActivityView] FAILED:', err.code, err.message);
+    if (err.code === 'permission-denied') {
+      console.error('[recordActivityView] HINT: Update Firestore rules in Firebase Console — the views/viewedBy update is being blocked. See backend/firestore.rules for the latest version.');
+    }
+    throw err;
+  }
 }
 
 /**

@@ -119,7 +119,7 @@ export default function Leaderboard() {
 
       {/* Nav */}
       <nav style={{ display:'flex', alignItems:'center', gap:20, padding:'16px 32px', borderBottom:`1px solid ${BORDER}`, background:BG2, position: 'relative', zIndex: 1 }}>
-        <Link to="/" style={{ display:'flex', alignItems:'center', gap:12, textDecoration:'none' }}>
+        <Link to="/activities" style={{ display:'flex', alignItems:'center', gap:12, textDecoration:'none' }}>
           <div className="lb-brand-mark"/>
           <span style={{ fontFamily:'Bebas Neue,sans-serif', fontSize:20, letterSpacing:'.18em', color:'#d7e4f1' }}>WIZMATH<span style={{ color:GOLD }}>.</span>DEV</span>
         </Link>
@@ -244,7 +244,7 @@ export default function Leaderboard() {
                     <div style={{ fontFamily:'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing:'.16em', color:'#9b8f7d', marginTop: 2 }}>
                       {isCreator
                         ? `${row.activityCount} ${row.activityCount === 1 ? 'activity' : 'activities'}`
-                        : `Level ${row.level || 1}`}
+                        : `Level ${(typeof row.level === 'number' ? row.level : Math.floor((row.xp || 0) / 100))}`}
                     </div>
                   </div>
                 </div>
@@ -258,7 +258,7 @@ export default function Leaderboard() {
                       <span style={{ color: TEAL }}>{row.totalViews}</span> {row.totalViews === 1 ? 'view' : 'views'}
                     </>
                   ) : (
-                    <>Lv. <span style={{ color: TEAL }}>{row.level || 1}</span></>
+                    <>Lv. <span style={{ color: TEAL }}>{(typeof row.level === 'number' ? row.level : Math.floor((row.xp || 0) / 100))}</span></>
                   )}
                 </div>
 

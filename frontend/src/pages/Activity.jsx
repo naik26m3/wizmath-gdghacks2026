@@ -356,12 +356,19 @@ export default function Activity() {
   useEffect(() => {
     if (!id || !user || !activity?.id) return;
     if (activity.authorUid && activity.authorUid === user.uid) return;
+    if ((activity.viewedBy || []).includes(user.uid)) return; // already counted
     let cancelled = false;
     (async () => {
       try {
         const { firstView } = await recordActivityView(id, user.uid);
         if (cancelled) return;
         if (firstView) {
+          // Optimistically bump the view count in local state
+          setActivity((a) => ({
+            ...a,
+            views: (a.views || 0) + 1,
+            viewedBy: [...(a.viewedBy || []), user.uid],
+          }));
           try { await awardXp(user.uid, 1); } catch (e) { console.warn('awardXp failed:', e); }
         }
       } catch (e) {
@@ -394,6 +401,7 @@ export default function Activity() {
 
   const isStarred = !!user && (activity.starredBy || []).includes(user.uid);
   const starCount = activity.stars || 0;
+  const viewCount = activity.views || 0;
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: aiCollapsed ? '1fr 44px' : '1fr 320px', height: '100vh', fontFamily: 'Manrope,sans-serif', background: BG, color: '#d7e4f1', overflow: 'hidden' }}>
@@ -415,13 +423,14 @@ export default function Activity() {
       <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', minWidth: 0, minHeight: 0 }}>
         {/* Nav */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 28px', borderBottom: `1px solid ${BORDER}`, background: BG2, flexShrink: 0 }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
+          <Link to="/activities" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
             <div className="wiz-brand-mark"/>
             <span className="wiz-font-bebas" style={{ fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>WIZMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12 }}>
             <Link to="/activities" style={{ textDecoration: 'none' }}><button className="nav-link" style={{ color: '#f0bf5c', borderBottomColor: 'rgba(240,191,92,.5)' }}>Activities</button></Link>
             <Link to="/create" style={{ textDecoration: 'none' }}><button className="nav-link">Create</button></Link>
+            <Link to="/leaderboard" style={{ textDecoration: 'none' }}><button className="nav-link">Leaderboard</button></Link>
           </div>
           <Link to="/activities" style={{ textDecoration: 'none', marginLeft: 'auto' }}>
             <button style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 7, color: '#aaa', padding: '8px 14px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', transition: 'border-color .2s, color .2s' }}
@@ -440,6 +449,11 @@ export default function Activity() {
               {activity.title}
             </h1>
             <div style={{ flexShrink: 0, paddingTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div title={`${viewCount} ${viewCount === 1 ? 'view' : 'views'}`}
+                style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.12)', borderRadius:7, color:'#aaa', padding:'7px 12px', fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:700, letterSpacing:'.04em' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                {viewCount}
+              </div>
               <Link to={`/activity/${id}/play`} style={{ textDecoration: 'none' }}>
                 <button title="Test your understanding"
                   style={{ display:'inline-flex', alignItems:'center', gap:8, background: 'linear-gradient(180deg,#43e2d2,#005049)', border: 0, borderRadius: 7, color: '#002a26', padding:'8px 16px', cursor:'pointer', fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:700, letterSpacing:'.16em', textTransform:'uppercase', boxShadow: '0 0 14px rgba(67,226,210,.25)', transition: 'transform .12s, filter .15s' }}
