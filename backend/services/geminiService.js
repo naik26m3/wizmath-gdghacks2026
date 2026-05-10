@@ -389,6 +389,59 @@ export async function generateGeoGebraCommand(userPrompt) {
 }
 
 /**
+ * Generate a 2-3 sentence description for an activity from its title + GeoGebra commands.
+ * Used by the Publish modal's "auto-generate" button.
+ */
+export async function generateActivityDescription({ title, commands, userHint }) {
+    try {
+        const safeTitle = validatePrompt(title, 'Title');
+        const safeCommands = Array.isArray(commands) ? commands.slice(0, 200) : [];
+        const safeHint = typeof userHint === 'string' ? userHint.trim().slice(0, 500) : '';
+
+        if (!process.env.GEMINI_API_KEY) {
+            throw new Error("Missing GEMINI_API_KEY");
+        }
+
+        const systemInstruction = `You are writing a short description for an interactive math activity.
+
+Activity title: "${safeTitle}"
+
+${safeHint ? `The author wrote this rough idea or hint to guide you (build on it, expand on it, or polish it — keep their main point):
+"${safeHint}"
+
+` : ''}The activity is built from these GeoGebra commands (for context only — do NOT mention GeoGebra or code in the description):
+${safeCommands.join('\n')}
+
+Write a 2-3 sentence description that:
+- Explains in plain language what the activity demonstrates or teaches.
+- Mentions what learners can interact with (e.g. "drag the slider to change the radius") if applicable.
+- ${safeHint ? "Honors the author's hint — keep the main point or angle they specified." : 'Sounds clear, encouraging, and concise.'}
+- Targets a high-school audience.
+- Does NOT mention GeoGebra, sliders by variable name, code, or math notation.
+- Does NOT use markdown, bullet points, headers, or quotation marks.
+
+Return ONLY the plain description text — no preface, no "Here's a description...", just the description itself.`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: 'Write the description now.',
+            config: {
+                systemInstruction,
+                temperature: 0.7,
+            },
+        });
+
+        const text = (response.text ?? '').trim();
+        if (!text) throw new Error('Empty response from Gemini');
+        // Strip stray surrounding quotes if Gemini added any
+        return text.replace(/^["'`]+|["'`]+$/g, '').trim();
+    } catch (error) {
+        console.error('Error generating description:', error);
+        throw new Error('Failed to generate description');
+    }
+}
+
+/**
  * Tutor mode: a student is exploring a published activity and asks a question.
  * Gemini answers in plain language — it does NOT generate GeoGebra commands.
  */
