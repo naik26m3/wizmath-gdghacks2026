@@ -377,7 +377,7 @@ export default function Create() {
   const activityIdToLoad = searchParams.get('id');
 
   const [aiOpen, setAiOpen] = useState(true);
-  const [commands, setCommands] = useState([]);
+  const [commands, setCommands] = useState(/** @type {string[]} */ ([]));
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [loadStatus, setLoadStatus] = useState(activityIdToLoad ? 'loading' : 'idle');
@@ -447,7 +447,22 @@ export default function Create() {
           setLoadStatus('not-found');
           return;
         }
-        handleApplyCommands(activity.commands || [], activity.settings || {});
+        // Prefer XML restore — perfect fidelity. After setXML, prime our
+        // local commands state from the live canvas so future AI prompts
+        // see the right currentCommands.
+        /** @type {any} */
+        const api = apiRef.current;
+        if (typeof activity.geogebraXML === 'string' && activity.geogebraXML.length > 0 && api?.setXML) {
+          try {
+            api.setXML(activity.geogebraXML);
+            setCommands(getLiveCommands());
+          } catch (e) {
+            console.warn('[Create] setXML failed on load, falling back to commands:', e);
+            handleApplyCommands(activity.commands || [], activity.settings || {});
+          }
+        } else {
+          handleApplyCommands(activity.commands || [], activity.settings || {});
+        }
         setLoadStatus('loaded');
       } catch (err) {
         console.error('Failed to load activity:', err);
@@ -501,15 +516,31 @@ export default function Create() {
     setIsPublishing(true);
     try {
       const liveCmds = getLiveCommands();
-      if (liveCmds.length === 0) {
+      // Snapshot the full GeoGebra construction XML — this is the canonical
+      // replay source. It captures everything (objects, colors, line styles,
+      // captions, view) at perfect fidelity, bypassing the lossy text-form
+      // round-trip that getCommandString / getDefinitionString suffer from
+      // for derivatives, tangents, text labels, and styled objects.
+      let geogebraXML = null;
+      try {
+        /** @type {any} */
+        const api = apiRef.current;
+        if (api?.getXML) geogebraXML = api.getXML() || null;
+      } catch (e) { console.warn('[Create] getXML failed:', e); }
+
+      if (!geogebraXML && liveCmds.length === 0) {
         throw new Error('Canvas is empty — create something first.');
       }
+
+      console.log('[Create] publishing — XML bytes:', geogebraXML?.length || 0, '· commands:', liveCmds.length);
+
       const thumbnail = await captureThumbnail();
       const authorName = profile?.displayName || user.displayName || 'Anonymous';
       const { id } = await publishActivity({
         title,
         description,
-        commands: liveCmds,
+        commands: liveCmds,     // legacy fallback + AI currentCommands input
+        geogebraXML,            // canonical replay source
         thumbnail,
         authorName,
         authorUid: user.uid,

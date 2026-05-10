@@ -330,7 +330,12 @@ const DEFAULT_ACTIVITY = {
 };
 
 // ─── GeoGebra Canvas (play mode) ─────────────────────────────────────────────
-function GeoGebraView({ commands, settings }) {
+// `geogebraXML` (when present) is the canonical replay source — captured at
+// publish time via api.getXML(). It restores objects, colors, line styles,
+// captions, and view at perfect fidelity. Falls back to the legacy `commands`
+// + `settings` evalCommand loop for activities published before the XML field
+// was added.
+function GeoGebraView({ commands, settings, geogebraXML }) {
   const containerRef = useRef(null);
   const apiRef = useRef(null);
   const initialized = useRef(false);
@@ -398,10 +403,28 @@ function GeoGebraView({ commands, settings }) {
     }
   }, []);
 
-  // Apply commands when applet is ready or commands change
+  // Apply state when applet is ready or inputs change.
+  //
+  // Path A (preferred): if a geogebraXML snapshot exists, restore it via
+  // setXML — this brings back every object, color, style, and view setting
+  // exactly as they were at publish time.
+  //
+  // Path B (legacy): fall back to the original evalCommand loop for older
+  // activities that pre-date the XML field.
   useEffect(() => {
     if (!isReady || !apiRef.current) return;
+    /** @type {any} */
     const api = apiRef.current;
+
+    if (typeof geogebraXML === 'string' && geogebraXML.length > 0) {
+      try {
+        api.setXML(geogebraXML);
+      } catch (e) {
+        console.warn('[Activity] setXML failed, falling back to commands:', e);
+      }
+      return;
+    }
+
     if (!Array.isArray(commands) || commands.length === 0) return;
 
     try { api.reset(); } catch {}
@@ -418,9 +441,12 @@ function GeoGebraView({ commands, settings }) {
     }
 
     for (const cmd of commands) {
-      try { api.evalCommand(cmd); } catch (e) { console.warn('cmd failed', cmd, e); }
+      try {
+        const ok = api.evalCommand(cmd);
+        if (ok === false) console.warn('[Activity] evalCommand returned false for:', cmd);
+      } catch (e) { console.warn('[Activity] cmd threw:', cmd, e); }
     }
-  }, [commands, settings, isReady]);
+  }, [commands, settings, geogebraXML, isReady]);
 
   // Resize handling
   useEffect(() => {
@@ -804,7 +830,7 @@ export default function Activity() {
           {/* Activity Panel — GeoGebra applet (graph + sliders) */}
           <section className="slope-panel wiz-rise wiz-rise-d2">
             <div style={{ background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, height: 600, overflow: 'hidden' }}>
-              <GeoGebraView commands={activity.commands} settings={activity.settings} />
+              <GeoGebraView commands={activity.commands} settings={activity.settings} geogebraXML={activity.geogebraXML} />
             </div>
           </section>
 

@@ -16,7 +16,7 @@ const GREEN = '#5fc28a';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 // ─── GeoGebra panel (interactive, classic+AG perspective) ───────────────────
-function PlayGeoGebra({ commands, settings }) {
+function PlayGeoGebra({ commands, settings, geogebraXML }) {
   const containerRef = useRef(null);
   const apiRef = useRef(null);
   const initialized = useRef(false);
@@ -83,10 +83,22 @@ function PlayGeoGebra({ commands, settings }) {
     }
   }, []);
 
-  // Apply commands when applet ready
+  // Apply state when applet is ready or inputs change.
+  // Prefer setXML (canonical full snapshot) over the legacy command loop.
   useEffect(() => {
     if (!isReady || !apiRef.current) return;
+    /** @type {any} */
     const api = apiRef.current;
+
+    if (typeof geogebraXML === 'string' && geogebraXML.length > 0) {
+      try {
+        api.setXML(geogebraXML);
+      } catch (e) {
+        console.warn('[Play] setXML failed, falling back to commands:', e);
+      }
+      return;
+    }
+
     if (!Array.isArray(commands) || commands.length === 0) return;
     try { api.reset(); } catch {}
     if (Array.isArray(settings?.coordSystem) && settings.coordSystem.length === 4) {
@@ -100,9 +112,12 @@ function PlayGeoGebra({ commands, settings }) {
       try { api.setGridVisible(settings.showGrid); } catch {}
     }
     for (const cmd of commands) {
-      try { api.evalCommand(cmd); } catch (e) { console.warn('cmd failed', cmd, e); }
+      try {
+        const ok = api.evalCommand(cmd);
+        if (ok === false) console.warn('[Play] evalCommand returned false for:', cmd);
+      } catch (e) { console.warn('[Play] cmd threw:', cmd, e); }
     }
-  }, [commands, settings, isReady]);
+  }, [commands, settings, geogebraXML, isReady]);
 
   // Resize
   useEffect(() => {
@@ -404,7 +419,7 @@ export default function Play() {
   const [searchParams] = useSearchParams();
   const wagerRaw = parseInt(searchParams.get('wager') || '0', 10);
   const wager = Number.isFinite(wagerRaw) && wagerRaw >= 0 ? wagerRaw : 0;
-  const [activity, setActivity] = useState(null);
+  const [activity, setActivity] = useState(/** @type {any} */ (null));
   const [questions, setQuestions] = useState(null);
   const [error, setError] = useState('');
   const [xpDelta, setXpDelta] = useState(/** @type {number | null} */ (null));
@@ -486,7 +501,7 @@ export default function Play() {
         {/* Left: GeoGebra */}
         <div className="wiz-rise wiz-rise-d1" style={{ position: 'relative', borderRight: `1px solid ${BORDER}`, minWidth: 0, minHeight: 0 }}>
           {activity ? (
-            <PlayGeoGebra commands={activity.commands || []} settings={activity.settings} />
+            <PlayGeoGebra commands={activity.commands || []} settings={activity.settings} geogebraXML={activity.geogebraXML} />
           ) : (
             <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, letterSpacing: '.1em' }}>
               Loading activity…

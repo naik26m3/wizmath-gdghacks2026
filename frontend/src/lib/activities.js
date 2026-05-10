@@ -34,6 +34,7 @@ export async function publishActivity({
   title,
   description = '',
   commands = [],
+  geogebraXML = null,
   settings = null,
   thumbnail = null,
   authorName = 'Anonymous',
@@ -44,16 +45,22 @@ export async function publishActivity({
   if (typeof title !== 'string' || title.trim().length === 0) {
     throw new Error('Title is required.');
   }
-  if (!Array.isArray(commands) || commands.length === 0) {
+  // Either a non-empty commands array OR a non-empty XML snapshot is required
+  // — we keep commands for the AI's currentCommands input, but XML is the
+  // canonical replay source for new publishes.
+  const hasCommands = Array.isArray(commands) && commands.length > 0;
+  const hasXML = typeof geogebraXML === 'string' && geogebraXML.length > 0;
+  if (!hasCommands && !hasXML) {
     throw new Error('Cannot publish an empty canvas.');
   }
 
-  console.log('[publishActivity] sending to Firestore...', { title, commandCount: commands.length, authorName });
+  console.log('[publishActivity] sending to Firestore...', { title, commandCount: commands.length, hasXML, authorName });
   try {
     const ref = await addDoc(collection(db, COLLECTION), {
       title: title.trim(),
       description: description.trim(),
       commands,
+      geogebraXML,
       settings,
       thumbnail,
       authorName,
