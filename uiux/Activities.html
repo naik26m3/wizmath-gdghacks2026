@@ -63,6 +63,8 @@
     mix-blend-mode: overlay;
   }
   main{ position: relative; z-index: 2; }
+  ::-webkit-scrollbar{ width: 8px; }
+  ::-webkit-scrollbar-thumb{ background: var(--gold-line-25); }
 
   /* ── Nav (logo · links · search · sign in) ── */
   .nav{
@@ -229,12 +231,12 @@
 
 <main>
   <nav class="nav" data-screen-label="Nav">
-    <div class="brand" onclick="window.location.href='WizMath.html'" style="cursor:pointer">
+    <div class="brand" onclick="window.location.href='Activities.html'" style="cursor:pointer">
       <div class="brand-mark"></div>
       <div class="brand-name">WIZMATH<span class="dot">.</span>DEV</div>
     </div>
     <div class="nav-links">
-      <button class="nav-link">Charts <span class="caret"></span></button>
+      <button class="nav-link" onclick="window.location.href='leaderboard.html'">Charts <span class="caret"></span></button>
       <button class="nav-link" onclick="window.location.href='Calculator.html'">Create <span class="caret"></span></button>
     </div>
     <div class="search">
@@ -456,5 +458,6 @@
   </section>
 </main>
 
+<script src="auth.js" defer></script>
 </body>
 </html>
