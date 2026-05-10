@@ -41,16 +41,23 @@ export async function publishActivity({
     throw new Error('Cannot publish an empty canvas.');
   }
 
-  const ref = await addDoc(collection(db, COLLECTION), {
-    title: title.trim(),
-    description: description.trim(),
-    commands,
-    settings,
-    thumbnail,
-    authorName,
-    createdAt: serverTimestamp(),
-  });
-  return { id: ref.id };
+  console.log('[publishActivity] sending to Firestore...', { title, commandCount: commands.length });
+  try {
+    const ref = await addDoc(collection(db, COLLECTION), {
+      title: title.trim(),
+      description: description.trim(),
+      commands,
+      settings,
+      thumbnail,
+      authorName,
+      createdAt: serverTimestamp(),
+    });
+    console.log('[publishActivity] success! doc id:', ref.id);
+    return { id: ref.id };
+  } catch (err) {
+    console.error('[publishActivity] FAILED:', err.code, err.message, err);
+    throw err;
+  }
 }
 
 /**

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const BACKEND_URL = 'http://localhost:3000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const INITIAL_MESSAGES = [
   { role: 'ai', text: 'Ask Arcane to explain.' },

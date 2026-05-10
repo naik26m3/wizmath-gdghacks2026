@@ -7,7 +7,7 @@ const BG2 = 'rgb(35,34,34)';
 const BG3 = 'rgb(28,27,27)';
 const BORDER = 'rgba(180,160,100,.22)';
 
-const BACKEND_URL = 'http://localhost:3000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 // ─── GeoGebra Canvas ─────────────────────────────────────────────────────────
 function GeoGebraCanvas({ onReady }) {
