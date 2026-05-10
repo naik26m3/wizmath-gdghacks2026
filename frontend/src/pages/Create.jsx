@@ -281,6 +281,8 @@ function AIChatPanel({ onCommands, getCurrentCommands, collapsed, onToggle }) {
 }
 
 // ─── Publish Modal ───────────────────────────────────────────────────────────
+const CHAMP_SM = 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)';
+
 function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -318,15 +320,80 @@ function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
   };
 
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(6px)' }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: BG2, border: `1px solid ${BORDER}`, borderRadius: 0, padding: 28, width: 'min(440px, 90vw)', boxShadow: '0 30px 60px rgba(0,0,0,.5)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <div style={{ width: 8, height: 8, borderRadius: 0, background: '#f0bf5c', boxShadow: '0 0 6px #f0bf5c' }}/>
-          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>
-            PUBLISH <span style={{ color: '#f0bf5c' }}>ACTIVITY</span>
-          </span>
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'rgba(1,8,16,0.55)',
+        backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'publishBackdropIn .22s ease',
+      }}
+    >
+      <style>{`
+        @keyframes publishBackdropIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes publishCardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .pub-close-btn:hover { border-color: rgba(240,191,92,.5) !important; color: #f0bf5c !important; }
+        .pub-cancel-btn:hover { background: rgba(255,255,255,.04) !important; border-color: rgba(200,155,60,.45) !important; color: #d7e4f1 !important; }
+      `}</style>
+
+      <div
+        role="dialog" aria-modal="true" aria-label="Publish activity"
+        onClick={e => e.stopPropagation()}
+        style={{
+          position: 'relative',
+          width: 480, maxWidth: 'calc(100vw - 32px)',
+          background: 'rgba(6,12,20,0.94)',
+          border: '1px solid rgba(240,191,92,0.28)',
+          borderRadius: 4,
+          padding: '36px 40px 28px',
+          boxShadow: '0 0 0 1px rgba(67,226,210,0.06) inset, 0 8px 48px rgba(0,0,0,.7), 0 0 80px rgba(67,226,210,0.04)',
+          fontFamily: 'Manrope,system-ui,sans-serif',
+          color: '#c8b97a',
+          animation: 'publishCardIn .22s ease',
+        }}
+      >
+        {/* Corner accents */}
+        <div style={{ position: 'absolute', top: -1, left: -1, width: 14, height: 14, borderTop: '1px solid rgba(240,191,92,.5)', borderLeft: '1px solid rgba(240,191,92,.5)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: -1, right: -1, width: 14, height: 14, borderBottom: '1px solid rgba(240,191,92,.5)', borderRight: '1px solid rgba(240,191,92,.5)', pointerEvents: 'none' }} />
+
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="pub-close-btn"
+          aria-label="Close"
+          style={{
+            position: 'absolute', top: 10, right: 10,
+            width: 28, height: 28, borderRadius: '50%',
+            background: 'transparent', border: '1px solid rgba(240,191,92,.15)',
+            color: 'rgba(200,185,122,.5)', fontSize: 18, lineHeight: 1, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'border-color .15s, color .15s',
+          }}
+        >&times;</button>
+
+        {/* Hex brand mark */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+          <svg width="56" height="64" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="pubGlow" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#f0bf5c" floodOpacity="0.6"/>
+              </filter>
+            </defs>
+            <polygon points="28,2 54,16 54,48 28,62 2,48 2,16" fill="none" stroke="#f0bf5c" strokeWidth="1.5" opacity=".8"/>
+            <polygon points="28,8 48,19.5 48,44.5 28,56 8,44.5 8,19.5" fill="none" stroke="rgba(240,191,92,.25)" strokeWidth="1"/>
+            <path d="M28 24 L28 40 M20 32 L28 24 L36 32" stroke="#f0bf5c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" filter="url(#pubGlow)"/>
+          </svg>
         </div>
-        <p style={{ color: '#888', fontSize: 12, fontFamily: 'Manrope,sans-serif', margin: '0 0 18px', lineHeight: '18px' }}>
+
+        <h2 style={{
+          fontFamily: 'Bebas Neue,Space Grotesk,sans-serif',
+          fontSize: 26, fontWeight: 400, letterSpacing: '.12em',
+          color: '#c8b97a', margin: '0 0 6px', lineHeight: 1.2, textAlign: 'center',
+        }}>
+          PUBLISH <span style={{ color: '#f0bf5c' }}>ACTIVITY</span>
+        </h2>
+        <p style={{ fontSize: 13, lineHeight: 1.6, color: 'rgba(200,185,122,.55)', margin: '0 0 24px', textAlign: 'center' }}>
           Share your interactive on the Activities page so others can explore it.
         </p>
 
@@ -338,7 +405,7 @@ function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
           onKeyDown={e => e.key === 'Enter' && handleSubmit()}
           placeholder="e.g. Movable circle with sliders"
           maxLength={80}
-          style={{ width: '100%', background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 14, outline: 0, marginBottom: 16, boxSizing: 'border-box' }}
+          style={{ width: '100%', background: 'rgba(6,12,20,.8)', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 14, outline: 0, marginBottom: 16, boxSizing: 'border-box', clipPath: CHAMP_SM }}
         />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -352,9 +419,7 @@ function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
               display: 'inline-flex', alignItems: 'center', gap: 6,
               background: isGenerating ? 'rgba(67,226,210,.06)' : 'transparent',
               border: '1px solid rgba(67,226,210,.35)',
-              borderRadius: 0,
-              color: '#43e2d2',
-              padding: '4px 10px',
+              borderRadius: 0, color: '#43e2d2', padding: '4px 10px',
               cursor: (isGenerating || isPublishing) ? 'not-allowed' : 'pointer',
               fontFamily: 'Space Grotesk,sans-serif',
               fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase',
@@ -373,21 +438,21 @@ function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
           onChange={e => setDescription(e.target.value)}
           placeholder="What does this activity teach? — type a quick hint then click Auto-Generate, or leave blank for the AI to write from scratch."
           maxLength={3500}
-          rows={10}
-          style={{ width: '100%', background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, lineHeight: '20px', outline: 0, marginBottom: 8, boxSizing: 'border-box', resize: 'vertical' }}
+          rows={8}
+          style={{ width: '100%', background: 'rgba(6,12,20,.8)', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, lineHeight: '20px', outline: 0, marginBottom: 8, boxSizing: 'border-box', resize: 'vertical' }}
         />
 
         {error && (
-          <div style={{ color: '#e25c7a', fontSize: 12, fontFamily: 'Manrope,sans-serif', margin: '8px 0' }}>
-            ⚠ {error}
-          </div>
+          <div style={{ color: '#e25c7a', fontSize: 12, fontFamily: 'Manrope,sans-serif', margin: '8px 0' }}>⚠ {error}</div>
         )}
 
         <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-          <button onClick={onClose} disabled={isPublishing} style={{ flex: 1, background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 0, color: '#aaa', padding: '10px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', opacity: isPublishing ? 0.5 : 1 }}>
+          <button onClick={onClose} disabled={isPublishing} className="pub-cancel-btn"
+            style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '11px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', clipPath: CHAMP_SM, opacity: isPublishing ? 0.5 : 1, transition: 'background .15s, border-color .15s, color .15s' }}>
             Cancel
           </button>
-          <button onClick={handleSubmit} disabled={isPublishing} style={{ flex: 1, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '10px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', opacity: isPublishing ? 0.7 : 1 }}>
+          <button onClick={handleSubmit} disabled={isPublishing}
+            style={{ flex: 1.4, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '11px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', clipPath: CHAMP_SM, opacity: isPublishing ? 0.7 : 1, filter: 'drop-shadow(0 0 10px rgba(240,191,92,.35))' }}>
             {isPublishing ? 'Publishing…' : 'Publish'}
           </button>
         </div>
