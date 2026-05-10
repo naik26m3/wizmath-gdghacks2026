@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>WizMath.dev — Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#010A13; --surface:#08151e; --surface-1:#091428; --surface-2:#111d26; --surface-3:#15212a; --surface-4:#1f2b35;
+    --gold:#f0bf5c; --gold-deep:#c89b3c; --gold-fixed:#ffdea4;
+    --teal:#43e2d2; --teal-dim:#00c6b7; --teal-deep:#005049;
+    --on-surface:#d7e4f1; --on-variant:#d2c5b1; --outline:#9b8f7d;
+    --gold-line-10:rgba(200,155,60,.10); --gold-line-25:rgba(200,155,60,.25); --gold-line-50:rgba(240,191,92,.5);
+    --teal-line-25:rgba(67,226,210,.25); --teal-line-35:rgba(67,226,210,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    font-family:'Manrope',system-ui,sans-serif;
+    background:var(--void);color:var(--on-surface);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    overflow:hidden;
+  }
+
+  .app{ display:grid; grid-template-columns: 84px 1fr 340px; height: 100vh; transition: grid-template-columns .25s ease; }
+  .app.ai-collapsed{ grid-template-columns: 84px 1fr 44px; }
+
+  /* ── Right sidebar: Ask AI ── */
+  .ai{
+    border-left: 1px solid var(--gold-line-25);
+    background: linear-gradient(180deg, var(--surface-1), var(--void));
+    display:flex; flex-direction:column;
+    min-height: 0; position: relative;
+  }
+  .ai::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:1px;
+    background: linear-gradient(180deg, transparent, var(--gold-line-50) 30%, transparent 70%);
+  }
+  .ai-head{
+    display:flex; align-items:center; gap: 12px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--gold-line-10);
+  }
+  .ai-collapse{
+    margin-left: auto;
+    width: 28px; height: 28px;
+    background: transparent; border: 0; cursor: pointer;
+    color: var(--on-variant);
+    display:inline-flex; align-items:center; justify-content:center;
+    transition: color .2s, transform .25s;
+  }
+  .ai-collapse:hover{ color: var(--gold); }
+  .ai-collapse svg{ width: 16px; height: 16px; }
+
+  /* Collapsed AI rail */
+  .ai.collapsed .ai-head{ padding: 14px 0; justify-content: center; border-bottom: 1px solid var(--gold-line-10); }
+  .ai.collapsed .ai-head .gem{ display:none; }
+  .ai.collapsed .ai-title{ display:none; }
+  .ai.collapsed .ai-body{ display:none; }
+  .ai.collapsed .ai-input-row{ display:none; }
+  .ai.collapsed .ai-collapse{ margin: 0; }
+  .ai.collapsed .ai-collapse svg{ transform: rotate(180deg); }
+  .ai-vertical-label{
+    display: none;
+    flex: 1;
+    align-items: center; justify-content: center;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family:'Bebas Neue', sans-serif; font-size: 16px;
+    letter-spacing:.32em; text-transform: uppercase;
+    color: var(--on-variant);
+    user-select: none;
+  }
+  .ai-vertical-label .tag{ color: var(--teal); }
+  .ai.collapsed .ai-vertical-label{ display:flex; }
+  .ai-head .gem{
+    width:22px; height:22px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-deep));
+    clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+    box-shadow: 0 0 14px rgba(67,226,210,.5);
+  }
+  .ai-title{
+    font-family:'Bebas Neue', sans-serif; font-size: 18px;
+    letter-spacing:.18em; text-transform: uppercase;
+    color: var(--on-surface);
+  }
+  .ai-title .tag{ color: var(--teal); }
+
+  .ai-body{
+    flex: 1; min-height: 0; overflow-y: auto;
+    padding: 20px 22px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .ai-body::-webkit-scrollbar{ width: 6px; }
+  .ai-body::-webkit-scrollbar-thumb{ background: var(--gold-line-25); }
+
+  .msg{
+    --c: 8px;
+    max-width: 86%;
+    padding: 12px 14px;
+    font-family:'Manrope', sans-serif; font-size: 14px; line-height: 22px;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+  }
+  .msg.user{
+    align-self: flex-end;
+    background: linear-gradient(180deg, rgba(240,191,92,.14), rgba(200,155,60,.06));
+    border: 1px solid var(--gold-line-25);
+    color: var(--on-surface);
+  }
+  .msg.ai{
+    align-self: flex-start;
+    background: linear-gradient(180deg, rgba(67,226,210,.10), rgba(0,80,73,.18));
+    border: 1px solid var(--teal-line-25);
+    color: var(--on-surface);
+  }
+  .msg .who{
+    display:block;
+    font-family:'Space Grotesk', sans-serif; font-size: 10px; font-weight: 700;
+    letter-spacing:.18em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .msg.user .who{ color: var(--gold); }
+  .msg.ai .who{ color: var(--teal); }
+  .msg p{ margin: 0; }
+  .msg p + p{ margin-top: 8px; }
+
+  .ai-input-row{
+    display:flex; align-items:stretch; gap: 8px;
+    padding: 14px 16px 18px;
+    border-top: 1px solid var(--gold-line-10);
+  }
+  .ai-input{
+    --c: 8px;
+    flex: 1;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    border: 1px solid var(--gold-line-25);
+    color: var(--on-surface);
+    padding: 12px 14px;
+    font-family:'Manrope', sans-serif; font-size: 14px;
+    outline: 0;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .ai-input::placeholder{ color: var(--outline); }
+  .ai-input:focus{ border-color: var(--teal); box-shadow: 0 0 18px rgba(67,226,210,.18); }
+  .ai-send{
+    --c: 8px;
+    width: 44px;
+    background: linear-gradient(180deg, var(--teal), var(--teal-dim) 60%, var(--teal-deep));
+    color:#002a26; border: 0; cursor: pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    box-shadow: 0 0 18px rgba(67,226,210,.25);
+    transition: filter .2s, transform .15s;
+  }
+  .ai-send:hover{ filter: brightness(1.08); transform: translateY(-1px); }
+  .ai-send svg{ width:16px; height:16px; }
+
+  /* ── Left rail ── */
+  .rail{
+    background: linear-gradient(180deg, var(--surface-1), var(--void));
+    border-right: 1px solid var(--gold-line-25);
+    display:flex; flex-direction:column;
+    padding: 14px 8px;
+    position: relative;
+  }
+  .rail::before{ content:""; position:absolute; right:0; top:0; bottom:0; width:1px; background: linear-gradient(180deg, transparent, var(--gold-line-50) 30%, transparent 70%); }
+  .rail-item{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    padding: 14px 4px; cursor:pointer;
+    color: var(--on-variant);
+    font-family:'Space Grotesk', sans-serif; font-size: 10px; font-weight:600;
+    letter-spacing:.14em; text-transform:uppercase;
+    border-bottom: 1px solid var(--gold-line-10);
+    transition: color .2s, background .2s;
+  }
+  .rail-item:hover{ color: var(--gold); background: rgba(240,191,92,.04); }
+  .rail-item.active{ color: var(--gold); background: rgba(240,191,92,.06); }
+  .rail-icn{
+    width:26px; height:26px;
+    display:flex; align-items:center; justify-content:center;
+    color: currentColor;
+  }
+  .rail-icn svg{ width:22px; height:22px; }
+
+  /* ── Main column ── */
+  .main{ display:grid; grid-template-rows: auto 1fr auto; min-width: 0; }
+
+  /* ── Top bar ── */
+  .top{
+    display:flex; align-items:center; gap: 16px;
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--gold-line-10);
+    background: linear-gradient(180deg, var(--surface), var(--void));
+  }
+  .menu-btn{
+    background:transparent; border:0; cursor:pointer;
+    width:32px; height:32px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    color: var(--on-variant);
+  }
+  .menu-btn span{ width:18px; height:1.5px; background: currentColor; }
+  .menu-btn:hover{ color: var(--gold); }
+
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand-mark{
+    width:32px; height:32px; position:relative;
+    background: conic-gradient(from 30deg, var(--gold-deep), var(--gold) 25%, var(--gold-fixed) 50%, var(--gold) 75%, var(--gold-deep));
+    clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  }
+  .brand-mark::after{ content:""; position:absolute; inset:4px; background: var(--void); clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+  .brand-mark::before{ content:""; position:absolute; inset:0; z-index:1; background: radial-gradient(circle at 50% 50%, var(--teal) 0 20%, transparent 22%); filter: drop-shadow(0 0 5px var(--teal)); }
+  .brand-name{ font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:.18em; color: var(--on-surface); }
+  .brand-name .dot{ color: var(--gold); }
+
+  .mode{
+    --c:8px;
+    display:inline-flex; align-items:center; gap: 10px;
+    padding: 8px 14px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    border: 1px solid var(--gold-line-50);
+    color: var(--gold);
+    cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; font-size: 12px; font-weight:600;
+    letter-spacing:.16em; text-transform:uppercase;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+  }
+  .mode .ico{ width:14px; height:14px; }
+  .mode .caret{ width:6px; height:6px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); margin-left:6px; }
+
+  .top-spacer{ flex:1; }
+
+  .icn-btn{
+    width:36px; height:36px;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:transparent; border:1px solid transparent; cursor:pointer;
+    color: var(--on-variant);
+    transition: color .2s, border-color .2s, background .2s;
+  }
+  .icn-btn:hover{ color: var(--gold); border-color: var(--gold-line-25); }
+
+  .signin{
+    --c:10px;
+    background: linear-gradient(180deg, var(--gold-fixed), var(--gold) 50%, var(--gold-deep));
+    color:#1a1100; border:0; cursor:pointer;
+    padding: 10px 22px;
+    font-family:'Bebas Neue',sans-serif; font-size: 16px; letter-spacing:.22em; text-transform:uppercase;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    box-shadow: 0 0 24px rgba(240,191,92,.25);
+    transition: filter .2s, transform .15s;
+  }
+  .signin:hover{ filter: brightness(1.08); transform: translateY(-1px); }
+
+  /* ── Stage: input panel + canvas ── */
+  .stage{ display:grid; grid-template-columns: 320px 1fr; min-height: 0; }
+
+  .input-panel{
+    border-right: 1px solid var(--gold-line-10);
+    background: linear-gradient(180deg, var(--surface), var(--void));
+    display:flex; flex-direction:column;
+  }
+  .input-row{
+    display:flex; align-items:stretch;
+    border-bottom: 1px solid var(--gold-line-10);
+  }
+  .add-btn{
+    width:54px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    border:0; border-right: 1px solid var(--gold-line-10);
+    color: var(--gold);
+    cursor: pointer;
+    font-family:'Bebas Neue',sans-serif; font-size: 26px; line-height: 1;
+    transition: background .2s, color .2s;
+  }
+  .add-btn:hover{ background: rgba(240,191,92,.08); }
+  .input-field{
+    flex:1;
+    background: transparent; border: 0; outline: 0;
+    padding: 0 18px;
+    color: var(--on-surface);
+    font-family:'Manrope', sans-serif; font-size: 14px;
+  }
+  .input-field::placeholder{ color: var(--outline); font-style: italic; }
+
+  /* ── Canvas ── */
+  .canvas-wrap{ position: relative; min-width: 0; }
+  .canvas-bar{
+    position: absolute; top: 12px; left: 14px;
+    display:flex; align-items:center; gap: 6px; z-index: 5;
+  }
+  .canvas-bar .icn-btn{ width:32px; height:32px; color: var(--outline); }
+  .canvas-bar .icn-btn:hover{ color: var(--gold); }
+
+  .gear{
+    position: absolute; top: 14px; right: 14px; z-index: 5;
+    color: var(--outline);
+    background: transparent; border: 0; cursor: pointer;
+    width:32px; height:32px;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .gear:hover{ color: var(--gold); }
+
+  .canvas{ width:100%; height:100%; display:block; }
+
+  .right-tools{
+    position: absolute; right: 12px; bottom: 80px; z-index: 5;
+    display:flex; flex-direction:column; gap: 8px;
+  }
+  .tool-btn{
+    width:34px; height:34px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    border:1px solid var(--gold-line-25);
+    color: var(--on-variant);
+    cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .tool-btn:hover{ color: var(--gold); border-color: var(--gold-line-50); }
+
+  /* ── Keypad ── */
+  .keypad{
+    background: linear-gradient(180deg, var(--surface-1), var(--surface));
+    border-top: 1px solid var(--gold-line-25);
+    padding: 14px 22px 18px;
+    position: relative;
+  }
+  .keypad::before{ content:""; position:absolute; left:0; right:0; top:0; height:1px; background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold-fixed) 50%, var(--gold) 70%, transparent); }
+
+  .keypad-tabs{
+    display:flex; align-items:center; gap: 8px;
+    margin-bottom: 12px;
+  }
+  .ktab{
+    --c:8px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--on-variant);
+    padding: 8px 18px;
+    font-family:'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600;
+    letter-spacing:.06em;
+    cursor: pointer;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+  }
+  .ktab.active{
+    background: linear-gradient(180deg, rgba(67,226,210,.18), rgba(0,80,73,.4));
+    color: var(--teal);
+    border-color: var(--teal-line-35);
+    box-shadow: 0 0 18px rgba(67,226,210,.18);
+  }
+  .ktab:hover:not(.active){ color: var(--gold); }
+  .more-btn{
+    margin-left: auto; margin-right: 8px;
+    background:transparent; border:0; cursor:pointer;
+    color: var(--on-variant); padding: 6px 8px;
+    font-size: 18px; letter-spacing: 2px;
+  }
+  .close-btn{
+    background:transparent; border:0; cursor:pointer;
+    color: var(--on-variant);
+    width:28px; height:28px;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .close-btn:hover{ color: var(--gold); }
+
+  /* Collapsed keypad */
+  .keypad.collapsed{ padding: 0; }
+  .keypad.collapsed .keypad-tabs{ display:none; }
+  .keypad.collapsed .grid{ display:none; }
+  .keypad-collapsed-bar{
+    display:none;
+    align-items:center; gap: 14px;
+    padding: 10px 22px;
+    width: 100%;
+  }
+  .keypad.collapsed .keypad-collapsed-bar{ display:flex; }
+  .keypad-collapsed-bar .label{
+    font-family:'Bebas Neue', sans-serif; font-size: 16px;
+    letter-spacing:.24em; text-transform: uppercase;
+    color: var(--on-variant);
+  }
+  .keypad-collapsed-bar .label .tag{ color: var(--teal); }
+  .keypad-collapsed-bar .spacer{ flex: 1; }
+  .keypad-expand{
+    --c:7px;
+    background: linear-gradient(180deg, var(--surface-3), var(--surface-1));
+    border: 1px solid var(--gold-line-25);
+    color: var(--gold);
+    cursor: pointer;
+    padding: 7px 16px;
+    font-family:'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing:.18em; text-transform: uppercase;
+    display:inline-flex; align-items:center; gap: 8px;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .keypad-expand:hover{ border-color: var(--gold-line-50); box-shadow: 0 0 16px rgba(67,226,210,.18); }
+  .keypad-expand svg{ width: 12px; height: 12px; }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+    max-width: 1100px; margin: 0 auto;
+  }
+  .key{
+    --c:7px;
+    height: 44px;
+    background: linear-gradient(180deg, var(--surface-3), var(--surface-1));
+    border:1px solid var(--gold-line-25);
+    color: var(--on-surface);
+    cursor: pointer;
+    font-family:'Space Grotesk', sans-serif; font-size: 16px; font-weight: 500;
+    display:inline-flex; align-items:center; justify-content:center;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    transition: border-color .15s, color .15s, background .2s, box-shadow .2s;
+  }
+  .key:hover{
+    border-color: var(--gold-line-50);
+    color: var(--gold);
+    box-shadow: 0 0 16px rgba(67,226,210,.12);
+  }
+  .key.var{ font-style: italic; color: var(--gold); }
+  .key.fn{ color: var(--teal); }
+  .key.muted{
+    background: linear-gradient(180deg, var(--surface-2), var(--void));
+    color: var(--on-variant);
+    border-color: var(--gold-line-10);
+  }
+  .key.muted:hover{ color: var(--gold); border-color: var(--gold-line-25); }
+  .key svg{ width:18px; height:18px; }
+
+  /* sub/superscript glyphs */
+  .glyph-pow{ position: relative; }
+  .glyph-pow::before{ content:"☐"; color: var(--outline); font-size: 14px; }
+  .glyph-pow::after{ content:"2"; position:absolute; right: 32%; top: 6px; font-size: 11px; color: var(--gold); }
+  .glyph-sup{ position: relative; }
+  .glyph-sup::before{ content:"☐"; color: var(--outline); font-size: 14px; }
+  .glyph-sup::after{ content:"☐"; position:absolute; right: 28%; top: 4px; font-size: 9px; color: var(--outline); }
+  .glyph-sub{ position: relative; }
+  .glyph-sub::before{ content:"☐"; color: var(--outline); font-size: 14px; }
+  .glyph-sub::after{ content:"☐"; position:absolute; right: 28%; bottom: 4px; font-size: 9px; color: var(--outline); }
+  .glyph-grid{ font-size: 14px; color: var(--outline); letter-spacing: -1px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Left rail -->
+  <aside class="rail" data-screen-label="Rail">
+    <div class="rail-item active">
+      <div class="rail-icn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg></div>
+      Algebra
+    </div>
+    <div class="rail-item">
+      <div class="rail-icn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3M6.3 6.3l2.1 2.1M15.6 15.6l2.1 2.1M6.3 17.7l2.1-2.1M15.6 8.4l2.1-2.1"/></svg></div>
+      Tools
+    </div>
+    <div class="rail-item">
+      <div class="rail-icn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="5" width="16" height="14"/><path d="M4 9h16M4 14h16M9 5v14M15 5v14"/></svg></div>
+      Table
+    </div>
+    <div class="rail-item">
+      <div class="rail-icn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16"/><path d="M3 8h18M3 12h18M3 16h18M9 4v16M15 4v16"/></svg></div>
+      Spreadsheet
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Top bar -->
+    <header class="top" data-screen-label="Top">
+      <button class="menu-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div class="brand-name">WIZMATH<span class="dot">.</span>DEV</div>
+      </div>
+      <button class="mode">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4 L20 20 M20 4 L4 20" opacity=".25"/><path d="M3 18 C8 6, 16 18, 21 6" /></svg>
+        Graphing
+        <span class="caret"></span>
+      </button>
+      <div class="top-spacer"></div>
+      <button class="icn-btn" aria-label="Share">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/>
+          <line x1="8" y1="11" x2="16" y2="7"/><line x1="8" y1="13" x2="16" y2="17"/>
+        </svg>
+      </button>
+      <button class="signin">Sign in</button>
+    </header>
+
+    <!-- Stage -->
+    <div class="stage">
+      <!-- Input panel -->
+      <aside class="input-panel" data-screen-label="Input">
+        <div class="input-row">
+          <button class="add-btn" aria-label="Add">+</button>
+          <input class="input-field" type="text" placeholder="Input…" />
+        </div>
+      </aside>
+
+      <!-- Canvas -->
+      <div class="canvas-wrap">
+        <div class="canvas-bar">
+          <button class="icn-btn" aria-label="Undo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 14 L4 9 L9 4"/><path d="M4 9 H14 a6 6 0 0 1 6 6 v0 a6 6 0 0 1 -6 6 H8"/></svg></button>
+          <button class="icn-btn" aria-label="Redo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 14 L20 9 L15 4"/><path d="M20 9 H10 a6 6 0 0 0 -6 6 v0 a6 6 0 0 0 6 6 H16"/></svg></button>
+        </div>
+        <button class="gear" aria-label="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+          </svg>
+        </button>
+
+        <svg class="canvas" viewBox="0 0 1200 700" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid-minor" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(155,143,125,.10)" stroke-width="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid-minor)"/>
+          <!-- axes -->
+          <line x1="600" y1="0" x2="600" y2="700" stroke="rgba(240,191,92,.35)" stroke-width="1"/>
+          <line x1="0" y1="350" x2="1200" y2="350" stroke="rgba(240,191,92,.35)" stroke-width="1"/>
+
+          <!-- x ticks/labels -->
+          <g font-family="Space Grotesk, sans-serif" font-size="10" fill="#9b8f7d">
+            <!-- negative -->
+            <g>
+              <text x="40" y="368" text-anchor="middle">−15</text>
+              <text x="80" y="368" text-anchor="middle">−14</text>
+              <text x="120" y="368" text-anchor="middle">−13</text>
+              <text x="160" y="368" text-anchor="middle">−12</text>
+              <text x="200" y="368" text-anchor="middle">−11</text>
+              <text x="240" y="368" text-anchor="middle">−10</text>
+              <text x="280" y="368" text-anchor="middle">−9</text>
+              <text x="320" y="368" text-anchor="middle">−8</text>
+              <text x="360" y="368" text-anchor="middle">−7</text>
+              <text x="400" y="368" text-anchor="middle">−6</text>
+              <text x="440" y="368" text-anchor="middle">−5</text>
+              <text x="480" y="368" text-anchor="middle">−4</text>
+              <text x="520" y="368" text-anchor="middle">−3</text>
+              <text x="560" y="368" text-anchor="middle">−2</text>
+            </g>
+            <text x="600" y="368" text-anchor="middle" fill="#d2c5b1">0</text>
+            <g>
+              <text x="640" y="368" text-anchor="middle">1</text>
+              <text x="680" y="368" text-anchor="middle">2</text>
+              <text x="720" y="368" text-anchor="middle">3</text>
+              <text x="760" y="368" text-anchor="middle">4</text>
+              <text x="800" y="368" text-anchor="middle">5</text>
+              <text x="840" y="368" text-anchor="middle">6</text>
+              <text x="880" y="368" text-anchor="middle">7</text>
+              <text x="920" y="368" text-anchor="middle">8</text>
+              <text x="960" y="368" text-anchor="middle">9</text>
+              <text x="1000" y="368" text-anchor="middle">10</text>
+              <text x="1040" y="368" text-anchor="middle">11</text>
+              <text x="1080" y="368" text-anchor="middle">12</text>
+              <text x="1120" y="368" text-anchor="middle">13</text>
+              <text x="1160" y="368" text-anchor="middle">14</text>
+            </g>
+          </g>
+
+          <!-- y ticks/labels -->
+          <g font-family="Space Grotesk, sans-serif" font-size="10" fill="#9b8f7d">
+            <text x="592" y="105" text-anchor="end">6</text>
+            <text x="592" y="155" text-anchor="end">5</text>
+            <text x="592" y="205" text-anchor="end">4</text>
+            <text x="592" y="255" text-anchor="end">3</text>
+            <text x="592" y="305" text-anchor="end">2</text>
+            <text x="592" y="345" text-anchor="end">1</text>
+            <text x="592" y="395" text-anchor="end">−1</text>
+            <text x="592" y="445" text-anchor="end">−2</text>
+            <text x="592" y="495" text-anchor="end">−3</text>
+            <text x="592" y="545" text-anchor="end">−4</text>
+            <text x="592" y="595" text-anchor="end">−5</text>
+            <text x="592" y="645" text-anchor="end">−6</text>
+          </g>
+
+          <!-- arrowheads on axes -->
+          <polygon points="1198,346 1190,344 1190,348" fill="rgba(240,191,92,.5)"/>
+          <polygon points="600,2 596,12 604,12" fill="rgba(240,191,92,.5)"/>
+        </svg>
+
+        <div class="right-tools">
+          <button class="tool-btn" aria-label="Format">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h10M4 18h16"/></svg>
+          </button>
+          <button class="tool-btn" aria-label="Zoom in">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="6"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="16" y1="16" x2="20" y2="20"/></svg>
+          </button>
+          <button class="tool-btn" aria-label="Zoom out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="6"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="16" y1="16" x2="20" y2="20"/></svg>
+          </button>
+          <button class="tool-btn" aria-label="Fullscreen">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keypad -->
+    <div class="keypad" data-screen-label="Keypad">
+      <div class="keypad-tabs">
+        <button class="ktab active">123</button>
+        <button class="ktab">f(x)</button>
+        <button class="ktab">ABC</button>
+        <button class="ktab">#&amp;¬</button>
+        <button class="more-btn" aria-label="More">⋯</button>
+        <button class="close-btn" id="keypad-collapse" aria-label="Collapse keypad">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 15 L12 9 L18 15"/></svg>
+        </button>
+      </div>
+      <div class="keypad-collapsed-bar">
+        <span class="label">Keypad</span>
+        <span class="spacer"></span>
+        <button class="keypad-expand" id="keypad-expand">
+          Show
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9 L12 15 L18 9"/></svg>
+        </button>
+      </div>
+
+      <div class="grid">
+        <!-- Row 1 -->
+        <button class="key var">x</button>
+        <button class="key var">y</button>
+        <button class="key var">π</button>
+        <button class="key var">e</button>
+        <button class="key">7</button>
+        <button class="key">8</button>
+        <button class="key">9</button>
+        <button class="key fn">×</button>
+
+        <!-- Row 2 -->
+        <button class="key fn"><span class="glyph-pow"></span></button>
+        <button class="key fn"><span class="glyph-sup"></span></button>
+        <button class="key fn">√</button>
+        <button class="key fn glyph-grid">|☐|</button>
+        <button class="key">4</button>
+        <button class="key">5</button>
+        <button class="key">6</button>
+        <button class="key fn">+</button>
+
+        <!-- Row 3 -->
+        <button class="key fn">&lt;</button>
+        <button class="key fn">&gt;</button>
+        <button class="key fn"><span class="glyph-sub"></span></button>
+        <button class="key fn glyph-grid">▦</button>
+        <button class="key">1</button>
+        <button class="key">2</button>
+        <button class="key">3</button>
+        <button class="key fn">−</button>
+
+        <!-- Row 4 -->
+        <button class="key var">ans</button>
+        <button class="key">,</button>
+        <button class="key">(</button>
+        <button class="key">)</button>
+        <button class="key">0</button>
+        <button class="key">.</button>
+        <button class="key fn">=</button>
+        <button class="key muted" aria-label="Backspace"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 5h11v14H9L3 12z"/><path d="M13 9 L17 15 M17 9 L13 15"/></svg></button>
+
+        <!-- Row 5: arrows + return, span across -->
+        <button class="key muted" style="grid-column: 5 / 6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6 L8 12 L14 18"/></svg></button>
+        <button class="key muted" style="grid-column: 6 / 7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6 L16 12 L10 18"/></svg></button>
+        <button class="key muted" style="grid-column: 7 / 9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 6 V13 a3 3 0 0 1 -3 3 H6"/><path d="M9 13 L6 16 L9 19"/></svg></button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right sidebar: Ask AI -->
+  <aside class="ai" data-screen-label="Ask AI">
+    <div class="ai-head">
+      <div class="gem"></div>
+      <div class="ai-title">Ask <span class="tag">AI</span></div>
+      <button class="ai-collapse" id="ai-collapse" aria-label="Collapse Ask AI">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6 L15 12 L9 18"/></svg>
+      </button>
+    </div>
+    <div class="ai-vertical-label">Ask <span class="tag">AI</span></div>
+    <div class="ai-body">
+      <div class="msg ai">
+        <span class="who">Oracle</span>
+        <p>Greetings, apprentice. Plot a function on the canvas, or ask me anything about the spell of mathematics.</p>
+      </div>
+      <div class="msg user">
+        <span class="who">You</span>
+        <p>What does the slope of a line tell me?</p>
+      </div>
+      <div class="msg ai">
+        <span class="who">Oracle</span>
+        <p>Slope is the line's rate of change — for every step right along x, how far it climbs or falls along y. A slope of 2 means the line rises 2 for every 1 it travels.</p>
+        <p>Try graphing <em>y = 2x + 1</em> and watch the rise vs. run.</p>
+      </div>
+      <div class="msg user">
+        <span class="who">You</span>
+        <p>And the y-intercept?</p>
+      </div>
+      <div class="msg ai">
+        <span class="who">Oracle</span>
+        <p>The y-intercept is where the line crosses the vertical axis — the value of y when x is zero. In <em>y = mx + b</em>, that's <em>b</em>.</p>
+      </div>
+    </div>
+    <div class="ai-input-row">
+      <input class="ai-input" type="text" placeholder="Ask the Oracle…" />
+      <button class="ai-send" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 12 L20 4 L14 20 L12 13 Z"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+  (function(){
+    var app = document.querySelector('.app');
+    var ai = document.querySelector('.ai');
+    var aiBtn = document.getElementById('ai-collapse');
+    aiBtn.addEventListener('click', function(){
+      var collapsed = ai.classList.toggle('collapsed');
+      app.classList.toggle('ai-collapsed', collapsed);
+      aiBtn.setAttribute('aria-label', collapsed ? 'Expand Ask AI' : 'Collapse Ask AI');
+    });
+    // Clicking anywhere on the collapsed rail expands it
+    ai.addEventListener('click', function(e){
+      if (!ai.classList.contains('collapsed')) return;
+      if (e.target.closest('#ai-collapse')) return;
+      ai.classList.remove('collapsed');
+      app.classList.remove('ai-collapsed');
+    });
+
+    var keypad = document.querySelector('.keypad');
+    var kCollapse = document.getElementById('keypad-collapse');
+    var kExpand = document.getElementById('keypad-expand');
+    kCollapse.addEventListener('click', function(){ keypad.classList.add('collapsed'); });
+    kExpand.addEventListener('click', function(){ keypad.classList.remove('collapsed'); });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>WizMath.dev — Exploring Slope and y-Intercept</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#010A13; --surface:#08151e; --surface-1:#091428; --surface-2:#111d26; --surface-3:#15212a; --surface-4:#1f2b35;
+    --gold:#f0bf5c; --gold-deep:#c89b3c; --gold-fixed:#ffdea4;
+    --teal:#43e2d2; --teal-dim:#00c6b7; --teal-deep:#005049;
+    --rose:#e25c7a;
+    --emerald:#5fc28a;
+    --on-surface:#d7e4f1; --on-variant:#d2c5b1; --outline:#9b8f7d;
+    --gold-line-10:rgba(200,155,60,.10); --gold-line-25:rgba(200,155,60,.25); --gold-line-50:rgba(240,191,92,.5);
+    --teal-line-25:rgba(67,226,210,.25); --teal-line-35:rgba(67,226,210,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    font-family:'Manrope',system-ui,sans-serif;
+    background:var(--void);color:var(--on-surface);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    overflow:hidden;
+  }
+
+  .app{ display:grid; grid-template-columns: 1fr 340px; height: 100vh; transition: grid-template-columns .25s ease; }
+  .app.ai-collapsed{ grid-template-columns: 1fr 44px; }
+
+  .main{ display:grid; grid-template-rows: auto 1fr; min-width: 0; min-height: 0; }
+
+  /* ── Nav ── */
+  .nav{
+    display:flex; align-items:center; gap: 24px;
+    padding: 22px 36px;
+    border-bottom: 1px solid var(--gold-line-10);
+  }
+  .nav-links{ display:flex; align-items:center; gap: 4px; margin-left: 16px; }
+  .nav-link{
+    display:inline-flex; align-items:center; gap:6px;
+    background: none; border: 0; cursor: pointer;
+    color: var(--on-variant);
+    font-family:'Space Grotesk', sans-serif; font-size:12px; font-weight:600;
+    letter-spacing:.18em; text-transform:uppercase;
+    padding: 10px 14px;
+    border-bottom: 1px solid transparent;
+    transition: color .2s, border-color .2s;
+  }
+  .nav-link:hover{ color: var(--gold); border-bottom-color: var(--gold-line-50); }
+  .nav-link .caret{ width:6px; height:6px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{
+    width:34px; height:34px; position:relative;
+    background: conic-gradient(from 30deg, var(--gold-deep), var(--gold) 25%, var(--gold-fixed) 50%, var(--gold) 75%, var(--gold-deep));
+    clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  }
+  .brand-mark::after{ content:""; position:absolute; inset:4px; background: var(--void); clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+  .brand-mark::before{ content:""; position:absolute; inset:0; z-index:1; background: radial-gradient(circle at 50% 50%, var(--teal) 0 20%, transparent 22%); filter: drop-shadow(0 0 5px var(--teal)); }
+  .brand-name{ font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:.18em; color: var(--on-surface); }
+  .brand-name .dot{ color: var(--gold); }
+
+  .search{
+    --c: 8px;
+    flex: 1; max-width: 420px; margin-left: 12px;
+    display:flex; align-items:center; gap:10px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    border: 1px solid var(--gold-line-25);
+    padding: 10px 16px;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .search:focus-within{ border-color: var(--gold); box-shadow: 0 0 18px rgba(240,191,92,.18); }
+  .search svg{ width:16px; height:16px; color: var(--outline); flex: 0 0 auto; }
+  .search input{
+    flex:1; background: transparent; border:0; outline:0;
+    color: var(--on-surface);
+    font-family:'Manrope', sans-serif; font-size: 13px;
+  }
+  .search input::placeholder{ color: var(--outline); }
+
+  .signin{
+    --c: 10px;
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--gold-line-50);
+    color: var(--gold);
+    padding: 10px 18px; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:12px;
+    letter-spacing:.16em; text-transform:uppercase;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    transition: background .2s, color .2s;
+  }
+  .signin:hover{ background: var(--gold); color: #1a1100; }
+
+  /* ── Content ── */
+  .content{
+    overflow-y: auto;
+    padding: 38px 56px 64px;
+  }
+  .content::-webkit-scrollbar{ width: 8px; }
+  .content::-webkit-scrollbar-thumb{ background: var(--gold-line-25); }
+
+  .page-title{
+    font-family:'Bebas Neue', sans-serif;
+    font-size: 56px; line-height: 1;
+    letter-spacing:.06em; text-transform: uppercase;
+    color: var(--on-surface);
+    margin: 0 0 36px;
+  }
+  .page-title .accent{ color: var(--gold); }
+
+  .info-row{
+    display:flex; align-items:flex-start; gap: 18px;
+    margin-bottom: 26px;
+    max-width: 980px;
+  }
+  .info-bullet{
+    flex: 0 0 auto;
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-deep));
+    color: var(--void);
+    display:inline-flex; align-items:center; justify-content:center;
+    clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+    font-family:'Bebas Neue', sans-serif; font-size: 18px;
+    box-shadow: 0 0 14px rgba(67,226,210,.4);
+  }
+  .info-text{
+    font-family:'Manrope', sans-serif; font-size: 16px; line-height: 26px;
+    color: var(--on-surface);
+    padding-top: 5px;
+  }
+  .info-row.heading .info-text{
+    font-family:'Bebas Neue', sans-serif;
+    font-size: 32px; letter-spacing:.06em; text-transform: uppercase;
+    line-height: 1; padding-top: 4px;
+    color: var(--on-surface);
+  }
+
+  /* ── Activity panel ── */
+  .panel{
+    --c: 14px;
+    position: relative;
+    background: linear-gradient(180deg, var(--surface-1), var(--surface));
+    border: 1px solid var(--gold-line-25);
+    padding: 28px 32px 56px;
+    margin-bottom: 32px;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+  }
+  .panel::before{
+    content:""; position:absolute; left:0; right:0; top:0; height:1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 25%, var(--gold-fixed) 50%, var(--gold) 75%, transparent);
+  }
+  .panel-caption{
+    font-family:'Manrope', sans-serif; font-size: 16px; line-height: 1.5;
+    color: var(--on-surface);
+    margin: 0 0 24px;
+  }
+  .panel-caption .var{ font-style: italic; color: var(--gold); }
+
+  .activity{
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 36px;
+    align-items: stretch;
+  }
+
+  /* ── Graph ── */
+  .graph{
+    background: var(--surface);
+    border: 1px solid var(--gold-line-10);
+    position: relative;
+    min-height: 480px;
+  }
+  .graph svg{ display:block; width:100%; height:100%; }
+
+  /* ── Sliders panel ── */
+  .controls{ display:flex; flex-direction:column; gap: 36px; padding-top: 8px; }
+
+  .group-title{
+    font-family:'Bebas Neue', sans-serif;
+    font-size: 20px; letter-spacing:.18em; text-transform: uppercase;
+    color: var(--on-surface);
+    margin: 0 0 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .group-title .var{ color: var(--gold); font-style: italic; }
+  .group-title.yint{ color: var(--emerald); }
+
+  .slider-row{
+    display: grid;
+    grid-template-columns: 56px 14px 1fr 14px;
+    align-items: center;
+    column-gap: 10px;
+    margin-bottom: 14px;
+  }
+  .slider-label{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 14px; font-weight: 700;
+    letter-spacing:.04em;
+  }
+  .slider-label.rise{ color: var(--rose); }
+  .slider-label.run{ color: var(--teal); }
+  .pm{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 18px; font-weight: 700;
+    color: var(--outline); cursor: pointer; user-select: none;
+    text-align: center;
+    background: transparent; border: 0;
+    transition: color .15s;
+  }
+  .pm:hover{ color: var(--gold); }
+
+  .track{
+    position: relative;
+    height: 6px;
+    background: var(--surface-3);
+    border: 1px solid var(--gold-line-10);
+    border-radius: 0;
+  }
+  .track .fill{
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--rose), color-mix(in srgb, var(--rose) 60%, var(--gold)));
+    box-shadow: 0 0 8px color-mix(in srgb, var(--rose) 60%, transparent);
+  }
+  .track.run .fill{
+    background: linear-gradient(90deg, var(--teal-deep), var(--teal));
+    box-shadow: 0 0 10px rgba(67,226,210,.4);
+  }
+  .thumb{
+    --tc: 5px;
+    position: absolute; top: 50%;
+    width: 22px; height: 22px;
+    background: linear-gradient(180deg, var(--rose), color-mix(in srgb, var(--rose) 50%, var(--void)));
+    border: 1px solid color-mix(in srgb, var(--rose) 70%, var(--gold-fixed));
+    transform: translate(-50%, -50%) rotate(45deg);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--rose) 60%, transparent);
+  }
+  .track.run .thumb{
+    background: linear-gradient(180deg, var(--teal), var(--teal-deep));
+    border-color: var(--teal-line-35);
+    box-shadow: 0 0 12px rgba(67,226,210,.55);
+  }
+
+  /* ── Vertical y-intercept ── */
+  .yint-wrap{
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto 1fr auto;
+    align-items: center;
+    justify-content: start;
+    column-gap: 18px;
+    row-gap: 8px;
+  }
+  .yint-pm{
+    grid-column: 1 / 2;
+    color: var(--emerald);
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 22px; font-weight: 700;
+    background:transparent; border:0; cursor:pointer;
+    width: 14px; text-align: center; padding: 0;
+    transition: filter .15s;
+  }
+  .yint-pm:hover{ filter: brightness(1.15); }
+  .vtrack{
+    grid-column: 1 / 2;
+    position: relative;
+    width: 6px; height: 220px;
+    background: var(--surface-3);
+    border: 1px solid var(--gold-line-10);
+    margin: 0 auto;
+  }
+  .vtrack .vthumb{
+    position: absolute; left: 50%;
+    width: 22px; height: 22px;
+    background: linear-gradient(180deg, var(--emerald), color-mix(in srgb, var(--emerald) 40%, var(--void)));
+    border: 1px solid color-mix(in srgb, var(--emerald) 70%, var(--gold-fixed));
+    transform: translate(-50%, 50%) rotate(45deg);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--emerald) 70%, transparent);
+  }
+  .yint-value{
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    align-self: center;
+    font-family:'Bebas Neue', sans-serif;
+    font-size: 28px; letter-spacing:.06em;
+    color: var(--emerald);
+  }
+
+  .panel-tools{
+    position: absolute; right: 16px; bottom: 14px;
+    display:flex; gap: 8px;
+  }
+  .panel-tools button{
+    width: 32px; height: 32px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    border: 1px solid var(--gold-line-25);
+    color: var(--outline); cursor: pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    transition: color .15s, border-color .15s;
+  }
+  .panel-tools button:hover{ color: var(--gold); border-color: var(--gold-line-50); }
+  .panel-tools svg{ width: 14px; height: 14px; }
+
+  /* ── Right sidebar: Ask AI ── */
+  .ai{
+    border-left: 1px solid var(--gold-line-25);
+    background: linear-gradient(180deg, var(--surface-1), var(--void));
+    display:flex; flex-direction:column;
+    min-height: 0; position: relative;
+  }
+  .ai::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:1px;
+    background: linear-gradient(180deg, transparent, var(--gold-line-50) 30%, transparent 70%);
+  }
+  .ai-head{
+    display:flex; align-items:center; gap: 12px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--gold-line-10);
+  }
+  .ai-head .gem{
+    width:22px; height:22px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-deep));
+    clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+    box-shadow: 0 0 14px rgba(67,226,210,.5);
+  }
+  .ai-title{
+    font-family:'Bebas Neue', sans-serif; font-size: 18px;
+    letter-spacing:.18em; text-transform: uppercase;
+    color: var(--on-surface);
+  }
+  .ai-title .tag{ color: var(--teal); }
+  .ai-collapse{
+    margin-left: auto;
+    width: 28px; height: 28px;
+    background: transparent; border: 0; cursor: pointer;
+    color: var(--on-variant);
+    display:inline-flex; align-items:center; justify-content:center;
+    transition: color .2s, transform .25s;
+  }
+  .ai-collapse:hover{ color: var(--gold); }
+  .ai-collapse svg{ width: 16px; height: 16px; }
+
+  .ai-body{
+    flex: 1; min-height: 0; overflow-y: auto;
+    padding: 20px 22px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .ai-body::-webkit-scrollbar{ width: 6px; }
+  .ai-body::-webkit-scrollbar-thumb{ background: var(--gold-line-25); }
+
+  .msg{
+    --c: 8px;
+    max-width: 86%;
+    padding: 12px 14px;
+    font-family:'Manrope', sans-serif; font-size: 14px; line-height: 22px;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+  }
+  .msg.user{
+    align-self: flex-end;
+    background: linear-gradient(180deg, rgba(240,191,92,.14), rgba(200,155,60,.06));
+    border: 1px solid var(--gold-line-25);
+    color: var(--on-surface);
+  }
+  .msg.ai{
+    align-self: flex-start;
+    background: linear-gradient(180deg, rgba(67,226,210,.10), rgba(0,80,73,.18));
+    border: 1px solid var(--teal-line-25);
+    color: var(--on-surface);
+  }
+  .msg .who{
+    display:block;
+    font-family:'Space Grotesk', sans-serif; font-size: 10px; font-weight: 700;
+    letter-spacing:.18em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .msg.user .who{ color: var(--gold); }
+  .msg.ai .who{ color: var(--teal); }
+  .msg p{ margin: 0; }
+  .msg p + p{ margin-top: 8px; }
+
+  .ai-input-row{
+    display:flex; align-items:stretch; gap: 8px;
+    padding: 14px 16px 18px;
+    border-top: 1px solid var(--gold-line-10);
+  }
+  .ai-input{
+    --c: 8px;
+    flex: 1;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    border: 1px solid var(--gold-line-25);
+    color: var(--on-surface);
+    padding: 12px 14px;
+    font-family:'Manrope', sans-serif; font-size: 14px;
+    outline: 0;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .ai-input::placeholder{ color: var(--outline); }
+  .ai-input:focus{ border-color: var(--teal); box-shadow: 0 0 18px rgba(67,226,210,.18); }
+  .ai-send{
+    --c: 8px;
+    width: 44px;
+    background: linear-gradient(180deg, var(--teal), var(--teal-dim) 60%, var(--teal-deep));
+    color:#002a26; border: 0; cursor: pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    box-shadow: 0 0 18px rgba(67,226,210,.25);
+    transition: filter .2s, transform .15s;
+  }
+  .ai-send:hover{ filter: brightness(1.08); transform: translateY(-1px); }
+  .ai-send svg{ width:16px; height:16px; }
+
+  /* Collapsed AI rail */
+  .ai.collapsed .ai-head{ padding: 14px 0; justify-content: center; border-bottom: 1px solid var(--gold-line-10); }
+  .ai.collapsed .ai-head .gem{ display:none; }
+  .ai.collapsed .ai-title{ display:none; }
+  .ai.collapsed .ai-body{ display:none; }
+  .ai.collapsed .ai-input-row{ display:none; }
+  .ai.collapsed .ai-collapse{ margin: 0; }
+  .ai.collapsed .ai-collapse svg{ transform: rotate(180deg); }
+  .ai-vertical-label{
+    display: none;
+    flex: 1;
+    align-items: center; justify-content: center;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family:'Bebas Neue', sans-serif; font-size: 16px;
+    letter-spacing:.32em; text-transform: uppercase;
+    color: var(--on-variant);
+    user-select: none;
+  }
+  .ai-vertical-label .tag{ color: var(--teal); }
+  .ai.collapsed .ai-vertical-label{ display:flex; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Main column -->
+  <div class="main">
+
+    <!-- Nav -->
+    <nav class="nav" data-screen-label="Nav">
+      <div class="brand" onclick="window.location.href='WizMath.html'" style="cursor:pointer">
+        <div class="brand-mark"></div>
+        <div class="brand-name">WIZMATH<span class="dot">.</span>DEV</div>
+      </div>
+      <div class="nav-links">
+        <button class="nav-link">Charts <span class="caret"></span></button>
+        <button class="nav-link" onclick="window.location.href='Calculator.html'">Create <span class="caret"></span></button>
+      </div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="16" y1="16" x2="21" y2="21"></line>
+        </svg>
+        <input type="text" placeholder="Search" />
+      </div>
+      <button class="signin">Sign in</button>
+    </nav>
+
+    <!-- Content -->
+    <div class="content" data-screen-label="Content">
+
+      <h1 class="page-title">Exploring Slope and <span class="accent">y</span>-Intercept</h1>
+
+      <div class="info-row">
+        <div class="info-bullet">i</div>
+        <p class="info-text">Adjust the slope and y-intercept to see how the line changes. Discover how rise and run affect direction and steepness.</p>
+      </div>
+
+      <!-- Activity panel -->
+      <section class="panel">
+        <p class="panel-caption">Use the sliders to explore the slope and the <span class="var">y</span>-intercept.</p>
+
+        <div class="activity">
+
+          <!-- Graph -->
+          <div class="graph">
+            <svg viewBox="0 0 600 480" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="grid" width="60" height="48" patternUnits="userSpaceOnUse">
+                  <path d="M 60 0 L 0 0 0 48" fill="none" stroke="rgba(155,143,125,.14)" stroke-width="0.5"/>
+                </pattern>
+                <marker id="arr-x" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="rgba(240,191,92,.55)"/>
+                </marker>
+                <marker id="arr-x-rev" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                  <path d="M10,0 L0,5 L10,10 z" fill="rgba(240,191,92,.55)"/>
+                </marker>
+                <marker id="arr-line" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="var(--gold-fixed)"/>
+                </marker>
+                <marker id="arr-rise" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#e25c7a"/>
+                </marker>
+                <marker id="arr-run" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#43e2d2"/>
+                </marker>
+              </defs>
+
+              <rect width="100%" height="100%" fill="url(#grid)"/>
+
+              <!-- axes -->
+              <line x1="300" y1="20" x2="300" y2="460" stroke="rgba(240,191,92,.45)" stroke-width="1"/>
+              <line x1="40" y1="240" x2="560" y2="240" stroke="rgba(240,191,92,.45)" stroke-width="1"/>
+              <!-- arrowheads -->
+              <polygon points="300,12 294,24 306,24" fill="rgba(240,191,92,.55)"/>
+              <polygon points="568,240 556,234 556,246" fill="rgba(240,191,92,.55)"/>
+              <polygon points="32,240 44,234 44,246" fill="rgba(240,191,92,.55)"/>
+              <polygon points="300,468 294,456 306,456" fill="rgba(240,191,92,.55)"/>
+
+              <!-- axis labels -->
+              <g font-family="Space Grotesk, sans-serif" font-size="13" fill="#d2c5b1" font-style="italic">
+                <text x="316" y="22" font-size="15">y</text>
+                <text x="568" y="258" font-size="15">x</text>
+              </g>
+
+              <!-- x ticks -->
+              <g font-family="Space Grotesk, sans-serif" font-size="11" fill="#9b8f7d" text-anchor="middle">
+                <text x="60" y="258">−5</text>
+                <text x="120" y="258">−4</text>
+                <text x="180" y="258">−3</text>
+                <text x="240" y="258">−2</text>
+                <text x="276" y="258">−1</text>
+                <text x="324" y="258">1</text>
+                <text x="360" y="258">2</text>
+                <text x="420" y="258">3</text>
+                <text x="480" y="258">4</text>
+                <text x="540" y="258">5</text>
+              </g>
+
+              <!-- y ticks -->
+              <g font-family="Space Grotesk, sans-serif" font-size="11" fill="#9b8f7d" text-anchor="end">
+                <text x="294" y="48">5</text>
+                <text x="294" y="92">4</text>
+                <text x="294" y="140">3</text>
+                <text x="294" y="188">2</text>
+                <text x="294" y="226">1</text>
+                <text x="294" y="262">−1</text>
+                <text x="294" y="310">−2</text>
+                <text x="294" y="358">−3</text>
+                <text x="294" y="406">−4</text>
+                <text x="294" y="450">−5</text>
+              </g>
+
+              <!-- the line: slope 1 through origin, extends to edges with arrowheads -->
+              <line x1="60" y1="480" x2="540" y2="0"
+                    stroke="var(--gold-fixed)" stroke-width="2"
+                    marker-start="url(#arr-x-rev)" marker-end="url(#arr-line)"
+                    style="filter: drop-shadow(0 0 4px rgba(240,191,92,.45));"/>
+
+              <!-- rise + run indicators at origin -->
+              <line x1="300" y1="240" x2="360" y2="240" stroke="#43e2d2" stroke-width="2.5"
+                    marker-end="url(#arr-run)"/>
+              <line x1="360" y1="240" x2="360" y2="192" stroke="#e25c7a" stroke-width="2.5"
+                    marker-end="url(#arr-rise)"/>
+
+              <!-- origin dot -->
+              <circle cx="300" cy="240" r="4" fill="#5fc28a" stroke="#0c3a26" stroke-width="1.5"/>
+            </svg>
+          </div>
+
+          <!-- Controls -->
+          <div class="controls">
+            <div class="slope-group">
+              <h3 class="group-title">Slope</h3>
+
+              <div class="slider-row">
+                <span class="slider-label rise">Rise</span>
+                <button class="pm" aria-label="Decrease rise">−</button>
+                <div class="track">
+                  <div class="fill" style="width: 65%"></div>
+                  <div class="thumb" style="left: 65%"></div>
+                </div>
+                <button class="pm" aria-label="Increase rise">+</button>
+              </div>
+
+              <div class="slider-row">
+                <span class="slider-label run">Run</span>
+                <button class="pm" aria-label="Decrease run">−</button>
+                <div class="track run">
+                  <div class="fill" style="width: 65%"></div>
+                  <div class="thumb" style="left: 65%"></div>
+                </div>
+                <button class="pm" aria-label="Increase run">+</button>
+              </div>
+            </div>
+
+            <div class="yint-group">
+              <h3 class="group-title yint"><span class="var">y</span>-intercept</h3>
+
+              <div class="yint-wrap">
+                <button class="yint-pm" aria-label="Increase y-intercept">+</button>
+                <div class="vtrack">
+                  <div class="vthumb" style="bottom: 50%"></div>
+                </div>
+                <span class="yint-value">0</span>
+                <button class="yint-pm" aria-label="Decrease y-intercept">−</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="panel-tools">
+          <button aria-label="Fullscreen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <div class="info-row heading">
+        <div class="info-bullet">i</div>
+        <h2 class="info-text">Putting it all together</h2>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Right sidebar: Ask AI -->
+  <aside class="ai" data-screen-label="Ask AI">
+    <div class="ai-head">
+      <div class="gem"></div>
+      <div class="ai-title">Ask <span class="tag">AI</span></div>
+      <button class="ai-collapse" id="ai-collapse" aria-label="Collapse Ask AI">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6 L15 12 L9 18"/></svg>
+      </button>
+    </div>
+    <div class="ai-vertical-label">Ask <span class="tag">AI</span></div>
+    <div class="ai-body">
+      <div class="msg ai">
+        <span class="who">Oracle</span>
+        <p>Welcome, apprentice. Move the Rise and Run sliders to change the slope, or drag the y-intercept to slide the line up and down.</p>
+      </div>
+      <div class="msg user">
+        <span class="who">You</span>
+        <p>What is rise over run?</p>
+      </div>
+      <div class="msg ai">
+        <span class="who">Oracle</span>
+        <p>Rise is how far the line travels vertically; run is how far it travels horizontally. Slope = rise ÷ run — a measure of how steeply the line climbs or falls.</p>
+      </div>
+      <div class="msg user">
+        <span class="who">You</span>
+        <p>And the y-intercept again?</p>
+      </div>
+      <div class="msg ai">
+        <span class="who">Oracle</span>
+        <p>It's where the line crosses the y-axis — the value of y when x is 0. In <em>y = mx + b</em>, that's <em>b</em>.</p>
+      </div>
+    </div>
+    <div class="ai-input-row">
+      <input class="ai-input" type="text" placeholder="Ask the Oracle…" />
+      <button class="ai-send" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 12 L20 4 L14 20 L12 13 Z"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+  (function(){
+    var app = document.querySelector('.app');
+    var ai = document.querySelector('.ai');
+    var aiBtn = document.getElementById('ai-collapse');
+    aiBtn.addEventListener('click', function(){
+      var collapsed = ai.classList.toggle('collapsed');
+      app.classList.toggle('ai-collapsed', collapsed);
+      aiBtn.setAttribute('aria-label', collapsed ? 'Expand Ask AI' : 'Collapse Ask AI');
+    });
+    ai.addEventListener('click', function(e){
+      if (!ai.classList.contains('collapsed')) return;
+      if (e.target.closest('#ai-collapse')) return;
+      ai.classList.remove('collapsed');
+      app.classList.remove('ai-collapsed');
+    });
+  })();
+</script>
+</body>
+</html>
