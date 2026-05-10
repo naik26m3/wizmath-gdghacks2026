@@ -55,7 +55,7 @@ export default function Slope() {
         <nav style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 28px', borderBottom: `1px solid ${BORDER}`, background: BG2, flexShrink: 0 }}>
           <Link to="/activities" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
             <div className="wiz-brand-mark"/>
-            <span className="wiz-font-bebas" style={{ fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>WIZMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
+            <span className="wiz-font-bebas" style={{ fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12 }}>
             <Link to="/activities" style={{ textDecoration: 'none' }}><button className="nav-link" style={{ color: '#f0bf5c', borderBottomColor: 'rgba(240,191,92,.5)' }}>Activities</button></Link>

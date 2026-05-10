@@ -21,14 +21,7 @@ export default function Home() {
       <ParticleField />
 
       <div className="relative z-[2] flex flex-col h-screen overflow-hidden">
-        <TopNav
-          links={[
-            { to: '/activities', label: 'Activities' },
-            { to: '/create',     label: 'Create' },
-            { to: '/leaderboard',label: 'Leaderboard' },
-          ]}
-          right={<AuthButton />}
-        />
+        <TopNav right={<AuthButton />} />
 
         {/* Hero */}
         <section className="relative flex-1 min-h-0 flex flex-col items-center justify-center text-center w-full max-w-[1200px] mx-auto px-6 pt-3 pb-4 overflow-hidden">
@@ -37,7 +30,7 @@ export default function Home() {
           </div>
 
           <div className="wiz-rise wiz-rise-d1 mb-2.5">
-            <EyebrowDivider tone="gold">Est. MMXXVI · Apprentices Welcome</EyebrowDivider>
+            <EyebrowDivider tone="teal">The Arcanum of Numbers</EyebrowDivider>
           </div>
 
           <h1 className="wiz-rise wiz-rise-d2 font-heading uppercase font-normal text-hextech-text leading-none tracking-wide-1 m-0 mb-2.5"
@@ -51,17 +44,17 @@ export default function Home() {
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              Wield It Like Magic.
+              Dominate Every Problem.
             </em>
           </h1>
 
           <p className="wiz-rise wiz-rise-d3 font-body text-base leading-6 text-hextech-text-variant max-w-[620px] mx-auto mb-3.5">
-            A spellbound path through arithmetic, algebra, geometry and beyond — forged for curious young minds and stubborn old ones. Each problem is a riddle. Each lesson, a rite.
+            Train across arithmetic, algebra, geometry and beyond — sharpen your mind, climb the ranks, and outplay every challenge. Knowledge is power. Power wins games.
           </p>
 
           <div className="wiz-rise wiz-rise-d4 flex flex-col items-center gap-4">
             <GoldButton onClick={() => navigate('/activities')}>
-              Begin Your Apprenticeship
+              Enter the Arena
             </GoldButton>
             <div className="font-mono text-[12px] tracking-wide-6 uppercase text-hextech-text-variant">
               ~ takes about two minutes ~
@@ -80,7 +73,7 @@ export default function Home() {
             </div>
             <div>
               <b className="text-hextech-gold font-semibold">873,142</b>
-              {' '}apprentices have unsealed their first scroll
+              {' '}summoners have answered the call
             </div>
           </div>
         </section>

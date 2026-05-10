@@ -515,7 +515,7 @@ export default function Leaderboard() {
       <nav style={{ display:'flex', alignItems:'center', gap:20, padding:'16px 32px', borderBottom:`1px solid ${BORDER}`, background:BG2, position: 'relative', zIndex: 2 }}>
         <Link to="/activities" style={{ display:'flex', alignItems:'center', gap:12, textDecoration:'none' }}>
           <div className="lb-brand-mark"/>
-          <span style={{ fontFamily:'Bebas Neue,sans-serif', fontSize:20, letterSpacing:'.18em', color:'#d7e4f1' }}>WIZMATH<span style={{ color:GOLD }}>.</span>DEV</span>
+          <span style={{ fontFamily:'Bebas Neue,sans-serif', fontSize:20, letterSpacing:'.18em', color:'#d7e4f1' }}>ARCANEMATH<span style={{ color:GOLD }}>.</span>DEV</span>
         </Link>
         <div style={{ display:'flex', alignItems:'center', marginLeft:16 }}>
           <Link to="/activities" style={{ textDecoration:'none' }}><button className="nav-link">Activities</button></Link>

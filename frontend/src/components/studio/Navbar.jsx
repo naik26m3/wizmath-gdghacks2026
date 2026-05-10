@@ -16,7 +16,7 @@ export default function Navbar() {
             </svg>
           </div>
           <span className="font-heading font-bold text-lg text-foreground hidden sm:inline">
-            WizMath
+            ArcaneMath
           </span>
         </Link>
 

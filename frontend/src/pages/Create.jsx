@@ -591,7 +591,7 @@ export default function Create() {
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(240,191,92,.06)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
           <div className="wiz-brand-mark"/>
-          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>WIZMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
+          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
         </Link>
 
         {loadStatus === 'loading' && (

@@ -460,7 +460,7 @@ export default function Play() {
       <header className="wiz-rise" style={{ display: 'flex', alignItems: 'center', padding: '10px 20px', borderBottom: `1px solid ${BORDER}`, background: BG2, gap: 16 }}>
         <Link to="/activities" title="Back to Activities" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <div className="play-brand-mark"/>
-          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>WIZMATH<span style={{ color: GOLD }}>.</span>DEV</span>
+          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: GOLD }}>.</span>DEV</span>
         </Link>
         <div style={{ width: 1, height: 22, background: BORDER }}/>
         <div style={{ flex: 1, minWidth: 0 }}>
