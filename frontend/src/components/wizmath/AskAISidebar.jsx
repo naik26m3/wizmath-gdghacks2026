@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+
+const BACKEND_URL = 'http://localhost:3000';
 
 const INITIAL_MESSAGES = [
-  { role: 'ai', text: 'Greetings, apprentice. Plot a function on the canvas, or ask me anything about the spell of mathematics.' },
+  { role: 'ai', text: 'Ask Arcane to explain.' },
 ];
 
-export default function AskAISidebar({ collapsed, onToggle }) {
+export default function AskAISidebar({ collapsed, onToggle, activity }) {
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,11 +22,32 @@ export default function AskAISidebar({ collapsed, onToggle }) {
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text }]);
     setLoading(true);
-    const reply = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are Oracle, a wise math tutor for WizMath. Answer concisely and helpfully. User asks: ${text}`,
-    });
-    setMessages(prev => [...prev, { role: 'ai', text: reply }]);
-    setLoading(false);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/tutor`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: text,
+          activity: {
+            title: activity?.title ?? '',
+            description: activity?.description ?? '',
+            commands: Array.isArray(activity?.commands) ? activity.commands : [],
+          },
+          history: messages.slice(-8),
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Backend error ${res.status}`);
+      }
+      const data = await res.json();
+      setMessages(prev => [...prev, { role: 'ai', text: data.answer || '(no answer)' }]);
+    } catch (err) {
+      console.error('Tutor failed:', err);
+      setMessages(prev => [...prev, { role: 'ai', text: `Error: ${err.message}. Make sure the backend is running on ${BACKEND_URL}.`, error: true }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,7 +69,7 @@ export default function AskAISidebar({ collapsed, onToggle }) {
           <>
             <div style={{ width:22, height:22, background:'linear-gradient(135deg,#43e2d2,#005049)', clipPath:'polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)', boxShadow:'0 0 14px rgba(67,226,210,.5)' }} />
             <span style={{ fontFamily:'Bebas Neue,sans-serif', fontSize:18, letterSpacing:'.18em', textTransform:'uppercase', color:'#d7e4f1' }}>
-              Ask <span style={{ color:'#43e2d2' }}>AI</span>
+              Ask <span style={{ color:'#43e2d2' }}>Arcane</span>
             </span>
           </>
         )}
@@ -59,7 +81,7 @@ export default function AskAISidebar({ collapsed, onToggle }) {
       {/* Vertical label when collapsed */}
       {collapsed && (
         <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', writingMode:'vertical-rl', transform:'rotate(180deg)', fontFamily:'Bebas Neue,sans-serif', fontSize:16, letterSpacing:'.32em', textTransform:'uppercase', color:'#d2c5b1', userSelect:'none', cursor:'pointer' }} onClick={onToggle}>
-          Ask <span style={{ color:'#43e2d2', marginLeft:4 }}>AI</span>
+          Ask <span style={{ color:'#43e2d2', marginLeft:4 }}>Arcane</span>
         </div>
       )}
 
@@ -74,22 +96,25 @@ export default function AskAISidebar({ collapsed, onToggle }) {
                 alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
                 background: msg.role === 'user'
                   ? 'linear-gradient(180deg,rgba(240,191,92,.14),rgba(200,155,60,.06))'
-                  : 'linear-gradient(180deg,rgba(67,226,210,.10),rgba(0,80,73,.18))',
-                border: `1px solid ${msg.role === 'user' ? 'rgba(200,155,60,.25)' : 'rgba(67,226,210,.25)'}`,
+                  : (msg.error
+                    ? 'linear-gradient(180deg,rgba(226,92,122,.10),rgba(120,30,50,.18))'
+                    : 'linear-gradient(180deg,rgba(67,226,210,.10),rgba(0,80,73,.18))'),
+                border: `1px solid ${msg.role === 'user' ? 'rgba(200,155,60,.25)' : (msg.error ? 'rgba(226,92,122,.35)' : 'rgba(67,226,210,.25)')}`,
                 clipPath: 'polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)',
                 fontFamily: 'Manrope,sans-serif',
                 fontSize: 14,
                 lineHeight: '22px',
                 color: '#d7e4f1',
+                whiteSpace: 'pre-wrap',
               }}>
-                <span style={{ display:'block', fontFamily:'Space Grotesk,sans-serif', fontSize:10, fontWeight:700, letterSpacing:'.18em', textTransform:'uppercase', marginBottom:6, color: msg.role === 'user' ? '#f0bf5c' : '#43e2d2' }}>
-                  {msg.role === 'user' ? 'You' : 'Oracle'}
+                <span style={{ display:'block', fontFamily:'Space Grotesk,sans-serif', fontSize:10, fontWeight:700, letterSpacing:'.18em', textTransform:'uppercase', marginBottom:6, color: msg.role === 'user' ? '#f0bf5c' : (msg.error ? '#e25c7a' : '#43e2d2') }}>
+                  {msg.role === 'user' ? 'You' : 'Arcane'}
                 </span>
                 <p style={{ margin:0 }}>{msg.text}</p>
               </div>
             ))}
             {loading && (
-              <div style={{ alignSelf:'flex-start', color:'#43e2d2', fontSize:13, fontFamily:'Manrope,sans-serif', opacity:0.7 }}>Oracle is thinking…</div>
+              <div style={{ alignSelf:'flex-start', color:'#43e2d2', fontSize:13, fontFamily:'Manrope,sans-serif', opacity:0.7 }}>Arcane is thinking…</div>
             )}
           </div>
           <div style={{ display:'flex', alignItems:'stretch', gap:8, padding:'14px 16px 18px', borderTop:'1px solid rgba(200,155,60,.10)' }}>
@@ -97,10 +122,10 @@ export default function AskAISidebar({ collapsed, onToggle }) {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && send()}
-              placeholder="Ask the Oracle…"
+              placeholder="Ask Arcane…"
               style={{ flex:1, background:'linear-gradient(180deg,#111d26,#091428)', border:'1px solid rgba(200,155,60,.25)', color:'#d7e4f1', padding:'12px 14px', fontFamily:'Manrope,sans-serif', fontSize:14, outline:0, clipPath:'polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)' }}
             />
-            <button onClick={send} style={{ width:44, background:'linear-gradient(180deg,#43e2d2,#00c6b7 60%,#005049)', color:'#002a26', border:0, cursor:'pointer', display:'inline-flex', alignItems:'center', justifyContent:'center', clipPath:'polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)', boxShadow:'0 0 18px rgba(67,226,210,.25)' }}>
+            <button onClick={send} disabled={loading} style={{ width:44, background:'linear-gradient(180deg,#43e2d2,#00c6b7 60%,#005049)', color:'#002a26', border:0, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.5 : 1, display:'inline-flex', alignItems:'center', justifyContent:'center', clipPath:'polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)', boxShadow:'0 0 18px rgba(67,226,210,.25)' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12 L20 4 L14 20 L12 13 Z"/></svg>
             </button>
           </div>

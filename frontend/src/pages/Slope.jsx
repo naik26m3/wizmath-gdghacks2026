@@ -59,7 +59,7 @@ export default function Slope() {
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12 }}>
             <Link to="/activities" style={{ textDecoration: 'none' }}><button className="nav-link" style={{ color: '#f0bf5c', borderBottomColor: 'rgba(240,191,92,.5)' }}>Activities</button></Link>
-            <Link to="/calculator" style={{ textDecoration: 'none' }}><button className="nav-link">Create</button></Link>
+            <Link to="/create" style={{ textDecoration: 'none' }}><button className="nav-link">Create</button></Link>
           </div>
           <Link to="/activities" style={{ textDecoration: 'none', marginLeft: 'auto' }}>
             <button style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 7, color: '#aaa', padding: '8px 14px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', transition: 'border-color .2s, color .2s' }}

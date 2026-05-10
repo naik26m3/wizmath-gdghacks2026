@@ -9,7 +9,8 @@ import Home from '@/pages/Home';
 import Studio from '@/pages/Studio';
 import Library from '@/pages/Library';
 import Activities from '@/pages/Activities';
-import Calculator from '@/pages/Calculator';
+import Create from '@/pages/Create';
+import Activity from '@/pages/Activity';
 import Slope from '@/pages/Slope';
 
 const AuthenticatedApp = () => {
@@ -42,7 +43,8 @@ const AuthenticatedApp = () => {
       <Route path="/studio" element={<Studio />} />
       <Route path="/library" element={<Library />} />
       <Route path="/activities" element={<Activities />} />
-      <Route path="/calculator" element={<Calculator />} />
+      <Route path="/create" element={<Create />} />
+      <Route path="/activity/:id" element={<Activity />} />
       <Route path="/slope" element={<Slope />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

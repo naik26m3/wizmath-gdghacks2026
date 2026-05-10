@@ -18,6 +18,14 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Anonymous publish: anyone can read, anyone can create.
+    // No edit/delete (prevents tampering with others' work). Tighten later when auth is wired up.
+    match /activities/{activityId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

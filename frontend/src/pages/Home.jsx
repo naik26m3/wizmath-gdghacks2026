@@ -111,7 +111,7 @@ export default function Home() {
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:4 }}>
             <Link to="/activities" style={{ color:'#d2c5b1', textDecoration:'none', fontFamily:'Space Grotesk,sans-serif', fontSize:12, fontWeight:600, letterSpacing:'.18em', textTransform:'uppercase', padding:'10px 14px', borderBottom:'1px solid transparent' }}>Activities</Link>
-            <Link to="/calculator" style={{ color:'#d2c5b1', textDecoration:'none', fontFamily:'Space Grotesk,sans-serif', fontSize:12, fontWeight:600, letterSpacing:'.18em', textTransform:'uppercase', padding:'10px 14px', borderBottom:'1px solid transparent' }}>Create</Link>
+            <Link to="/create" style={{ color:'#d2c5b1', textDecoration:'none', fontFamily:'Space Grotesk,sans-serif', fontSize:12, fontWeight:600, letterSpacing:'.18em', textTransform:'uppercase', padding:'10px 14px', borderBottom:'1px solid transparent' }}>Create</Link>
 
           </div>
           <button className="home-gbtn" style={{ marginLeft:'auto' }}>Sign in</button>
