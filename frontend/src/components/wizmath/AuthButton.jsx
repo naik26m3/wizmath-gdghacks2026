@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 
 /**
@@ -7,8 +8,14 @@ import { useAuth } from '@/lib/AuthContext';
  * - Logged in: shows avatar + name; click opens a tiny menu with Sign out.
  */
 export default function AuthButton() {
-  const { user, profile, isLoadingAuth, signIn, logout, authError } = useAuth();
+  const { user, profile, isLoadingAuth, logout, authError } = useAuth();
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const goToSignIn = () => {
+    navigate('/signin', { state: { from: location.pathname + location.search } });
+  };
 
   if (isLoadingAuth) {
     return (
@@ -19,8 +26,8 @@ export default function AuthButton() {
   if (!user) {
     return (
       <button
-        onClick={signIn}
-        title={authError || 'Sign in with Google'}
+        onClick={goToSignIn}
+        title={authError || 'Sign in'}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
           background: 'transparent', border: '1px solid rgba(180,160,100,.35)', borderRadius: 7,
