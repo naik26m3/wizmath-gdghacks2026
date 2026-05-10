@@ -437,7 +437,8 @@ Return ONLY the plain description text — no preface, no "Here's a description.
         return text.replace(/^["'`]+|["'`]+$/g, '').trim();
     } catch (error) {
         console.error('Error generating description:', error);
-        throw new Error('Failed to generate description');
+        const msg = error?.message || 'unknown error';
+        throw new Error(`Description generation failed: ${msg}`);
     }
 }
 

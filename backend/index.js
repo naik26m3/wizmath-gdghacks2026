@@ -124,7 +124,7 @@ app.post('/api/describe', async (req, res) => {
         return res.json({ description });
     } catch (error) {
         console.error('Failed to generate description:', error);
-        return res.status(500).json({ error: 'Failed to generate description.' });
+        return res.status(500).json({ error: error?.message || 'Failed to generate description.' });
     }
 });
 

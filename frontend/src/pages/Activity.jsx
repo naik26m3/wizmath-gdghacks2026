@@ -2,8 +2,149 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import AskAISidebar from '@/components/wizmath/AskAISidebar';
 import StarButton from '@/components/wizmath/StarButton';
-import { getActivity, toggleStar } from '@/lib/activities';
+import { getActivity, toggleStar, updateActivity, deleteActivity } from '@/lib/activities';
 import { useAuth } from '@/lib/AuthContext';
+
+const BACKEND_URL_DESCRIBE = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000') + '/api/describe';
+
+// ─── Edit Activity Modal ─────────────────────────────────────────────────────
+function EditActivityModal({ activity, onClose, onSave, isSaving }) {
+  const [title, setTitle] = useState(activity?.title || '');
+  const [description, setDescription] = useState(activity?.description || '');
+  const [error, setError] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!title.trim()) {
+      setError('Title is required.');
+      return;
+    }
+    setError('');
+    try {
+      await onSave({ title: title.trim(), description: description.trim() });
+    } catch (e) {
+      setError(e.message || 'Failed to save.');
+    }
+  };
+
+  const handleAutoGenerate = async () => {
+    if (!title.trim()) {
+      setError('Enter a title first.');
+      return;
+    }
+    setError('');
+    setIsGenerating(true);
+    try {
+      const res = await fetch(BACKEND_URL_DESCRIBE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.trim(), commands: activity?.commands || [], userHint: description.trim() }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Backend ${res.status}`);
+      }
+      const data = await res.json();
+      if (data.description) setDescription(data.description);
+    } catch (e) {
+      setError(`Auto-generate failed: ${e.message || 'try again'}`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(6px)' }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: 'rgb(35,34,34)', border: '1px solid rgba(180,160,100,.22)', borderRadius: 12, padding: 28, width: 'min(440px, 90vw)', boxShadow: '0 30px 60px rgba(0,0,0,.5)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#f0bf5c', boxShadow: '0 0 6px #f0bf5c' }}/>
+          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>
+            EDIT <span style={{ color: '#f0bf5c' }}>ACTIVITY</span>
+          </span>
+        </div>
+
+        <label style={{ display: 'block', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#888', marginBottom: 6 }}>Title *</label>
+        <input
+          autoFocus
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          maxLength={80}
+          style={{ width: '100%', background: 'rgb(28,27,27)', border: '1px solid rgba(180,160,100,.22)', borderRadius: 7, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 14, outline: 0, marginBottom: 16, boxSizing: 'border-box' }}
+        />
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <label style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#888' }}>Description</label>
+          <button
+            type="button"
+            onClick={handleAutoGenerate}
+            disabled={isGenerating || isSaving}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: isGenerating ? 'rgba(67,226,210,.06)' : 'transparent',
+              border: '1px solid rgba(67,226,210,.35)', borderRadius: 6, color: '#43e2d2',
+              padding: '4px 10px', cursor: (isGenerating || isSaving) ? 'not-allowed' : 'pointer',
+              fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase',
+              opacity: (isGenerating || isSaving) ? 0.6 : 1,
+            }}
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
+            {isGenerating ? 'Generating…' : 'Auto-Generate'}
+          </button>
+        </div>
+        <textarea
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          maxLength={300}
+          rows={4}
+          style={{ width: '100%', background: 'rgb(28,27,27)', border: '1px solid rgba(180,160,100,.22)', borderRadius: 7, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, outline: 0, marginBottom: 8, boxSizing: 'border-box', resize: 'vertical' }}
+        />
+
+        {error && (
+          <div style={{ color: '#e25c7a', fontSize: 12, fontFamily: 'Manrope,sans-serif', margin: '8px 0' }}>⚠ {error}</div>
+        )}
+
+        <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
+          <button onClick={onClose} disabled={isSaving} style={{ flex: 1, background: 'transparent', border: '1px solid rgba(180,160,100,.22)', borderRadius: 7, color: '#aaa', padding: '10px', cursor: isSaving ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', opacity: isSaving ? 0.5 : 1 }}>
+            Cancel
+          </button>
+          <button onClick={handleSubmit} disabled={isSaving} style={{ flex: 1, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 7, color: '#1a1a1a', padding: '10px', cursor: isSaving ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', opacity: isSaving ? 0.7 : 1 }}>
+            {isSaving ? 'Saving…' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Delete Confirmation Modal ──────────────────────────────────────────────
+function DeleteConfirmModal({ title, onCancel, onConfirm, isDeleting }) {
+  return (
+    <div onClick={onCancel} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(6px)' }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: 'rgb(35,34,34)', border: '1px solid rgba(226,92,122,.4)', borderRadius: 12, padding: 28, width: 'min(420px, 90vw)', boxShadow: '0 30px 60px rgba(0,0,0,.6)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#e25c7a', boxShadow: '0 0 6px #e25c7a' }}/>
+          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#e25c7a' }}>
+            DELETE ACTIVITY?
+          </span>
+        </div>
+        <p style={{ color: '#d7e4f1', fontSize: 14, fontFamily: 'Manrope,sans-serif', margin: '0 0 8px', lineHeight: '22px' }}>
+          You're about to delete <strong style={{ color: '#f0bf5c' }}>"{title}"</strong>. This action cannot be undone.
+        </p>
+        <p style={{ color: '#888', fontSize: 12, fontFamily: 'Manrope,sans-serif', margin: '0 0 22px', lineHeight: '18px' }}>
+          The activity, its star count, and any references to it will be permanently removed.
+        </p>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={onCancel} disabled={isDeleting} style={{ flex: 1, background: 'transparent', border: '1px solid rgba(180,160,100,.22)', borderRadius: 7, color: '#aaa', padding: '10px', cursor: isDeleting ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', opacity: isDeleting ? 0.5 : 1 }}>
+            Cancel
+          </button>
+          <button onClick={onConfirm} disabled={isDeleting} style={{ flex: 1, background: 'linear-gradient(180deg,#e25c7a,#a83456)', border: 0, borderRadius: 7, color: '#fff', padding: '10px', cursor: isDeleting ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', opacity: isDeleting ? 0.7 : 1 }}>
+            {isDeleting ? 'Deleting…' : 'Delete Forever'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const BG = 'rgb(43,42,42)';
 const BG2 = 'rgb(35,34,34)';
@@ -169,8 +310,37 @@ export default function Activity() {
   const { id } = useParams();
   const [aiCollapsed, setAiCollapsed] = useState(false);
   const [activity, setActivity] = useState(/** @type {any} */ (DEFAULT_ACTIVITY));
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isAuthor = !!user && !!activity?.authorUid && activity.authorUid === user.uid;
+
+  const handleSaveEdit = async ({ title, description }) => {
+    if (!activity?.id) return;
+    setIsSaving(true);
+    try {
+      await updateActivity(activity.id, { title, description });
+      setActivity((a) => ({ ...a, title, description }));
+      setShowEditModal(false);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!activity?.id) return;
+    setIsDeleting(true);
+    try {
+      await deleteActivity(activity.id);
+      navigate('/activities', { replace: true });
+    } catch (e) {
+      console.error('Delete failed:', e);
+      setIsDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -249,10 +419,45 @@ export default function Activity() {
             <h1 className="wiz-font-bebas" style={{ fontSize: 56, lineHeight: 1, letterSpacing: '.06em', color: '#d7e4f1', margin: 0, flex: 1, minWidth: 0 }}>
               {activity.title}
             </h1>
-            <div style={{ flexShrink: 0, paddingTop: 8 }}>
+            <div style={{ flexShrink: 0, paddingTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+              {isAuthor && (
+                <>
+                  <button onClick={() => setShowEditModal(true)} title="Edit title and description"
+                    style={{ display:'inline-flex', alignItems:'center', gap:6, background:'transparent', border:'1px solid rgba(180,160,100,.35)', borderRadius:7, color:'#d2c5b1', padding:'7px 12px', cursor:'pointer', fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:600, letterSpacing:'.14em', textTransform:'uppercase', transition:'border-color .15s, color .15s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor='rgba(240,191,92,.6)'; e.currentTarget.style.color='#f0bf5c'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor='rgba(180,160,100,.35)'; e.currentTarget.style.color='#d2c5b1'; }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Edit
+                  </button>
+                  <button onClick={() => setShowDeleteModal(true)} title="Delete this activity"
+                    style={{ display:'inline-flex', alignItems:'center', gap:6, background:'transparent', border:'1px solid rgba(226,92,122,.35)', borderRadius:7, color:'#e25c7a', padding:'7px 12px', cursor:'pointer', fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:600, letterSpacing:'.14em', textTransform:'uppercase', transition:'background .15s, border-color .15s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background='rgba(226,92,122,.08)'; e.currentTarget.style.borderColor='rgba(226,92,122,.6)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.borderColor='rgba(226,92,122,.35)'; }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                    Delete
+                  </button>
+                </>
+              )}
               <StarButton isStarred={isStarred} count={starCount} onClick={handleToggleStar} />
             </div>
           </div>
+
+          {showEditModal && (
+            <EditActivityModal
+              activity={activity}
+              onClose={() => setShowEditModal(false)}
+              onSave={handleSaveEdit}
+              isSaving={isSaving}
+            />
+          )}
+          {showDeleteModal && (
+            <DeleteConfirmModal
+              title={activity.title}
+              onCancel={() => setShowDeleteModal(false)}
+              onConfirm={handleDelete}
+              isDeleting={isDeleting}
+            />
+          )}
           {activity.authorName && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
               {activity.authorPhotoURL ? (

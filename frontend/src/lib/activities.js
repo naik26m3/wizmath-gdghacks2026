@@ -9,6 +9,7 @@ import {
   limit,
   serverTimestamp,
   updateDoc,
+  deleteDoc,
   arrayUnion,
   arrayRemove,
   increment,
@@ -94,6 +95,28 @@ export async function getActivity(id) {
   const snap = await getDoc(doc(db, COLLECTION, id));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() };
+}
+
+/**
+ * Update title/description for an existing activity. Author-only (enforced by rules).
+ */
+export async function updateActivity(activityId, { title, description }) {
+  ensureReady();
+  if (!activityId) throw new Error('Missing activity id.');
+  const patch = {};
+  if (typeof title === 'string') patch.title = title.trim();
+  if (typeof description === 'string') patch.description = description.trim();
+  if (Object.keys(patch).length === 0) return;
+  await updateDoc(doc(db, COLLECTION, activityId), patch);
+}
+
+/**
+ * Delete an activity. Author-only (enforced by rules).
+ */
+export async function deleteActivity(activityId) {
+  ensureReady();
+  if (!activityId) throw new Error('Missing activity id.');
+  await deleteDoc(doc(db, COLLECTION, activityId));
 }
 
 /**

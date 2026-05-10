@@ -18,12 +18,20 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Anonymous publish: anyone can read, anyone can create.
-    // No edit/delete (prevents tampering with others' work). Tighten later when auth is wired up.
+    // Activities — anyone can read; signed-in users can publish; star toggle by any authed user;
+    // title/description edits only by the author; delete only by the author.
     match /activities/{activityId} {
       allow read: if true;
       allow create: if true;
-      allow update, delete: if false;
+      allow update: if request.auth != null && (
+        // Anyone signed in can star/unstar (only stars + starredBy fields)
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stars', 'starredBy'])
+        ||
+        // The author can edit title and/or description (only those fields)
+        (resource.data.authorUid == request.auth.uid
+         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'description']))
+      );
+      allow delete: if request.auth != null && resource.data.authorUid == request.auth.uid;
     }
 
     match /{document=**} {
