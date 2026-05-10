@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 
-const BG2 = 'rgb(35,34,34)';
-const BORDER = 'rgba(180,160,100,.22)';
+const BG2 = '#111d26';
+const BORDER = 'rgba(200,155,60,.25)';
 
 export default function SignInModal() {
   const { user, isSignInModalOpen, closeSignInModal, signIn, isLoadingAuth, authError } = useAuth();
@@ -62,7 +62,7 @@ export default function SignInModal() {
           width: 'min(420px, 100%)',
           background: BG2,
           border: `1px solid ${BORDER}`,
-          borderRadius: 16,
+          borderRadius: 0,
           padding: '48px 40px',
           textAlign: 'center',
           position: 'relative',
@@ -77,7 +77,7 @@ export default function SignInModal() {
           aria-label="Close"
           style={{
             position: 'absolute', top: 14, right: 14,
-            width: 32, height: 32, borderRadius: '50%',
+            width: 32, height: 32, borderRadius: 0,
             background: 'rgba(255,255,255,.06)', border: `1px solid ${BORDER}`,
             color: '#d7e4f1', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -124,7 +124,7 @@ export default function SignInModal() {
             padding: '12px 18px',
             background: '#fff',
             border: 0,
-            borderRadius: 8,
+            borderRadius: 0,
             color: '#1f1f1f',
             fontFamily: 'Manrope,sans-serif', fontSize: 14, fontWeight: 600,
             cursor: isLoadingAuth ? 'not-allowed' : 'pointer',
@@ -145,7 +145,7 @@ export default function SignInModal() {
         </button>
 
         {authError && (
-          <div style={{ marginTop: 18, padding: '10px 14px', background: 'rgba(226,92,122,.08)', border: '1px solid rgba(226,92,122,.3)', borderRadius: 7, color: '#e25c7a', fontSize: 12, lineHeight: '18px', textAlign: 'left' }}>
+          <div style={{ marginTop: 18, padding: '10px 14px', background: 'rgba(226,92,122,.08)', border: '1px solid rgba(226,92,122,.3)', borderRadius: 0, color: '#e25c7a', fontSize: 12, lineHeight: '18px', textAlign: 'left' }}>
             {typeof authError === 'string' ? authError : (authError?.message || 'Sign in failed')}
           </div>
         )}

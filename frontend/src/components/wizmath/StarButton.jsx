@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 /**
  * Star/favorite toggle button.
@@ -31,7 +31,7 @@ export default function StarButton({ isStarred, count = 0, onClick, size = 'md',
         display: 'inline-flex', alignItems: 'center', gap: 6,
         background: isStarred ? 'rgba(240,191,92,.14)' : 'rgba(255,255,255,.04)',
         border: `1px solid ${isStarred ? 'rgba(240,191,92,.5)' : 'rgba(255,255,255,.12)'}`,
-        borderRadius: 7,
+        borderRadius: 0,
         color: isStarred ? '#f0bf5c' : '#aaa',
         padding: `${padY}px ${padX}px`,
         cursor: 'pointer',

@@ -1,13 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+﻿import React, { useEffect, useRef, useState } from 'react';
+import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { getActivity } from '@/lib/activities';
 import { useAuth } from '@/lib/AuthContext';
 import { awardXp } from '@/lib/userProfile';
 
-const BG = 'rgb(43,42,42)';
-const BG2 = 'rgb(35,34,34)';
-const BG3 = 'rgb(28,27,27)';
-const BORDER = 'rgba(180,160,100,.22)';
+const BG = '#010A13';
+const BG2 = '#111d26';
+const BG3 = '#091428';
+const BORDER = 'rgba(200,155,60,.25)';
 const GOLD = '#f0bf5c';
 const TEAL = '#43e2d2';
 const RED = '#e25c7a';
@@ -150,8 +150,8 @@ function LoadingScreen({ activity }) {
         .lb-hex { width: 70px; height: 70px; position: relative; background: conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); animation: lb-pulse 2s ease-in-out infinite; }
         .lb-hex::after { content:''; position:absolute; inset:7px; background:${BG}; clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
         .lb-hex::before { content:''; position:absolute; inset:0; z-index:1; background:radial-gradient(circle at 50% 50%,${TEAL} 0 22%,transparent 24%); }
-        .lb-orbit { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: ${GOLD}; box-shadow: 0 0 8px ${GOLD}; }
-        .lb-dot { display: inline-block; width: 6px; height: 6px; margin: 0 3px; background: ${TEAL}; border-radius: 50%; animation: lb-bounce 1s infinite; }
+        .lb-orbit { position: absolute; width: 4px; height: 4px; border-radius: 0; background: ${GOLD}; box-shadow: 0 0 8px ${GOLD}; }
+        .lb-dot { display: inline-block; width: 6px; height: 6px; margin: 0 3px; background: ${TEAL}; border-radius: 0; animation: lb-bounce 1s infinite; }
         @keyframes lb-bounce { 0%,100% { transform: translateY(0); opacity: .4; } 50% { transform: translateY(-6px); opacity: 1; } }
         .lb-dot:nth-child(2) { animation-delay: .15s; }
         .lb-dot:nth-child(3) { animation-delay: .3s; }
@@ -181,7 +181,7 @@ function LoadingScreen({ activity }) {
 }
 
 // ─── Question panel ──────────────────────────────────────────────────────────
-function QuestionPanel({ questions, onComplete, onBack, xpAwarded = 0 }) {
+function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 0 }) {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState(null);
   const [revealed, setRevealed] = useState(false);
@@ -190,6 +190,8 @@ function QuestionPanel({ questions, onComplete, onBack, xpAwarded = 0 }) {
 
   const q = questions[index];
   const isCorrect = revealed && selected === q.correctIndex;
+  const wrongCount = (revealed ? index + 1 : index) - score;
+  const runningDelta = wager > 0 ? (score - wrongCount) * wager : 0;
 
   const handlePick = (i) => {
     if (revealed) return;
@@ -201,7 +203,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpAwarded = 0 }) {
   const handleNext = () => {
     if (index + 1 >= questions.length) {
       setDone(true);
-      onComplete?.({ score: score + (isCorrect ? 0 : 0), total: questions.length });
+      onComplete?.({ score, total: questions.length });
     } else {
       setIndex((i) => i + 1);
       setSelected(null);
@@ -220,6 +222,9 @@ function QuestionPanel({ questions, onComplete, onBack, xpAwarded = 0 }) {
   if (done) {
     const pct = Math.round((score / questions.length) * 100);
     const tier = pct >= 80 ? 'mastered' : pct >= 50 ? 'great' : 'keep going';
+    const wrong = questions.length - score;
+    const positive = xpDelta != null && xpDelta > 0;
+    const negative = xpDelta != null && xpDelta < 0;
     return (
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16, textAlign: 'center' }}>
         <div style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.32em', textTransform: 'uppercase', color: TEAL }}>
@@ -231,12 +236,32 @@ function QuestionPanel({ questions, onComplete, onBack, xpAwarded = 0 }) {
         <div style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, letterSpacing: '.18em', color: '#d7e4f1', textTransform: 'uppercase' }}>
           {tier}
         </div>
-        {xpAwarded > 0 && (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'rgba(67,226,210,.08)', border: `1px solid rgba(67,226,210,.35)`, borderRadius: 7, color: TEAL, fontFamily: 'Space Grotesk,sans-serif', fontSize: 13, fontWeight: 700, letterSpacing: '.12em' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
-            +{xpAwarded} XP EARNED
+
+        {wager > 0 && xpDelta != null && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginTop: 4 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 16, padding: '8px 18px', background: 'rgba(255,255,255,.03)', border: `1px solid ${BORDER}`, borderRadius: 0, fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, color: '#888', letterSpacing: '.14em', textTransform: 'uppercase' }}>
+              <span><span style={{ color: GREEN }}>{score}</span> correct × +{wager} XP</span>
+              <span style={{ color: '#444' }}>•</span>
+              <span><span style={{ color: RED }}>{wrong}</span> wrong × −{wager} XP</span>
+            </div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '12px 22px',
+                background: positive ? 'rgba(95,194,138,.1)' : negative ? 'rgba(226,92,122,.1)' : 'rgba(255,255,255,.04)',
+                border: `1px solid ${positive ? 'rgba(95,194,138,.4)' : negative ? 'rgba(226,92,122,.4)' : BORDER}`,
+                borderRadius: 0,
+                color: positive ? GREEN : negative ? RED : '#aaa',
+                fontFamily: 'Bebas Neue,sans-serif', fontSize: 26, letterSpacing: '.06em' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
+              {xpDelta > 0 ? `+${xpDelta} XP earned` : xpDelta < 0 ? `${xpDelta} XP lost` : '0 XP — even break'}
+            </div>
           </div>
         )}
+        {wager === 0 && xpDelta != null && xpDelta > 0 && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'rgba(67,226,210,.08)', border: `1px solid rgba(67,226,210,.35)`, borderRadius: 0, color: TEAL, fontFamily: 'Space Grotesk,sans-serif', fontSize: 13, fontWeight: 700, letterSpacing: '.12em' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
+            +{xpDelta} XP EARNED
+          </div>
+        )}
+
         <div style={{ fontFamily: 'Manrope,sans-serif', fontSize: 14, color: '#888', maxWidth: 400, lineHeight: '22px', marginTop: 6 }}>
           {pct >= 80 ? 'You really get this concept. Try another activity to keep building your spellbook.' : pct >= 50 ? "Solid effort. Re-explore the activity, then try the questions again." : "Take your time with the activity, then come back. The sliders teach more than the questions do."}
         </div>
@@ -251,21 +276,32 @@ function QuestionPanel({ questions, onComplete, onBack, xpAwarded = 0 }) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '24px 28px 24px 28px', overflow: 'hidden' }}>
       {/* Progress bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, gap: 10, flexWrap: 'wrap' }}>
         <span style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: '#888' }}>
           Question <span style={{ color: GOLD }}>{index + 1}</span> / {questions.length}
         </span>
-        <span style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', color: TEAL }}>
-          {score} ⭐ correct
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {wager > 0 && (
+            <span title={`Wagered ${wager} XP per question`}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 0, background: 'rgba(240,191,92,.1)', border: '1px solid rgba(240,191,92,.35)', fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD }}>
+              ±{wager} XP
+            </span>
+          )}
+          <span style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em',
+              color: wager > 0 ? (runningDelta > 0 ? GREEN : runningDelta < 0 ? RED : '#aaa') : TEAL }}>
+            {wager > 0
+              ? `${runningDelta > 0 ? '+' : ''}${runningDelta} XP`
+              : `${score} ⭐ correct`}
+          </span>
+        </div>
       </div>
-      <div style={{ height: 4, background: BG3, borderRadius: 2, overflow: 'hidden', marginBottom: 24 }}>
+      <div style={{ height: 4, background: BG3, borderRadius: 0, overflow: 'hidden', marginBottom: 24 }}>
         <div style={{ width: `${((index + (revealed ? 1 : 0)) / questions.length) * 100}%`, height: '100%', background: `linear-gradient(90deg, ${GOLD}, ${TEAL})`, transition: 'width .3s' }}/>
       </div>
 
       {/* Question */}
       <div style={{ flex: 1, overflow: 'auto', paddingRight: 4 }}>
-        <h2 style={{ fontFamily: 'Manrope,sans-serif', fontSize: 20, lineHeight: '30px', color: '#d7e4f1', margin: '0 0 22px', fontWeight: 600 }}>
+        <h2 key={`q-${index}`} className="wiz-rise" style={{ fontFamily: 'Manrope,sans-serif', fontSize: 20, lineHeight: '30px', color: '#d7e4f1', margin: '0 0 22px', fontWeight: 600 }}>
           {q.question}
         </h2>
 
@@ -278,7 +314,8 @@ function QuestionPanel({ questions, onComplete, onBack, xpAwarded = 0 }) {
             const bgColor = isThisCorrect ? 'rgba(95,194,138,.08)' : isThisWrong ? 'rgba(226,92,122,.08)' : isPicked ? 'rgba(240,191,92,.06)' : BG3;
             return (
               <button
-                key={i}
+                key={`${index}-${i}`}
+                className="wiz-rise"
                 onClick={() => handlePick(i)}
                 disabled={revealed}
                 style={{
@@ -286,13 +323,14 @@ function QuestionPanel({ questions, onComplete, onBack, xpAwarded = 0 }) {
                   textAlign: 'left',
                   background: bgColor,
                   border: `1px solid ${borderColor}`,
-                  borderRadius: 8,
+                  borderRadius: 0,
                   color: '#d7e4f1',
                   padding: '12px 14px',
                   cursor: revealed ? 'default' : 'pointer',
                   fontFamily: 'Manrope,sans-serif',
                   fontSize: 14, lineHeight: '20px',
                   transition: 'background .15s, border-color .15s, transform .1s',
+                  animationDelay: `${80 + i * 60}ms`,
                 }}
                 onMouseEnter={(e) => { if (!revealed) e.currentTarget.style.borderColor = 'rgba(240,191,92,.5)'; }}
                 onMouseLeave={(e) => { if (!revealed) e.currentTarget.style.borderColor = isPicked ? GOLD : BORDER; }}
@@ -313,9 +351,16 @@ function QuestionPanel({ questions, onComplete, onBack, xpAwarded = 0 }) {
         </div>
 
         {revealed && (
-          <div style={{ marginTop: 18, padding: '12px 14px', background: isCorrect ? 'rgba(95,194,138,.08)' : 'rgba(226,92,122,.06)', border: `1px solid ${isCorrect ? 'rgba(95,194,138,.3)' : 'rgba(226,92,122,.25)'}`, borderRadius: 7 }}>
-            <div style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: isCorrect ? GREEN : RED, marginBottom: 6 }}>
-              {isCorrect ? 'Correct!' : 'Not quite'}
+          <div style={{ marginTop: 18, padding: '12px 14px', background: isCorrect ? 'rgba(95,194,138,.08)' : 'rgba(226,92,122,.06)', border: `1px solid ${isCorrect ? 'rgba(95,194,138,.3)' : 'rgba(226,92,122,.25)'}`, borderRadius: 0}}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
+              <div style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: isCorrect ? GREEN : RED }}>
+                {isCorrect ? 'Correct!' : 'Not quite'}
+              </div>
+              {wager > 0 && (
+                <div style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, letterSpacing: '.06em', color: isCorrect ? GREEN : RED }}>
+                  {isCorrect ? `+${wager}` : `−${wager}`} XP
+                </div>
+              )}
             </div>
             <div style={{ fontFamily: 'Manrope,sans-serif', fontSize: 13, lineHeight: '20px', color: '#bbb' }}>
               {q.explanation || (isCorrect ? 'Great work.' : `The correct answer was ${String.fromCharCode(65 + q.correctIndex)}.`)}
@@ -339,14 +384,14 @@ function QuestionPanel({ questions, onComplete, onBack, xpAwarded = 0 }) {
 
 const btnPrimary = {
   background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)',
-  border: 0, borderRadius: 7, color: '#1a1a1a',
+  border: 0, borderRadius: 0, color: '#1a1a1a',
   padding: '11px 18px', cursor: 'pointer',
   fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase',
 };
 
 const btnSecondary = {
   background: 'transparent',
-  border: `1px solid ${BORDER}`, borderRadius: 7, color: '#aaa',
+  border: `1px solid ${BORDER}`, borderRadius: 0, color: '#aaa',
   padding: '11px 18px', cursor: 'pointer',
   fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase',
 };
@@ -355,11 +400,14 @@ const btnSecondary = {
 export default function Play() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const [searchParams] = useSearchParams();
+  const wagerRaw = parseInt(searchParams.get('wager') || '0', 10);
+  const wager = Number.isFinite(wagerRaw) && wagerRaw >= 0 ? wagerRaw : 0;
   const [activity, setActivity] = useState(null);
   const [questions, setQuestions] = useState(null);
   const [error, setError] = useState('');
-  const [xpAwarded, setXpAwarded] = useState(0);
+  const [xpDelta, setXpDelta] = useState(/** @type {number | null} */ (null));
 
   // Load activity
   useEffect(() => {
@@ -409,7 +457,7 @@ export default function Play() {
       `}</style>
 
       {/* Header */}
-      <header style={{ display: 'flex', alignItems: 'center', padding: '10px 20px', borderBottom: `1px solid ${BORDER}`, background: BG2, gap: 16 }}>
+      <header className="wiz-rise" style={{ display: 'flex', alignItems: 'center', padding: '10px 20px', borderBottom: `1px solid ${BORDER}`, background: BG2, gap: 16 }}>
         <Link to="/activities" title="Back to Activities" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <div className="play-brand-mark"/>
           <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>WIZMATH<span style={{ color: GOLD }}>.</span>DEV</span>
@@ -421,6 +469,13 @@ export default function Play() {
           </div>
           <div style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, color: '#666', letterSpacing: '.16em', textTransform: 'uppercase' }}>Quest Mode</div>
         </div>
+        {wager > 0 && (
+          <div title={`Each correct: +${wager} XP   Each wrong: −${wager} XP`}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: 'rgba(240,191,92,.08)', border: `1px solid rgba(240,191,92,.4)`, borderRadius: 0, color: GOLD, fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
+            Wager ±{wager} XP
+          </div>
+        )}
         <Link to={id ? `/activity/${id}` : '/activities'} style={{ textDecoration: 'none' }}>
           <button style={btnSecondary}>← Exit</button>
         </Link>
@@ -429,7 +484,7 @@ export default function Play() {
       {/* Body: GeoGebra | Question */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: 0, overflow: 'hidden' }}>
         {/* Left: GeoGebra */}
-        <div style={{ position: 'relative', borderRight: `1px solid ${BORDER}`, minWidth: 0, minHeight: 0 }}>
+        <div className="wiz-rise wiz-rise-d1" style={{ position: 'relative', borderRight: `1px solid ${BORDER}`, minWidth: 0, minHeight: 0 }}>
           {activity ? (
             <PlayGeoGebra commands={activity.commands || []} settings={activity.settings} />
           ) : (
@@ -440,7 +495,7 @@ export default function Play() {
         </div>
 
         {/* Right: Question panel */}
-        <div style={{ background: BG2, minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
+        <div className="wiz-rise wiz-rise-d2" style={{ background: BG2, minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
           {error ? (
             <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, gap: 14, textAlign: 'center' }}>
               <div style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 24, letterSpacing: '.16em', color: RED }}>Quest Failed</div>
@@ -454,16 +509,23 @@ export default function Play() {
           ) : (
             <QuestionPanel
               questions={questions}
-              onComplete={async ({ score }) => {
-                // Award 5 XP per correct answer (only if signed in and not already awarded)
-                if (user && score > 0 && xpAwarded === 0) {
-                  const xp = score * 5;
-                  setXpAwarded(xp);
-                  try { await awardXp(user.uid, xp); } catch (e) { console.warn('awardXp failed:', e); }
+              wager={wager}
+              onComplete={async ({ score, total }) => {
+                if (xpDelta !== null) return; // already awarded once
+                if (!user) { setXpDelta(0); return; }
+                let delta = wager > 0
+                  ? (score - (total - score)) * wager  // (correct − wrong) × wager
+                  : score * 5;                          // legacy: 5 XP per correct
+                // Clamp so XP can't go below zero
+                const balance = profile?.xp ?? 0;
+                if (delta < -balance) delta = -balance;
+                setXpDelta(delta);
+                if (delta !== 0) {
+                  try { await awardXp(user.uid, delta); } catch (e) { console.warn('awardXp failed:', e); }
                 }
               }}
               onBack={() => navigate(`/activity/${id}`)}
-              xpAwarded={xpAwarded}
+              xpDelta={xpDelta}
             />
           )}
         </div>

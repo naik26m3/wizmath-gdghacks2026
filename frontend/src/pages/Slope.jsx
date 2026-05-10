@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AskAISidebar from '@/components/wizmath/AskAISidebar';
 
-const BG = 'rgb(43,42,42)';
-const BG2 = 'rgb(35,34,34)';
-const BG3 = 'rgb(28,27,27)';
-const BORDER = 'rgba(180,160,100,.22)';
+const BG = '#010A13';
+const BG2 = '#111d26';
+const BG3 = '#091428';
+const BORDER = 'rgba(200,155,60,.25)';
 
 export default function Slope() {
   const [aiCollapsed, setAiCollapsed] = useState(false);
@@ -36,16 +36,16 @@ export default function Slope() {
         .wiz-font-bebas { font-family:'Bebas Neue',sans-serif; }
         .wiz-font-space { font-family:'Space Grotesk',sans-serif; }
         .slope-content::-webkit-scrollbar { width:6px; }
-        .slope-content::-webkit-scrollbar-thumb { background:rgba(180,160,100,.2); border-radius:3px; }
-        .slope-panel { position:relative; background:${BG2}; border:1px solid ${BORDER}; border-radius:10px; padding:28px 32px 40px; margin-bottom:28px; }
-        .slope-panel::before { content:''; position:absolute; left:0; right:0; top:0; height:1px; background:linear-gradient(90deg,transparent,rgba(240,191,92,.5),transparent); border-radius:10px 10px 0 0; }
+        .slope-content::-webkit-scrollbar-thumb { background:rgba(180,160,100,.2); border-radius: 0; }
+        .slope-panel { position:relative; background:${BG2}; border:1px solid ${BORDER}; border-radius: 0; padding:28px 32px 40px; margin-bottom:28px; }
+        .slope-panel::before { content:''; position:absolute; left:0; right:0; top:0; height:1px; background:linear-gradient(90deg,transparent,rgba(240,191,92,.5),transparent); border-radius: 0; }
         .wiz-brand-mark { width:32px; height:32px; position:relative; background:conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
         .wiz-brand-mark::after { content:''; position:absolute; inset:4px; background:${BG}; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
         .wiz-brand-mark::before { content:''; position:absolute; inset:0; z-index:1; background:radial-gradient(circle at 50% 50%,#43e2d2 0 20%,transparent 22%); filter:drop-shadow(0 0 5px #43e2d2); }
-        .slope-range { appearance:none; -webkit-appearance:none; width:100%; height:6px; border-radius:3px; outline:none; cursor:pointer; background:transparent; }
-        .slope-range::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; background:#d7e4f1; border-radius:5px; box-shadow:0 2px 6px rgba(0,0,0,.5); cursor:grab; }
+        .slope-range { appearance:none; -webkit-appearance:none; width:100%; height:6px; border-radius: 0; outline:none; cursor:pointer; background:transparent; }
+        .slope-range::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; background:#d7e4f1; border-radius: 0; box-shadow:0 2px 6px rgba(0,0,0,.5); cursor:grab; }
         .slope-range::-webkit-slider-thumb:active { cursor:grabbing; transform:scale(1.15); }
-        .slope-range::-moz-range-thumb { width:18px; height:18px; background:#d7e4f1; border-radius:5px; border:none; box-shadow:0 2px 6px rgba(0,0,0,.5); cursor:grab; }
+        .slope-range::-moz-range-thumb { width:18px; height:18px; background:#d7e4f1; border-radius: 0; border:none; box-shadow:0 2px 6px rgba(0,0,0,.5); cursor:grab; }
         .nav-link { background:none;border:0;cursor:pointer;color:#aaa;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;border-bottom:2px solid transparent;transition:color .2s; }
         .nav-link:hover { color:#d7e4f1; }
       `}</style>
@@ -62,7 +62,7 @@ export default function Slope() {
             <Link to="/create" style={{ textDecoration: 'none' }}><button className="nav-link">Create</button></Link>
           </div>
           <Link to="/activities" style={{ textDecoration: 'none', marginLeft: 'auto' }}>
-            <button style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 7, color: '#aaa', padding: '8px 14px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', transition: 'border-color .2s, color .2s' }}
+            <button style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 0, color: '#aaa', padding: '8px 14px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', transition: 'border-color .2s, color .2s' }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(240,191,92,.45)'; e.currentTarget.style.color = '#d7e4f1'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = '#aaa'; }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
@@ -78,7 +78,7 @@ export default function Slope() {
           </h1>
 
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 24, maxWidth: 900 }}>
-            <div style={{ flexShrink: 0, width: 32, height: 32, background: 'linear-gradient(135deg,#43e2d2,#005049)', borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, color: '#002a26', boxShadow: '0 0 12px rgba(67,226,210,.35)' }}>i</div>
+            <div style={{ flexShrink: 0, width: 32, height: 32, background: 'linear-gradient(135deg,#43e2d2,#005049)', borderRadius: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, color: '#002a26', boxShadow: '0 0 12px rgba(67,226,210,.35)' }}>i</div>
             <p style={{ fontFamily: 'Manrope,sans-serif', fontSize: 15, lineHeight: '25px', color: '#bbb', paddingTop: 4, margin: 0 }}>
               Adjust the slope and y-intercept to see how the line changes. Discover how rise and run affect direction and steepness.
             </p>
@@ -92,7 +92,7 @@ export default function Slope() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 48, alignItems: 'stretch' }}>
               {/* Graph */}
-              <div style={{ background: BG3, border: `1px solid ${BORDER}`, borderRadius: 8, minHeight: 420, overflow: 'hidden' }}>
+              <div style={{ background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, minHeight: 420, overflow: 'hidden' }}>
                 <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: '100%' }}>
                   <defs>
                     <pattern id="slope-grid" width={scale} height={scale} patternUnits="userSpaceOnUse">
@@ -144,13 +144,13 @@ export default function Slope() {
                         <span style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 14, fontWeight: 700, color, minWidth: 32, textAlign: 'right' }}>{val}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <button onClick={() => set(v => Math.max(-10, v-1))} style={{ width: 28, height: 28, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 6, color: '#aaa', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
-                        <div style={{ position: 'relative', flex: 1, height: 6, background: BG3, borderRadius: 3 }}>
-                          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${((val+10)/20)*100}%`, background: `linear-gradient(90deg,${color}55,${color})`, borderRadius: 3, pointerEvents: 'none' }}/>
+                        <button onClick={() => set(v => Math.max(-10, v-1))} style={{ width: 28, height: 28, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#aaa', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
+                        <div style={{ position: 'relative', flex: 1, height: 6, background: BG3, borderRadius: 0}}>
+                          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${((val+10)/20)*100}%`, background: `linear-gradient(90deg,${color}55,${color})`, borderRadius: 0, pointerEvents: 'none' }}/>
                           <input type="range" className="slope-range" min={-10} max={10} value={val} onChange={e => set(Number(e.target.value))}
                             style={{ position: 'absolute', inset: '-6px 0', width: '100%', height: 'calc(100% + 12px)' }}/>
                         </div>
-                        <button onClick={() => set(v => Math.min(10, v+1))} style={{ width: 28, height: 28, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 6, color: '#aaa', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
+                        <button onClick={() => set(v => Math.min(10, v+1))} style={{ width: 28, height: 28, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#aaa', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
                       </div>
                     </div>
                   ))}
@@ -170,13 +170,13 @@ export default function Slope() {
                     <span style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 13, fontWeight: 700, color: '#5fc28a' }}>{yInt}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <button onClick={() => setYInt(v => Math.max(-10, v-1))} style={{ width: 28, height: 28, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 6, color: '#aaa', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
-                    <div style={{ position: 'relative', flex: 1, height: 6, background: BG3, borderRadius: 3 }}>
-                      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${((yInt+10)/20)*100}%`, background: 'linear-gradient(90deg,#5fc28a55,#5fc28a)', borderRadius: 3, pointerEvents: 'none' }}/>
+                    <button onClick={() => setYInt(v => Math.max(-10, v-1))} style={{ width: 28, height: 28, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#aaa', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>−</button>
+                    <div style={{ position: 'relative', flex: 1, height: 6, background: BG3, borderRadius: 0}}>
+                      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${((yInt+10)/20)*100}%`, background: 'linear-gradient(90deg,#5fc28a55,#5fc28a)', borderRadius: 0, pointerEvents: 'none' }}/>
                       <input type="range" className="slope-range" min={-10} max={10} value={yInt} onChange={e => setYInt(Number(e.target.value))}
                         style={{ position: 'absolute', inset: '-6px 0', width: '100%', height: 'calc(100% + 12px)' }}/>
                     </div>
-                    <button onClick={() => setYInt(v => Math.min(10, v+1))} style={{ width: 28, height: 28, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 6, color: '#aaa', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
+                    <button onClick={() => setYInt(v => Math.min(10, v+1))} style={{ width: 28, height: 28, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#aaa', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
                   </div>
                 </div>
               </div>
@@ -184,7 +184,7 @@ export default function Slope() {
           </section>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, maxWidth: 900 }}>
-            <div style={{ flexShrink: 0, width: 32, height: 32, background: 'linear-gradient(135deg,#43e2d2,#005049)', borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, color: '#002a26' }}>i</div>
+            <div style={{ flexShrink: 0, width: 32, height: 32, background: 'linear-gradient(135deg,#43e2d2,#005049)', borderRadius: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, color: '#002a26' }}>i</div>
             <h2 className="wiz-font-bebas" style={{ fontSize: 28, letterSpacing: '.06em', textTransform: 'uppercase', color: '#d7e4f1', margin: 0 }}>Putting it all together</h2>
           </div>
         </div>

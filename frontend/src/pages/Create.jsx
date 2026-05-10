@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+﻿import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { publishActivity, getActivity } from '@/lib/activities';
 import { useAuth } from '@/lib/AuthContext';
 import AuthButton from '@/components/wizmath/AuthButton';
 
-const BG = 'rgb(43,42,42)';
-const BG2 = 'rgb(35,34,34)';
-const BG3 = 'rgb(28,27,27)';
-const BORDER = 'rgba(180,160,100,.22)';
+const BG = '#010A13';
+const BG2 = '#111d26';
+const BG3 = '#091428';
+const BORDER = 'rgba(200,155,60,.25)';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -129,7 +129,7 @@ function GeoGebraCanvas({ onReady }) {
     <div style={{ position: 'relative', width: '100%', height: '100%', background: BG3, overflow: 'hidden' }}>
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
       {isReady && (
-        <button onClick={fitToView} title="Fit view (1:1 aspect)" style={{ position: 'absolute', bottom: 12, left: 12, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(35,34,34,.85)', border: `1px solid ${BORDER}`, borderRadius: 6, color: '#d7e4f1', padding: '7px 12px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', backdropFilter: 'blur(4px)', zIndex: 10 }}
+        <button onClick={fitToView} title="Fit view (1:1 aspect)" style={{ position: 'absolute', bottom: 12, left: 12, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(35,34,34,.85)', border: `1px solid ${BORDER}`, borderRadius: 0, color: '#d7e4f1', padding: '7px 12px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', backdropFilter: 'blur(4px)', zIndex: 10 }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(67,226,210,.5)'; e.currentTarget.style.color = '#43e2d2'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = '#d7e4f1'; }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/></svg>
@@ -190,15 +190,15 @@ function AIChatPanel({ onCommands, getCurrentCommands, onCollapse }) {
   };
 
   return (
-    <aside style={{ background: BG2, borderLeft: `1px solid ${BORDER}`, display: 'grid', gridTemplateRows: 'auto 1fr auto', overflow: 'hidden', height: '100%' }}>
+    <aside className="wiz-rise wiz-rise-d2" style={{ background: BG2, borderLeft: `1px solid ${BORDER}`, display: 'grid', gridTemplateRows: 'auto 1fr auto', overflow: 'hidden', height: '100%' }}>
       {/* Header */}
       <div style={{ padding: '12px 14px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#43e2d2', boxShadow: '0 0 6px #43e2d2' }}/>
+        <div style={{ width: 8, height: 8, borderRadius: 0, background: '#43e2d2', boxShadow: '0 0 6px #43e2d2' }}/>
         <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 14, letterSpacing: '.18em', color: '#d7e4f1' }}>
           AI <span style={{ color: '#43e2d2' }}>Arcane</span>
         </span>
         <span style={{ marginLeft: 4, fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, color: '#555', fontWeight: 600, letterSpacing: '.1em' }}>GEOGEBRA</span>
-        <button onClick={onCollapse} style={{ marginLeft: 'auto', background: 'transparent', border: 0, cursor: 'pointer', color: '#555', fontSize: 16, width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }}
+        <button onClick={onCollapse} style={{ marginLeft: 'auto', background: 'transparent', border: 0, cursor: 'pointer', color: '#555', fontSize: 16, width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 0}}
           onMouseEnter={e => e.currentTarget.style.color = '#aaa'}
           onMouseLeave={e => e.currentTarget.style.color = '#555'}>✕</button>
       </div>
@@ -210,7 +210,7 @@ function AIChatPanel({ onCommands, getCurrentCommands, onCollapse }) {
             <div style={{ fontSize: 10, fontFamily: 'Space Grotesk,sans-serif', fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 4, color: msg.role === 'user' ? '#f0bf5c' : (msg.error ? '#e25c7a' : '#43e2d2') }}>
               {msg.role === 'user' ? 'You' : 'Arcane'}
             </div>
-            <div style={{ padding: '9px 12px', background: msg.role === 'user' ? 'rgba(240,191,92,.08)' : (msg.error ? 'rgba(226,92,122,.06)' : 'rgba(67,226,210,.06)'), border: `1px solid ${msg.role === 'user' ? 'rgba(200,155,60,.2)' : (msg.error ? 'rgba(226,92,122,.25)' : 'rgba(67,226,210,.15)')}`, borderRadius: 8, fontSize: 13, lineHeight: '20px', color: '#d7e4f1', fontFamily: 'Manrope,sans-serif' }}>
+            <div style={{ padding: '9px 12px', background: msg.role === 'user' ? 'rgba(240,191,92,.08)' : (msg.error ? 'rgba(226,92,122,.06)' : 'rgba(67,226,210,.06)'), border: `1px solid ${msg.role === 'user' ? 'rgba(200,155,60,.2)' : (msg.error ? 'rgba(226,92,122,.25)' : 'rgba(67,226,210,.15)')}`, borderRadius: 0, fontSize: 13, lineHeight: '20px', color: '#d7e4f1', fontFamily: 'Manrope,sans-serif' }}>
               {msg.text}
               {msg.commands?.length > 0 && (
                 <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 3, fontFamily: 'monospace', fontSize: 10, color: '#888', borderTop: '1px solid rgba(255,255,255,.05)', paddingTop: 8 }}>
@@ -227,7 +227,7 @@ function AIChatPanel({ onCommands, getCurrentCommands, onCollapse }) {
           <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 8, color: '#43e2d2', fontSize: 12, fontFamily: 'Manrope,sans-serif', opacity: 0.7 }}>
             <div style={{ display: 'flex', gap: 3 }}>
               {[0,1,2].map(i => (
-                <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: '#43e2d2', animation: `bounce 1s ${i*0.15}s infinite` }}/>
+                <div key={i} style={{ width: 5, height: 5, borderRadius: 0, background: '#43e2d2', animation: `bounce 1s ${i*0.15}s infinite` }}/>
               ))}
             </div>
             Arcane is conjuring…
@@ -243,9 +243,9 @@ function AIChatPanel({ onCommands, getCurrentCommands, onCollapse }) {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && send()}
           placeholder="Describe what to graph…"
-          style={{ flex: 1, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 7, color: '#d7e4f1', padding: '9px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, outline: 0 }}
+          style={{ flex: 1, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#d7e4f1', padding: '9px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, outline: 0 }}
         />
-        <button onClick={send} disabled={loading} style={{ width: 38, background: 'linear-gradient(180deg,#43e2d2,#005049)', border: 0, borderRadius: 7, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.5 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <button onClick={send} disabled={loading} style={{ width: 38, background: 'linear-gradient(180deg,#43e2d2,#005049)', border: 0, borderRadius: 0, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.5 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#002a26" strokeWidth="2.5"><path d="M4 12 L20 4 L14 20 L12 13 Z"/></svg>
         </button>
       </div>
@@ -292,9 +292,9 @@ function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
 
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(6px)' }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: BG2, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 28, width: 'min(440px, 90vw)', boxShadow: '0 30px 60px rgba(0,0,0,.5)' }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: BG2, border: `1px solid ${BORDER}`, borderRadius: 0, padding: 28, width: 'min(440px, 90vw)', boxShadow: '0 30px 60px rgba(0,0,0,.5)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#f0bf5c', boxShadow: '0 0 6px #f0bf5c' }}/>
+          <div style={{ width: 8, height: 8, borderRadius: 0, background: '#f0bf5c', boxShadow: '0 0 6px #f0bf5c' }}/>
           <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>
             PUBLISH <span style={{ color: '#f0bf5c' }}>ACTIVITY</span>
           </span>
@@ -311,7 +311,7 @@ function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
           onKeyDown={e => e.key === 'Enter' && handleSubmit()}
           placeholder="e.g. Movable circle with sliders"
           maxLength={80}
-          style={{ width: '100%', background: BG3, border: `1px solid ${BORDER}`, borderRadius: 7, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 14, outline: 0, marginBottom: 16, boxSizing: 'border-box' }}
+          style={{ width: '100%', background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 14, outline: 0, marginBottom: 16, boxSizing: 'border-box' }}
         />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -325,7 +325,7 @@ function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
               display: 'inline-flex', alignItems: 'center', gap: 6,
               background: isGenerating ? 'rgba(67,226,210,.06)' : 'transparent',
               border: '1px solid rgba(67,226,210,.35)',
-              borderRadius: 6,
+              borderRadius: 0,
               color: '#43e2d2',
               padding: '4px 10px',
               cursor: (isGenerating || isPublishing) ? 'not-allowed' : 'pointer',
@@ -345,9 +345,9 @@ function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
           value={description}
           onChange={e => setDescription(e.target.value)}
           placeholder="What does this activity teach? — type a quick hint then click Auto-Generate, or leave blank for the AI to write from scratch."
-          maxLength={300}
-          rows={4}
-          style={{ width: '100%', background: BG3, border: `1px solid ${BORDER}`, borderRadius: 7, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, outline: 0, marginBottom: 8, boxSizing: 'border-box', resize: 'vertical' }}
+          maxLength={3500}
+          rows={10}
+          style={{ width: '100%', background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, lineHeight: '20px', outline: 0, marginBottom: 8, boxSizing: 'border-box', resize: 'vertical' }}
         />
 
         {error && (
@@ -357,10 +357,10 @@ function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
         )}
 
         <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-          <button onClick={onClose} disabled={isPublishing} style={{ flex: 1, background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 7, color: '#aaa', padding: '10px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', opacity: isPublishing ? 0.5 : 1 }}>
+          <button onClick={onClose} disabled={isPublishing} style={{ flex: 1, background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 0, color: '#aaa', padding: '10px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', opacity: isPublishing ? 0.5 : 1 }}>
             Cancel
           </button>
-          <button onClick={handleSubmit} disabled={isPublishing} style={{ flex: 1, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 7, color: '#1a1a1a', padding: '10px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', opacity: isPublishing ? 0.7 : 1 }}>
+          <button onClick={handleSubmit} disabled={isPublishing} style={{ flex: 1, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '10px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', opacity: isPublishing ? 0.7 : 1 }}>
             {isPublishing ? 'Publishing…' : 'Publish'}
           </button>
         </div>
@@ -586,8 +586,8 @@ export default function Create() {
       `}</style>
 
       {/* Header — click the logo to go back to Activities */}
-      <header style={{ display: 'flex', alignItems: 'center', padding: '10px 20px', borderBottom: `1px solid ${BORDER}`, background: BG2 }}>
-        <Link to="/activities" title="Back to Activities" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6, transition: 'background .2s' }}
+      <header className="wiz-rise" style={{ display: 'flex', alignItems: 'center', padding: '10px 20px', borderBottom: `1px solid ${BORDER}`, background: BG2 }}>
+        <Link to="/activities" title="Back to Activities" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 0, transition: 'background .2s' }}
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(240,191,92,.06)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
           <div className="wiz-brand-mark"/>
@@ -602,7 +602,7 @@ export default function Create() {
         )}
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={() => setShowPublishModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 7, color: '#1a1a1a', padding: '8px 18px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase' }}
+          <button onClick={() => setShowPublishModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '8px 18px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase' }}
             onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.1)'}
             onMouseLeave={e => e.currentTarget.style.filter = 'none'}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
@@ -624,13 +624,13 @@ export default function Create() {
       {/* Body: GeoGebra | Chat */}
       <div style={{ display: 'grid', gridTemplateColumns: aiOpen ? '1fr 360px' : '1fr', minHeight: 0, overflow: 'hidden' }}>
         {/* GeoGebra Canvas (with its own native algebra panel built in) */}
-        <div style={{ position: 'relative', minWidth: 0, minHeight: 0 }}>
+        <div className="wiz-rise wiz-rise-d1" style={{ position: 'relative', minWidth: 0, minHeight: 0 }}>
           <GeoGebraCanvas onReady={handleReady}/>
 
           {/* Floating button to reopen chat when closed */}
           {!aiOpen && (
-            <button onClick={() => setAiOpen(true)} style={{ position: 'absolute', top: 16, right: 16, display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(67,226,210,.08)', border: '1px solid rgba(67,226,210,.4)', borderRadius: 7, color: '#43e2d2', padding: '8px 16px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.12em', backdropFilter: 'blur(6px)', zIndex: 10 }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#43e2d2', boxShadow: '0 0 5px #43e2d2' }}/>
+            <button onClick={() => setAiOpen(true)} style={{ position: 'absolute', top: 16, right: 16, display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(67,226,210,.08)', border: '1px solid rgba(67,226,210,.4)', borderRadius: 0, color: '#43e2d2', padding: '8px 16px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.12em', backdropFilter: 'blur(6px)', zIndex: 10 }}>
+              <div style={{ width: 7, height: 7, borderRadius: 0, background: '#43e2d2', boxShadow: '0 0 5px #43e2d2' }}/>
               Ask AI Arcane
             </button>
           )}

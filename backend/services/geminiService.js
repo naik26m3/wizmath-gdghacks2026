@@ -27,8 +27,8 @@ const GEO_GEBRA_RULES = `CRITICAL RULES:
 7. null in settings means "leave GeoGebra default; do not change this setting."
 8. Point names MUST start with an UPPERCASE letter: O, A, B, CenterPt, StartPt. A name starting with a lowercase letter (like centerPoint, origin, pt) creates a NUMBER or VECTOR, not a Point. Circle() and Segment() will silently fail when given a vector instead of a point.
 9. Never put app/view actions in commands, including ZoomIn, ZoomOut, Pan, SetVisibleInView, SetAxesSteps, or SetAxesRatio.
-10. For "x axis into 30 degrees each", use "xAxisStep": 30 and "xAxisUnit": "°".
-11. For trig graphs intended to use degrees on the x-axis, use degree input in the function, e.g. f(x) = sin(x°), not f(x) = sin(x).
+10. TRIG AXIS POLICY (mandatory, unconditional): If the construction involves ANY trigonometric function — sin, cos, tan, sec, csc, cot, or their inverse forms (asin, acos, atan, arcsin, arccos, arctan) — you MUST set "xAxisStep": 30 and "xAxisUnit": "°", and choose an x-range that is a multiple of 360 (e.g. coordSystem [-360, 360, -2, 2] for sin/cos, [-180, 180, -4, 4] for tan). This applies even if the user did not explicitly ask for degrees on the axis.
+11. TRIG INPUT POLICY (mandatory, unconditional): For ANY trig function, you MUST use degree input — f(x) = sin(x°), g(x) = cos(x°), h(x) = tan(x°). NEVER use raw radian input like sin(x), cos(x), or tan(x). When a slider feeds into a trig function, treat its value as degrees and apply the ° unit at the call site, e.g. sin((x + angleSlider)°). Slider ranges for angles should be in degrees too (typically 0 to 360, step 1).
 12. coordSystem must be an array [xmin, xmax, ymin, ymax] when requested.
 13. Use "axisRatio": 1 when circles or squares need to look geometrically accurate on screen.
 14. Avoid dependent slider limits such as Slider(0, denominator, 1). Make sliders fixed-range, then use If(...) or visibility conditions for visuals.
@@ -55,20 +55,20 @@ User: Create a slider that changes the phase of a sine wave.
 You:
 {
   "commands": [
-    "angleSlider = Slider(0, 6.28, 0.01, 1, 150, false, true, false, false)",
-    "f(x) = sin(x + angleSlider)",
+    "angleSlider = Slider(0, 360, 1, 1, 150, false, true, false, false)",
+    "f(x) = sin((x + angleSlider)°)",
     "SetColor(f, \\"Blue\\")"
   ],
   "settings": {
     "resetBeforeRun": true,
     "showAxes": true,
     "showGrid": true,
-    "xAxisStep": null,
-    "yAxisStep": null,
-    "xAxisUnit": "",
+    "xAxisStep": 30,
+    "yAxisStep": 1,
+    "xAxisUnit": "°",
     "yAxisUnit": "",
     "axisRatio": null,
-    "coordSystem": [-6.28, 6.28, -2, 2]
+    "coordSystem": [-360, 360, -2, 2]
   }
 }
 
@@ -491,7 +491,7 @@ Generate 3 to 5 questions total — pick a count appropriate to how rich the act
 }
 
 /**
- * Generate a 2-3 sentence description for an activity from its title + GeoGebra commands.
+ * Generate a 250-500 word description for an activity from its title + GeoGebra commands.
  * Used by the Publish modal's "auto-generate" button.
  */
 export async function generateActivityDescription({ title, commands, userHint }) {
@@ -504,32 +504,61 @@ export async function generateActivityDescription({ title, commands, userHint })
             throw new Error("Missing GEMINI_API_KEY");
         }
 
-        const systemInstruction = `You are writing a short description for an interactive math activity.
+        const systemInstruction = `You are writing an in-depth explanation of the math concept that an interactive activity demonstrates. This is the long-form description students will read to actually LEARN the topic — not a tagline. The output is rendered as GitHub-flavored Markdown — think a polished, readable README.
 
 Activity title: "${safeTitle}"
 
 ${safeHint ? `The author wrote this rough idea or hint to guide you (build on it, expand on it, or polish it — keep their main point):
 "${safeHint}"
 
-` : ''}The activity is built from these GeoGebra commands (for context only — do NOT mention GeoGebra or code in the description):
+` : ''}The activity is built from these GeoGebra commands (study them to figure out which math concept is being demonstrated — but do NOT mention GeoGebra, code, or variable names in your output):
 ${safeCommands.join('\n')}
 
-Write a 2-3 sentence description that:
-- Explains in plain language what the activity demonstrates or teaches.
-- Mentions what learners can interact with (e.g. "drag the slider to change the radius") if applicable.
-- ${safeHint ? "Honors the author's hint — keep the main point or angle they specified." : 'Sounds clear, encouraging, and concise.'}
-- Targets a high-school audience.
-- Does NOT mention GeoGebra, sliders by variable name, code, or math notation.
-- Does NOT use markdown, bullet points, headers, or quotation marks.
+Write the explanation as **GitHub-flavored Markdown**, MINIMUM 300 WORDS (target 350-450), with this exact structure:
 
-Return ONLY the plain description text — no preface, no "Here's a description...", just the description itself.`;
+> ⚠️ **Heads up:** It helps if you're already a little familiar with [prerequisite topic(s)].
+
+(Use a real \`> ⚠️ **Heads up:** ...\` blockquote at the very top — one to two sentences naming the prior math the student should know before exploring.)
+
+## What's going on
+
+(One ##-level heading exactly like above, or a close variant like \`## The big idea\` / \`## The concept\`. Then 1-2 paragraphs defining and motivating the core math concept in plain language — what is it, why does it matter, where does it show up in math or the real world. Teach someone who has never seen this concept before.)
+
+## How it works
+
+(Another ##-level heading. Then 1-2 paragraphs explaining the *mechanics* — the key rules, relationships, or formulas (expressed in plain English; short symbolic snippets like \`y = mx + b\` or \`sin(x°)\` are fine in inline code). Build intuition: explain WHY things happen, not just what. Concrete examples welcome.)
+
+## Try this in the activity
+
+(##-level heading. Then a bullet list — \`-\` markers — of 3 to 5 concrete things to play with and what to notice. Use **bold** to emphasize key terms or actions inside each item, e.g. \`- **Increase the slope** and watch the line tilt steeper — that's because…\`)
+
+> 💡 **Key insight:** (One closing blockquote with the single sentence-or-two takeaway you want students to remember. Bold the lead phrase.)
+
+Markdown formatting rules:
+- Use **bold** for key concepts and terms (4-8 times total across the whole piece, not more).
+- Use *italics* sparingly (once or twice) for gentle emphasis or a rhetorical question.
+- Use \`inline code\` for short symbolic expressions where they help readability — e.g. \`y = mx + b\`, \`sin(x°)\`, \`f(x)\`. Don't overdo it.
+- Section headings MUST be \`##\` (not \`#\` — \`#\` is reserved for the page title above).
+- Bullet lists use \`-\`. No numbered lists.
+- Blank line between paragraphs, between a heading and its body, and between sections. Blockquotes get blank lines around them too.
+- Do NOT use \`---\` horizontal rules, tables, images, or HTML.
+
+Content rules:
+- MINIMUM 300 words, target 350-450 (count the prose, not the markdown syntax).
+- Do NOT mention GeoGebra, code, slider variable names, JavaScript, or any technical platform terms.
+- Sound like a friendly tutor — encouraging, clear, never condescending.
+- Target a curious high-school student.
+${safeHint ? "- Honor the author's hint — frame the explanation around the angle they specified." : ''}
+
+Return ONLY the Markdown body — no preface, no "Here's a description...", no surrounding code fences. Start directly with the \`> ⚠️ **Heads up:**\` blockquote.`;
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: 'Write the description now.',
+            contents: 'Write the full concept explanation now. Minimum 300 words.',
             config: {
                 systemInstruction,
                 temperature: 0.7,
+                maxOutputTokens: 2000,
             },
         });
 
