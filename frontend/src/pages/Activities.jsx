@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { listActivities } from '@/lib/activities';
+import { listActivities, toggleStar } from '@/lib/activities';
 import AuthButton from '@/components/wizmath/AuthButton';
+import StarButton from '@/components/wizmath/StarButton';
+import { useAuth } from '@/lib/AuthContext';
 
 const BG = 'rgb(43,42,42)';
 const BG2 = 'rgb(35,34,34)';
@@ -46,6 +48,29 @@ export default function Activities() {
     }, 5000);
     return () => clearTimeout(t);
   }, [justPublishedId, setSearchParams]);
+
+  const { user } = useAuth();
+
+  const handleToggleStar = async (activity) => {
+    if (!user) {
+      navigate('/signin', { state: { from: '/activities' } });
+      return;
+    }
+    const wasStarred = (activity.starredBy || []).includes(user.uid);
+    // Optimistic UI: update local state first
+    setPublished((prev) => prev.map((a) => a.id === activity.id ? {
+      ...a,
+      starredBy: wasStarred ? (a.starredBy || []).filter((u) => u !== user.uid) : [...(a.starredBy || []), user.uid],
+      stars: Math.max(0, (a.stars || 0) + (wasStarred ? -1 : 1)),
+    } : a));
+    try {
+      await toggleStar(activity.id, user.uid);
+    } catch (err) {
+      console.error('Star failed, rolling back:', err);
+      // Rollback
+      setPublished((prev) => prev.map((a) => a.id === activity.id ? activity : a));
+    }
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: BG, color: '#d7e4f1', fontFamily: 'Manrope,sans-serif' }}>
@@ -129,13 +154,36 @@ export default function Activities() {
               )}
             </div>
             <div style={{ padding:'16px 18px 20px' }}>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:12 }}>
+              <div style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:8, marginBottom:12 }}>
                 <span className="act-tag" style={TAG_STYLES.exp}>Community</span>
                 <span className="act-tag" style={TAG_STYLES.grade}>{act.commands?.length || 0} cmds</span>
+                <div style={{ marginLeft:'auto' }}>
+                  <StarButton
+                    isStarred={!!user && (act.starredBy || []).includes(user.uid)}
+                    count={act.stars || 0}
+                    onClick={() => handleToggleStar(act)}
+                    size="sm"
+                    stopPropagation
+                  />
+                </div>
               </div>
               <h3 style={{ fontFamily:'Manrope,sans-serif', fontWeight:600, fontSize:16, lineHeight:'24px', color:'#d7e4f1', margin:'0 0 6px' }}>{act.title}</h3>
               {act.description && (
-                <p style={{ fontFamily:'Manrope,sans-serif', fontSize:13, color:'#888', margin:0, lineHeight:'18px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{act.description}</p>
+                <p style={{ fontFamily:'Manrope,sans-serif', fontSize:13, color:'#888', margin:'0 0 10px', lineHeight:'18px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{act.description}</p>
+              )}
+              {act.authorName && (
+                <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:10, paddingTop:10, borderTop:`1px solid ${BORDER}` }}>
+                  {act.authorPhotoURL ? (
+                    <img src={act.authorPhotoURL} alt={act.authorName} referrerPolicy="no-referrer" style={{ width:20, height:20, borderRadius:'50%', display:'block' }}/>
+                  ) : (
+                    <div style={{ width:20, height:20, borderRadius:'50%', background:'linear-gradient(135deg,#43e2d2,#005049)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11 }}>
+                      {act.authorName?.[0]?.toUpperCase() || '?'}
+                    </div>
+                  )}
+                  <span style={{ fontFamily:'Space Grotesk,sans-serif', fontSize:11, color:'#888', letterSpacing:'.04em' }}>
+                    by <span style={{ color:'#d7e4f1', fontWeight:500 }}>{act.authorName}</span>
+                  </span>
+                </div>
               )}
             </div>
           </article>

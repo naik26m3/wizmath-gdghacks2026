@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import AuthButton from '@/components/wizmath/AuthButton';
 
 function Crest() {
   return (
@@ -114,7 +115,9 @@ export default function Home() {
             <Link to="/create" style={{ color:'#d2c5b1', textDecoration:'none', fontFamily:'Space Grotesk,sans-serif', fontSize:12, fontWeight:600, letterSpacing:'.18em', textTransform:'uppercase', padding:'10px 14px', borderBottom:'1px solid transparent' }}>Create</Link>
 
           </div>
-          <button className="home-gbtn" style={{ marginLeft:'auto' }}>Sign in</button>
+          <div style={{ marginLeft:'auto' }}>
+            <AuthButton />
+          </div>
         </nav>
 
         {/* Hero */}

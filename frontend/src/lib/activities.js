@@ -8,6 +8,10 @@ import {
   orderBy,
   limit,
   serverTimestamp,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+  increment,
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase.js';
 
@@ -90,4 +94,34 @@ export async function getActivity(id) {
   const snap = await getDoc(doc(db, COLLECTION, id));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() };
+}
+
+/**
+ * Toggle a star on an activity. Atomic increment/decrement + arrayUnion/Remove.
+ * Returns { isStarred, stars } reflecting the new state.
+ */
+export async function toggleStar(activityId, userId) {
+  ensureReady();
+  if (!userId) throw new Error('Sign in to star activities.');
+  if (!activityId) throw new Error('Missing activity id.');
+
+  const ref = doc(db, COLLECTION, activityId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) throw new Error('Activity not found.');
+  const data = snap.data();
+  const wasStarred = Array.isArray(data.starredBy) && data.starredBy.includes(userId);
+  const oldCount = typeof data.stars === 'number' ? data.stars : 0;
+
+  if (wasStarred) {
+    await updateDoc(ref, {
+      starredBy: arrayRemove(userId),
+      stars: increment(-1),
+    });
+    return { isStarred: false, stars: Math.max(oldCount - 1, 0) };
+  }
+  await updateDoc(ref, {
+    starredBy: arrayUnion(userId),
+    stars: increment(1),
+  });
+  return { isStarred: true, stars: oldCount + 1 };
 }

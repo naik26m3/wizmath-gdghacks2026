@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import AskAISidebar from '@/components/wizmath/AskAISidebar';
-import { getActivity } from '@/lib/activities';
+import StarButton from '@/components/wizmath/StarButton';
+import { getActivity, toggleStar } from '@/lib/activities';
+import { useAuth } from '@/lib/AuthContext';
 
 const BG = 'rgb(43,42,42)';
 const BG2 = 'rgb(35,34,34)';
@@ -167,6 +169,8 @@ export default function Activity() {
   const { id } = useParams();
   const [aiCollapsed, setAiCollapsed] = useState(false);
   const [activity, setActivity] = useState(/** @type {any} */ (DEFAULT_ACTIVITY));
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!id) return;
@@ -176,6 +180,30 @@ export default function Activity() {
       .catch(() => { /* keep default */ });
     return () => { cancelled = true; };
   }, [id]);
+
+  const handleToggleStar = async () => {
+    if (!user) {
+      navigate('/signin', { state: { from: `/activity/${id}` } });
+      return;
+    }
+    if (!activity?.id) return; // mock activity, no Firestore doc
+    const wasStarred = (activity.starredBy || []).includes(user.uid);
+    const prev = activity;
+    setActivity((a) => ({
+      ...a,
+      starredBy: wasStarred ? (a.starredBy || []).filter((u) => u !== user.uid) : [...(a.starredBy || []), user.uid],
+      stars: Math.max(0, (a.stars || 0) + (wasStarred ? -1 : 1)),
+    }));
+    try {
+      await toggleStar(activity.id, user.uid);
+    } catch (err) {
+      console.error('Star failed, rolling back:', err);
+      setActivity(prev);
+    }
+  };
+
+  const isStarred = !!user && (activity.starredBy || []).includes(user.uid);
+  const starCount = activity.stars || 0;
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: aiCollapsed ? '1fr 44px' : '1fr 320px', height: '100vh', fontFamily: 'Manrope,sans-serif', background: BG, color: '#d7e4f1', overflow: 'hidden' }}>
@@ -217,9 +245,28 @@ export default function Activity() {
 
         {/* Content */}
         <div className="slope-content" style={{ overflowY: 'auto', padding: '48px 64px 80px' }}>
-          <h1 className="wiz-font-bebas" style={{ fontSize: 56, lineHeight: 1, letterSpacing: '.06em', color: '#d7e4f1', margin: '0 0 28px' }}>
-            {activity.title}
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, marginBottom: 12 }}>
+            <h1 className="wiz-font-bebas" style={{ fontSize: 56, lineHeight: 1, letterSpacing: '.06em', color: '#d7e4f1', margin: 0, flex: 1, minWidth: 0 }}>
+              {activity.title}
+            </h1>
+            <div style={{ flexShrink: 0, paddingTop: 8 }}>
+              <StarButton isStarred={isStarred} count={starCount} onClick={handleToggleStar} />
+            </div>
+          </div>
+          {activity.authorName && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
+              {activity.authorPhotoURL ? (
+                <img src={activity.authorPhotoURL} alt={activity.authorName} referrerPolicy="no-referrer" style={{ width: 26, height: 26, borderRadius: '50%', display: 'block', border: `1px solid ${BORDER}` }}/>
+              ) : (
+                <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg,#43e2d2,#005049)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#002a26', fontFamily: 'Bebas Neue,sans-serif' }}>
+                  {activity.authorName?.[0]?.toUpperCase() || '?'}
+                </div>
+              )}
+              <span style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 13, color: '#888', letterSpacing: '.04em' }}>
+                created by <span style={{ color: '#43e2d2', fontWeight: 500 }}>{activity.authorName}</span>
+              </span>
+            </div>
+          )}
 
           {/* Activity Panel — GeoGebra applet (graph + sliders) */}
           <section className="slope-panel">
