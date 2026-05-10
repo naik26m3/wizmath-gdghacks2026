@@ -1,21 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 
 /**
  * Drop-in sign-in / user-menu button.
- * - Logged out: shows "Sign in" pill that triggers Google popup.
+ * - Logged out: shows "Sign in" pill that opens the sign-in modal.
  * - Logged in: shows avatar + name; click opens a tiny menu with Sign out.
  */
 export default function AuthButton() {
-  const { user, profile, isLoadingAuth, logout, authError } = useAuth();
+  const { user, profile, isLoadingAuth, logout, authError, openSignInModal } = useAuth();
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const goToSignIn = () => {
-    navigate('/signin', { state: { from: location.pathname + location.search } });
-  };
 
   if (isLoadingAuth) {
     return (
@@ -26,7 +19,7 @@ export default function AuthButton() {
   if (!user) {
     return (
       <button
-        onClick={goToSignIn}
+        onClick={openSignInModal}
         title={authError || 'Sign in'}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,

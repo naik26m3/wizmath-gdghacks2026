@@ -49,11 +49,11 @@ export default function Activities() {
     return () => clearTimeout(t);
   }, [justPublishedId, setSearchParams]);
 
-  const { user } = useAuth();
+  const { user, openSignInModal } = useAuth();
 
   const handleToggleStar = async (activity) => {
     if (!user) {
-      navigate('/signin', { state: { from: '/activities' } });
+      openSignInModal();
       return;
     }
     const wasStarred = (activity.starredBy || []).includes(user.uid);
@@ -93,7 +93,7 @@ export default function Activities() {
 
       {/* Nav */}
       <nav style={{ display:'flex', alignItems:'center', gap:20, padding:'16px 32px', borderBottom:`1px solid ${BORDER}`, background:BG2 }}>
-        <Link to="/" style={{ display:'flex', alignItems:'center', gap:12, textDecoration:'none' }}>
+        <Link to="/activities" style={{ display:'flex', alignItems:'center', gap:12, textDecoration:'none' }}>
           <div className="wiz-brand-mark"/>
           <span className="wiz-font-bebas" style={{ fontSize:20, letterSpacing:'.18em', color:'#d7e4f1' }}>WIZMATH<span style={{ color:'#f0bf5c' }}>.</span>DEV</span>
         </Link>

@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { generateGeoGebraConstruction, repairGeoGebraConstruction, answerTutorQuestion } from './services/geminiService.js';
+import { generateGeoGebraConstruction, repairGeoGebraConstruction, answerTutorQuestion, generateActivityDescription, generateChallengeQuestions } from './services/geminiService.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -102,6 +102,49 @@ app.post('/api/tutor', async (req, res) => {
     } catch (error) {
         console.error('Failed to answer tutor question:', error);
         return res.status(500).json({ error: 'Failed to answer the question.' });
+    }
+});
+
+app.post('/api/describe', async (req, res) => {
+    const { title, commands, userHint } = req.body ?? {};
+
+    if (typeof title !== 'string' || title.trim().length === 0) {
+        return res.status(400).json({ error: 'Title is required.' });
+    }
+    if (title.length > 200) {
+        return res.status(400).json({ error: 'Title is too long.' });
+    }
+
+    try {
+        const description = await generateActivityDescription({
+            title: title.trim(),
+            commands: Array.isArray(commands) ? commands : [],
+            userHint: typeof userHint === 'string' ? userHint : '',
+        });
+        return res.json({ description });
+    } catch (error) {
+        console.error('Failed to generate description:', error);
+        return res.status(500).json({ error: error?.message || 'Failed to generate description.' });
+    }
+});
+
+app.post('/api/challenge', async (req, res) => {
+    const { title, description, commands } = req.body ?? {};
+
+    if (typeof title !== 'string' || title.trim().length === 0) {
+        return res.status(400).json({ error: 'Title is required.' });
+    }
+
+    try {
+        const result = await generateChallengeQuestions({
+            title: title.trim(),
+            description: typeof description === 'string' ? description : '',
+            commands: Array.isArray(commands) ? commands : [],
+        });
+        return res.json(result);
+    } catch (error) {
+        console.error('Failed to generate challenge questions:', error);
+        return res.status(500).json({ error: error?.message || 'Failed to generate questions.' });
     }
 });
 

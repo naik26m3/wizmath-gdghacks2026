@@ -11,6 +11,10 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [authError, setAuthError] = useState(null);
+  const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
+
+  const openSignInModal = () => { setAuthError(null); setIsSignInModalOpen(true); };
+  const closeSignInModal = () => setIsSignInModalOpen(false);
 
   useEffect(() => {
     if (!isFirebaseConfigured() || !auth) {
@@ -63,7 +67,10 @@ export const AuthProvider = ({ children }) => {
     authChecked: !isLoadingAuth,         // legacy
     signIn,
     logout,
-    navigateToLogin: signIn,             // legacy alias
+    isSignInModalOpen,
+    openSignInModal,
+    closeSignInModal,
+    navigateToLogin: openSignInModal,    // legacy alias — now opens the modal
     checkUserAuth: async () => {},       // legacy no-op
     checkAppState: async () => {},       // legacy no-op
   };

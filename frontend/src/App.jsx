@@ -1,7 +1,8 @@
+import { useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -12,8 +13,16 @@ import Activities from '@/pages/Activities';
 import Create from '@/pages/Create';
 import Activity from '@/pages/Activity';
 import Slope from '@/pages/Slope';
-import SignIn from '@/pages/SignIn';
 import Leaderboard from '@/pages/Leaderboard';
+import Play from '@/pages/Play';
+import SignInModal from '@/components/wizmath/SignInModal';
+
+// Old /signin URL → bounce to /activities and open the modal so existing links keep working.
+function SignInRedirect() {
+  const { openSignInModal } = useAuth();
+  useEffect(() => { openSignInModal(); }, [openSignInModal]);
+  return <Navigate to="/activities" replace />;
+}
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -40,18 +49,22 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/studio" element={<Studio />} />
-      <Route path="/library" element={<Library />} />
-      <Route path="/activities" element={<Activities />} />
-      <Route path="/leaderboard" element={<Leaderboard />} />
-      <Route path="/signin" element={<SignIn />} />
-      <Route path="/create" element={<Create />} />
-      <Route path="/activity/:id" element={<Activity />} />
-      <Route path="/slope" element={<Slope />} />
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/studio" element={<Studio />} />
+        <Route path="/library" element={<Library />} />
+        <Route path="/activities" element={<Activities />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/signin" element={<SignInRedirect />} />
+        <Route path="/create" element={<Create />} />
+        <Route path="/activity/:id" element={<Activity />} />
+        <Route path="/activity/:id/play" element={<Play />} />
+        <Route path="/slope" element={<Slope />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+      <SignInModal />
+    </>
   );
 };
 

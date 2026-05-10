@@ -9,6 +9,7 @@ import {
   limit,
   serverTimestamp,
   updateDoc,
+  deleteDoc,
   arrayUnion,
   arrayRemove,
   increment,
@@ -60,6 +61,8 @@ export async function publishActivity({
       authorPhotoURL,
       stars: 0,
       starredBy: [],
+      views: 0,
+      viewedBy: [],
       createdAt: serverTimestamp(),
     });
     console.log('[publishActivity] success! doc id:', ref.id);
@@ -94,6 +97,63 @@ export async function getActivity(id) {
   const snap = await getDoc(doc(db, COLLECTION, id));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() };
+}
+
+/**
+ * Record that a user viewed this activity. Idempotent per user — only counts the first view.
+ * Returns { firstView: boolean } so caller knows whether to award XP.
+ */
+export async function recordActivityView(activityId, userId) {
+  ensureReady();
+  if (!activityId || !userId) return { firstView: false };
+  const ref = doc(db, COLLECTION, activityId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    console.warn('[recordActivityView] activity not found:', activityId);
+    return { firstView: false };
+  }
+  const data = snap.data();
+  const viewedBy = Array.isArray(data.viewedBy) ? data.viewedBy : [];
+  if (viewedBy.includes(userId)) {
+    console.log('[recordActivityView] already viewed by this user, skipping');
+    return { firstView: false };
+  }
+  try {
+    await updateDoc(ref, {
+      viewedBy: arrayUnion(userId),
+      views: increment(1),
+    });
+    console.log('[recordActivityView] view recorded ✓');
+    return { firstView: true };
+  } catch (err) {
+    console.error('[recordActivityView] FAILED:', err.code, err.message);
+    if (err.code === 'permission-denied') {
+      console.error('[recordActivityView] HINT: Update Firestore rules in Firebase Console — the views/viewedBy update is being blocked. See backend/firestore.rules for the latest version.');
+    }
+    throw err;
+  }
+}
+
+/**
+ * Update title/description for an existing activity. Author-only (enforced by rules).
+ */
+export async function updateActivity(activityId, { title, description }) {
+  ensureReady();
+  if (!activityId) throw new Error('Missing activity id.');
+  const patch = {};
+  if (typeof title === 'string') patch.title = title.trim();
+  if (typeof description === 'string') patch.description = description.trim();
+  if (Object.keys(patch).length === 0) return;
+  await updateDoc(doc(db, COLLECTION, activityId), patch);
+}
+
+/**
+ * Delete an activity. Author-only (enforced by rules).
+ */
+export async function deleteActivity(activityId) {
+  ensureReady();
+  if (!activityId) throw new Error('Missing activity id.');
+  await deleteDoc(doc(db, COLLECTION, activityId));
 }
 
 /**

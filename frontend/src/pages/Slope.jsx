@@ -53,7 +53,7 @@ export default function Slope() {
       <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', minWidth: 0, minHeight: 0 }}>
         {/* Nav */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 28px', borderBottom: `1px solid ${BORDER}`, background: BG2, flexShrink: 0 }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
+          <Link to="/activities" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
             <div className="wiz-brand-mark"/>
             <span className="wiz-font-bebas" style={{ fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>WIZMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
           </Link>
