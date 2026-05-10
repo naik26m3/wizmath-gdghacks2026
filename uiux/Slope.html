@@ -81,9 +81,17 @@
   }
   .search input::placeholder{ color: var(--outline); }
 
+  .icn-btn{
+    width:36px; height:36px;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:transparent; border:1px solid transparent; cursor:pointer;
+    color: var(--on-variant);
+    transition: color .2s, border-color .2s;
+  }
+  .icn-btn:hover{ color: var(--gold); border-color: var(--gold-line-25); }
+
   .signin{
     --c: 10px;
-    margin-left: auto;
     background: transparent;
     border: 1px solid var(--gold-line-50);
     color: var(--gold);
@@ -444,12 +452,12 @@
 
     <!-- Nav -->
     <nav class="nav" data-screen-label="Nav">
-      <div class="brand" onclick="window.location.href='WizMath.html'" style="cursor:pointer">
+      <div class="brand" onclick="window.location.href='Activities.html'" style="cursor:pointer">
         <div class="brand-mark"></div>
         <div class="brand-name">WIZMATH<span class="dot">.</span>DEV</div>
       </div>
       <div class="nav-links">
-        <button class="nav-link">Charts <span class="caret"></span></button>
+        <button class="nav-link" onclick="window.location.href='leaderboard.html'">Charts <span class="caret"></span></button>
         <button class="nav-link" onclick="window.location.href='Calculator.html'">Create <span class="caret"></span></button>
       </div>
       <div class="search">
@@ -459,7 +467,15 @@
         </svg>
         <input type="text" placeholder="Search" />
       </div>
-      <button class="signin">Sign in</button>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+        <button class="icn-btn" aria-label="Share">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/>
+            <line x1="8" y1="11" x2="16" y2="7"/><line x1="8" y1="13" x2="16" y2="17"/>
+          </svg>
+        </button>
+        <button class="signin">Sign in</button>
+      </div>
     </nav>
 
     <!-- Content -->
@@ -684,5 +700,6 @@
     });
   })();
 </script>
+<script src="auth.js" defer></script>
 </body>
 </html>
