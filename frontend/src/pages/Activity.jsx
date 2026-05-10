@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import AskAISidebar from '@/components/wizmath/AskAISidebar';
 import StarButton from '@/components/wizmath/StarButton';
-import { getActivity, toggleStar, updateActivity, deleteActivity } from '@/lib/activities';
+import { getActivity, toggleStar, updateActivity, deleteActivity, recordActivityView } from '@/lib/activities';
 import { useAuth } from '@/lib/AuthContext';
+import { awardXp } from '@/lib/userProfile';
 
 const BACKEND_URL_DESCRIBE = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000') + '/api/describe';
 
@@ -314,7 +315,7 @@ export default function Activity() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const { user } = useAuth();
+  const { user, openSignInModal } = useAuth();
   const navigate = useNavigate();
   const isAuthor = !!user && !!activity?.authorUid && activity.authorUid === user.uid;
 
@@ -351,9 +352,28 @@ export default function Activity() {
     return () => { cancelled = true; };
   }, [id]);
 
+  // Record view + award 1 XP to student on first view (skip if user is the author)
+  useEffect(() => {
+    if (!id || !user || !activity?.id) return;
+    if (activity.authorUid && activity.authorUid === user.uid) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { firstView } = await recordActivityView(id, user.uid);
+        if (cancelled) return;
+        if (firstView) {
+          try { await awardXp(user.uid, 1); } catch (e) { console.warn('awardXp failed:', e); }
+        }
+      } catch (e) {
+        console.warn('recordActivityView failed:', e);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id, user, activity?.id, activity?.authorUid]);
+
   const handleToggleStar = async () => {
     if (!user) {
-      navigate('/signin', { state: { from: `/activity/${id}` } });
+      openSignInModal();
       return;
     }
     if (!activity?.id) return; // mock activity, no Firestore doc
@@ -420,6 +440,15 @@ export default function Activity() {
               {activity.title}
             </h1>
             <div style={{ flexShrink: 0, paddingTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Link to={`/activity/${id}/play`} style={{ textDecoration: 'none' }}>
+                <button title="Test your understanding"
+                  style={{ display:'inline-flex', alignItems:'center', gap:8, background: 'linear-gradient(180deg,#43e2d2,#005049)', border: 0, borderRadius: 7, color: '#002a26', padding:'8px 16px', cursor:'pointer', fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:700, letterSpacing:'.16em', textTransform:'uppercase', boxShadow: '0 0 14px rgba(67,226,210,.25)', transition: 'transform .12s, filter .15s' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.filter = 'brightness(1.1)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.filter = 'none'; }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Play
+                </button>
+              </Link>
               {isAuthor && (
                 <>
                   <button onClick={() => setShowEditModal(true)} title="Edit title and description"

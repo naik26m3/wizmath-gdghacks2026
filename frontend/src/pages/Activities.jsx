@@ -49,11 +49,11 @@ export default function Activities() {
     return () => clearTimeout(t);
   }, [justPublishedId, setSearchParams]);
 
-  const { user } = useAuth();
+  const { user, openSignInModal } = useAuth();
 
   const handleToggleStar = async (activity) => {
     if (!user) {
-      navigate('/signin', { state: { from: '/activities' } });
+      openSignInModal();
       return;
     }
     const wasStarred = (activity.starredBy || []).includes(user.uid);

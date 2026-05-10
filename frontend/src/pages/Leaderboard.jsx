@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { collection, query, orderBy, limit as fbLimit, getDocs } from 'firebase/firestore';
 import { listActivities } from '@/lib/activities';
+import { db, isFirebaseConfigured } from '@/lib/firebase';
 import AuthButton from '@/components/wizmath/AuthButton';
 
 const BG = 'rgb(43,42,42)';
@@ -12,44 +14,66 @@ const TEAL = '#43e2d2';
 
 export default function Leaderboard() {
   const [activities, setActivities] = useState(/** @type {any[]} */ ([]));
+  const [students, setStudents] = useState(/** @type {any[]} */ ([]));
   const [status, setStatus] = useState('loading');
+  const [tab, setTab] = useState(/** @type {'creators' | 'students'} */ ('creators'));
 
   useEffect(() => {
     let cancelled = false;
-    listActivities(200)
-      .then((rows) => {
+    Promise.all([
+      listActivities(200).catch((err) => { console.warn('listActivities failed:', err); return []; }),
+      // Top students from leaderboard collection (synced via awardXp)
+      (async () => {
+        if (!isFirebaseConfigured() || !db) return [];
+        try {
+          const q = query(collection(db, 'leaderboard'), orderBy('xp', 'desc'), fbLimit(10));
+          const snap = await getDocs(q);
+          return snap.docs.map((d) => ({ uid: d.id, ...d.data() }));
+        } catch (e) {
+          console.warn('leaderboard fetch failed:', e);
+          return [];
+        }
+      })(),
+    ])
+      .then(([acts, lb]) => {
         if (cancelled) return;
-        setActivities(rows);
+        setActivities(acts);
+        setStudents(lb);
         setStatus('ok');
       })
-      .catch((err) => {
-        console.warn('listActivities failed:', err);
-        if (!cancelled) setStatus('error');
-      });
+      .catch(() => { if (!cancelled) setStatus('error'); });
     return () => { cancelled = true; };
   }, []);
 
-  // Group by author, sum stars
-  const contributors = useMemo(() => {
+  // Top Creators: aggregate XP from their activities
+  // XP rule: stars × 10 + views × 5
+  const creators = useMemo(() => {
     const map = new Map();
     for (const a of activities) {
-      if (!a.authorUid) continue; // skip anonymous
+      if (!a.authorUid) continue;
       const existing = map.get(a.authorUid) || {
         authorUid: a.authorUid,
         authorName: a.authorName || 'Explorer',
         authorPhotoURL: a.authorPhotoURL || null,
         totalStars: 0,
+        totalViews: 0,
+        totalXp: 0,
         activityCount: 0,
       };
-      existing.totalStars += (a.stars || 0);
+      const stars = a.stars || 0;
+      const views = a.views || 0;
+      existing.totalStars += stars;
+      existing.totalViews += views;
+      existing.totalXp += (stars * 10) + (views * 5);
       existing.activityCount += 1;
-      // Update name/photo from latest activity (in case it changed)
       if (a.authorName) existing.authorName = a.authorName;
       if (a.authorPhotoURL) existing.authorPhotoURL = a.authorPhotoURL;
       map.set(a.authorUid, existing);
     }
-    return Array.from(map.values()).sort((a, b) => b.totalStars - a.totalStars).slice(0, 10);
+    return Array.from(map.values()).sort((a, b) => b.totalXp - a.totalXp).slice(0, 10);
   }, [activities]);
+
+  const rows = tab === 'creators' ? creators : students;
 
   return (
     <div style={{ minHeight: '100vh', background: BG, color: '#d7e4f1', fontFamily: 'Manrope,sans-serif' }}>
@@ -122,23 +146,40 @@ export default function Leaderboard() {
           </div>
         </div>
 
-        {/* Section header */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap: 12, marginBottom: 26 }}>
-          <div className="lb-hex" style={{ width:14, height:14, background: `linear-gradient(135deg, ${GOLD}, ${'#c89b3c'})`, boxShadow: '0 0 8px rgba(240,191,92,.6)' }}/>
-          <span style={{ fontFamily:'Bebas Neue,sans-serif', fontSize: 24, letterSpacing:'.18em', textTransform:'uppercase', color: GOLD }}>
-            Top Contributors
-          </span>
-          <div className="lb-hex" style={{ width:14, height:14, background: `linear-gradient(135deg, ${GOLD}, ${'#c89b3c'})`, boxShadow: '0 0 8px rgba(240,191,92,.6)' }}/>
+        {/* Tabs */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', maxWidth: 720, margin: '0 auto 26px', background: `linear-gradient(180deg, ${BG2}, ${BG3})`, border: `1px solid ${BORDER}`, borderRadius: 10, position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position:'absolute', left:0, right:0, top:0, height:1, background: `linear-gradient(90deg, transparent, ${GOLD} 25%, #ffdea4 50%, ${GOLD} 75%, transparent)` }}/>
+          {[
+            { key: 'creators', label: 'Top Creators' },
+            { key: 'students', label: 'Top Students' },
+          ].map((t) => {
+            const active = tab === t.key;
+            return (
+              <button key={t.key} onClick={() => setTab(t.key)}
+                style={{
+                  background: active ? 'linear-gradient(180deg, rgba(240,191,92,.12), rgba(200,155,60,.04))' : 'transparent',
+                  border: 0, cursor: 'pointer', padding: '16px 20px',
+                  fontFamily: 'Bebas Neue,sans-serif', fontSize: 20, letterSpacing: '.18em', textTransform: 'uppercase',
+                  color: active ? GOLD : '#d2c5b1',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+                  boxShadow: active ? `inset 0 -2px 0 ${GOLD}` : 'none',
+                  transition: 'color .2s, background .2s',
+                }}>
+                <div className="lb-hex" style={{ width: 14, height: 14, background: active ? `linear-gradient(135deg, #ffdea4, #c89b3c)` : `linear-gradient(135deg, ${TEAL}, #005049)`, boxShadow: active ? '0 0 8px rgba(240,191,92,.6)' : 'none', opacity: active ? 1 : 0.6 }}/>
+                {t.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Board */}
         <section className="lb-board">
           {/* Column header */}
-          <div style={{ display:'grid', gridTemplateColumns:'80px 1fr 160px 140px', alignItems:'center', padding:'18px 32px 14px', borderBottom:`1px solid rgba(200,155,60,.10)`, fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:700, letterSpacing:'.22em', textTransform:'uppercase', color:'#9b8f7d' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'80px 1fr 200px 140px', alignItems:'center', padding:'18px 32px 14px', borderBottom:`1px solid rgba(200,155,60,.10)`, fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:700, letterSpacing:'.22em', textTransform:'uppercase', color:'#9b8f7d' }}>
             <div>Rank</div>
             <div>Name</div>
-            <div>Activities</div>
-            <div style={{ textAlign:'right' }}>Stars</div>
+            <div>{tab === 'creators' ? 'Stars · Views' : 'Level'}</div>
+            <div style={{ textAlign:'right' }}>XP</div>
           </div>
 
           {/* Loading / empty / rows */}
@@ -148,35 +189,41 @@ export default function Leaderboard() {
           {status === 'error' && (
             <div style={{ padding: '40px 32px', textAlign:'center', color:'#e25c7a', fontSize: 13, fontFamily:'Manrope,sans-serif' }}>Failed to load. Check Firebase setup.</div>
           )}
-          {status === 'ok' && contributors.length === 0 && (
+          {status === 'ok' && rows.length === 0 && (
             <div style={{ padding: '60px 32px', textAlign:'center', color:'#666', fontSize: 14, fontFamily:'Manrope,sans-serif', lineHeight: '22px' }}>
-              No contributors yet.<br/>
-              <Link to="/create" style={{ color: GOLD, textDecoration:'none', fontWeight: 600, marginTop: 8, display: 'inline-block' }}>
-                Be the first to publish →
-              </Link>
+              {tab === 'creators' ? (
+                <>No creators yet.<br/>
+                <Link to="/create" style={{ color: GOLD, textDecoration:'none', fontWeight: 600, marginTop: 8, display: 'inline-block' }}>
+                  Be the first to publish →
+                </Link></>
+              ) : (
+                <>No students yet.<br/>
+                <Link to="/activities" style={{ color: GOLD, textDecoration:'none', fontWeight: 600, marginTop: 8, display: 'inline-block' }}>
+                  Explore an activity →
+                </Link></>
+              )}
             </div>
           )}
-          {status === 'ok' && contributors.map((c, i) => {
+          {status === 'ok' && rows.map((row, i) => {
             const rank = i + 1;
             const isTop = rank <= 3;
-            const initial = (c.authorName || '?')[0]?.toUpperCase() || '?';
-            const crestColor = rank === 1
-              ? 'linear-gradient(180deg,#ffdea4,#c89b3c)'
-              : rank === 2
-              ? 'linear-gradient(180deg,#c8d2db,#6b7682)'
-              : rank === 3
-              ? 'linear-gradient(180deg,#c98a5d,#6b3f25)'
-              : null;
-            const crestShadow = rank === 1
-              ? '0 0 12px rgba(240,191,92,.4)'
-              : rank === 2
-              ? '0 0 10px rgba(200,210,219,.3)'
-              : rank === 3
-              ? '0 0 10px rgba(201,138,93,.35)'
-              : 'none';
+
+            // Normalize fields between creators and students
+            const isCreator = tab === 'creators';
+            const name = isCreator ? row.authorName : (row.displayName || 'Explorer');
+            const photo = isCreator ? row.authorPhotoURL : row.photoURL;
+            const xp = isCreator ? row.totalXp : (row.xp || 0);
+            const initial = (name || '?')[0]?.toUpperCase() || '?';
+
+            const crestColor = rank === 1 ? 'linear-gradient(180deg,#ffdea4,#c89b3c)'
+              : rank === 2 ? 'linear-gradient(180deg,#c8d2db,#6b7682)'
+              : rank === 3 ? 'linear-gradient(180deg,#c98a5d,#6b3f25)' : null;
+            const crestShadow = rank === 1 ? '0 0 12px rgba(240,191,92,.4)'
+              : rank === 2 ? '0 0 10px rgba(200,210,219,.3)'
+              : rank === 3 ? '0 0 10px rgba(201,138,93,.35)' : 'none';
 
             return (
-              <div key={c.authorUid} className="lb-row" style={{ display:'grid', gridTemplateColumns:'80px 1fr 160px 140px', alignItems:'center', padding:'16px 32px', borderBottom:`1px solid rgba(200,155,60,.10)` }}>
+              <div key={isCreator ? row.authorUid : row.uid} className="lb-row" style={{ display:'grid', gridTemplateColumns:'80px 1fr 200px 140px', alignItems:'center', padding:'16px 32px', borderBottom:`1px solid rgba(200,155,60,.10)` }}>
                 {/* Rank */}
                 <div style={{ display:'flex', alignItems:'center', gap: 10, fontFamily:'Bebas Neue,sans-serif', fontSize: 30, letterSpacing:'.04em', color: isTop ? GOLD : '#9b8f7d' }}>
                   {String(rank).padStart(2, '0')}
@@ -187,35 +234,39 @@ export default function Leaderboard() {
 
                 {/* Who */}
                 <div style={{ display:'flex', alignItems:'center', gap: 16 }}>
-                  {c.authorPhotoURL ? (
-                    <img src={c.authorPhotoURL} alt={c.authorName} referrerPolicy="no-referrer" className="lb-hex" style={{ width: 44, height: 44, objectFit: 'cover', border: `1px solid ${BORDER}` }}/>
+                  {photo ? (
+                    <img src={photo} alt={name} referrerPolicy="no-referrer" className="lb-hex" style={{ width: 44, height: 44, objectFit: 'cover', border: `1px solid ${BORDER}` }}/>
                   ) : (
-                    <div className="lb-hex" style={{
-                      width: 44, height: 44,
-                      background: `linear-gradient(135deg, ${BG3}, ${BG2})`,
-                      border: `1px solid ${BORDER}`,
-                      fontFamily: 'Bebas Neue,sans-serif', fontSize: 18,
-                      color: GOLD,
-                    }}>{initial}</div>
+                    <div className="lb-hex" style={{ width: 44, height: 44, background: `linear-gradient(135deg, ${BG3}, ${BG2})`, border: `1px solid ${BORDER}`, fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, color: GOLD }}>{initial}</div>
                   )}
                   <div>
-                    <div style={{ fontFamily:'Bebas Neue,sans-serif', fontSize: 22, letterSpacing:'.08em', textTransform:'uppercase', color:'#d7e4f1' }}>{c.authorName}</div>
+                    <div style={{ fontFamily:'Bebas Neue,sans-serif', fontSize: 22, letterSpacing:'.08em', textTransform:'uppercase', color:'#d7e4f1' }}>{name}</div>
                     <div style={{ fontFamily:'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing:'.16em', color:'#9b8f7d', marginTop: 2 }}>
-                      {c.activityCount} {c.activityCount === 1 ? 'activity' : 'activities'}
+                      {isCreator
+                        ? `${row.activityCount} ${row.activityCount === 1 ? 'activity' : 'activities'}`
+                        : `Level ${row.level || 1}`}
                     </div>
                   </div>
                 </div>
 
-                {/* Activities count (separate col) */}
-                <div style={{ fontFamily:'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing:'.16em', textTransform:'uppercase', color:'#d2c5b1' }}>
-                  <span style={{ color: TEAL }}>{c.activityCount}</span> published
+                {/* Middle col: stars · views OR level */}
+                <div style={{ fontFamily:'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing:'.12em', textTransform:'uppercase', color:'#d2c5b1' }}>
+                  {isCreator ? (
+                    <>
+                      <span style={{ color: GOLD }}>{row.totalStars}</span> {row.totalStars === 1 ? 'star' : 'stars'}
+                      <span style={{ color: '#555', margin: '0 8px' }}>·</span>
+                      <span style={{ color: TEAL }}>{row.totalViews}</span> {row.totalViews === 1 ? 'view' : 'views'}
+                    </>
+                  ) : (
+                    <>Lv. <span style={{ color: TEAL }}>{row.level || 1}</span></>
+                  )}
                 </div>
 
-                {/* Score */}
+                {/* Score: XP */}
                 <div style={{ textAlign:'right', fontFamily:'Bebas Neue,sans-serif', fontSize: 28, letterSpacing:'.04em', color: GOLD }}>
-                  {c.totalStars}
+                  {xp.toLocaleString()}
                   <span style={{ fontFamily:'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing:'.22em', color:'#9b8f7d', marginLeft: 6 }}>
-                    {c.totalStars === 1 ? 'STAR' : 'STARS'}
+                    XP
                   </span>
                 </div>
               </div>

@@ -61,6 +61,8 @@ export async function publishActivity({
       authorPhotoURL,
       stars: 0,
       starredBy: [],
+      views: 0,
+      viewedBy: [],
       createdAt: serverTimestamp(),
     });
     console.log('[publishActivity] success! doc id:', ref.id);
@@ -95,6 +97,26 @@ export async function getActivity(id) {
   const snap = await getDoc(doc(db, COLLECTION, id));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() };
+}
+
+/**
+ * Record that a user viewed this activity. Idempotent per user — only counts the first view.
+ * Returns { firstView: boolean } so caller knows whether to award XP.
+ */
+export async function recordActivityView(activityId, userId) {
+  ensureReady();
+  if (!activityId || !userId) return { firstView: false };
+  const ref = doc(db, COLLECTION, activityId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return { firstView: false };
+  const data = snap.data();
+  const viewedBy = Array.isArray(data.viewedBy) ? data.viewedBy : [];
+  if (viewedBy.includes(userId)) return { firstView: false };
+  await updateDoc(ref, {
+    viewedBy: arrayUnion(userId),
+    views: increment(1),
+  });
+  return { firstView: true };
 }
 
 /**

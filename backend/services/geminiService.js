@@ -389,6 +389,108 @@ export async function generateGeoGebraCommand(userPrompt) {
 }
 
 /**
+ * Generate 3-5 multiple-choice questions about an activity.
+ * Used by the "Play" mode where students test their understanding.
+ */
+export async function generateChallengeQuestions({ title, description, commands }) {
+    try {
+        const safeTitle = validatePrompt(title, 'Title');
+        const safeDescription = typeof description === 'string' ? description.trim().slice(0, 500) : '';
+        const safeCommands = Array.isArray(commands) ? commands.slice(0, 200) : [];
+
+        if (!process.env.GEMINI_API_KEY) {
+            throw new Error("Missing GEMINI_API_KEY");
+        }
+
+        const systemInstruction = `You are a math tutor creating multiple-choice questions for a student exploring an interactive math activity.
+
+Activity title: "${safeTitle}"
+${safeDescription ? `Activity description: ${safeDescription}` : ''}
+
+The activity is built from these GeoGebra commands (study them to understand what variables/sliders exist and what the activity teaches):
+${safeCommands.join('\n')}
+
+Generate 3 to 5 multiple-choice questions that test the student's understanding of the math concept this activity demonstrates.
+
+Rules for the questions:
+- Focus on CONCEPTUAL understanding ("What does the slider 'a' control?", "What happens when 'b' increases?", "Which transformation does this show?")
+- Use the actual variable/slider names that appear in the commands, written in plain language (e.g. if there's a slider 'a' that shifts the graph, ask about 'a')
+- Each question has EXACTLY 4 options.
+- Exactly one is correct.
+- Wrong options should be plausible (common misconceptions, not silly).
+- Keep each option short — under 80 characters.
+- Don't reference GeoGebra or code syntax.
+- Difficulty: appropriate for a high-school student.
+
+Return ONLY a JSON object in this exact shape (no markdown, no backticks, no explanations outside the JSON):
+{
+  "questions": [
+    {
+      "question": "What does the slider 'a' control?",
+      "options": [
+        "The vertical shift of the graph",
+        "The horizontal shift of the graph",
+        "The slope of the line",
+        "The y-intercept"
+      ],
+      "correctIndex": 0,
+      "explanation": "The slider 'a' moves the graph up or down by changing the constant term."
+    }
+  ]
+}
+
+correctIndex is 0-based (0, 1, 2, or 3).
+Generate 3 to 5 questions total — pick a count appropriate to how rich the activity is.`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: 'Generate the questions now as JSON.',
+            config: {
+                systemInstruction,
+                temperature: 0.7,
+                responseMimeType: 'application/json',
+            },
+        });
+
+        const text = (response.text ?? '').trim();
+        if (!text) throw new Error('Empty response from Gemini');
+
+        // Strip any markdown fences if Gemini ignored the rule
+        const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(cleaned);
+
+        if (!Array.isArray(parsed.questions) || parsed.questions.length === 0) {
+            throw new Error('Gemini returned no questions');
+        }
+
+        // Sanitize each question
+        const questions = parsed.questions
+            .filter((q) =>
+                q
+                && typeof q.question === 'string'
+                && Array.isArray(q.options)
+                && q.options.length === 4
+                && typeof q.correctIndex === 'number'
+                && q.correctIndex >= 0 && q.correctIndex <= 3
+            )
+            .slice(0, 5)
+            .map((q) => ({
+                question: q.question,
+                options: q.options.map((o) => String(o)),
+                correctIndex: q.correctIndex,
+                explanation: typeof q.explanation === 'string' ? q.explanation : '',
+            }));
+
+        if (questions.length === 0) throw new Error('All questions failed validation');
+        return { questions };
+    } catch (error) {
+        console.error('Error generating challenge questions:', error);
+        const msg = error?.message || 'unknown error';
+        throw new Error(`Question generation failed: ${msg}`);
+    }
+}
+
+/**
  * Generate a 2-3 sentence description for an activity from its title + GeoGebra commands.
  * Used by the Publish modal's "auto-generate" button.
  */
