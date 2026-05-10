@@ -1,11 +1,10 @@
 import React from 'react';
+import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Gamepad2, Trash2, ArrowLeft, BookOpen, Target, Rocket } from 'lucide-react';
-import { useAuth } from '@/lib/AuthContext';
-import { listMiniGames, deleteMiniGame } from '@wizmath/lib/miniGames.js';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/studio/Navbar';
@@ -28,19 +27,16 @@ const iconColorMap = {
 
 export default function Library() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
-  const uid = user?.uid;
 
   const { data: games = [], isLoading } = useQuery({
-    queryKey: ['miniGames', uid],
-    queryFn: () => listMiniGames(uid, 50),
-    enabled: !!uid,
+    queryKey: ['miniGames'],
+    queryFn: () => base44.entities.MiniGame.list('-created_date', 50),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => deleteMiniGame(id),
+    mutationFn: (id) => base44.entities.MiniGame.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['miniGames', uid] });
+      queryClient.invalidateQueries({ queryKey: ['miniGames'] });
       toast.success('Game deleted');
     },
   });

@@ -1,9 +1,7 @@
 import React, { useState, useCallback } from 'react';
+import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useAuth } from '@/lib/AuthContext';
-import { listMiniGames, createMiniGame, deleteMiniGame } from '@wizmath/lib/miniGames.js';
-import { invokeLLM } from '@wizmath/lib/llm.js';
 import Navbar from '@/components/studio/Navbar';
 import LeftPane from '@/components/studio/LeftPane';
 import GeoGebraStage from '@/components/studio/GeoGebraStage';
@@ -45,24 +43,21 @@ const GAME_CONFIG_SCHEMA = {
 };
 
 export default function Studio() {
-  const { user } = useAuth();
-  const uid = user?.uid;
   const [prompt, setPrompt] = useState('');
   const [currentGame, setCurrentGame] = useState(null);
   const queryClient = useQueryClient();
 
   // Fetch saved games
   const { data: savedGames = [], isLoading: savedGamesLoading } = useQuery({
-    queryKey: ['miniGames', uid],
-    queryFn: () => listMiniGames(uid, 20),
-    enabled: !!uid,
+    queryKey: ['miniGames'],
+    queryFn: () => base44.entities.MiniGame.list('-created_date', 20),
   });
 
   // Generate game via LLM
   const generateMutation = useMutation({
     mutationFn: async (userPrompt) => {
-      const result = await invokeLLM({
-        prompt: `You are a math game designer for a Roblox-style educational platform called MathQuest.
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a math game designer for a Roblox-style educational platform called MathQuest. 
 A teacher wants to create an interactive math game. Generate a complete game configuration based on their description.
 
 Teacher's request: "${userPrompt}"
@@ -89,8 +84,8 @@ Rules:
   // Save game
   const saveMutation = useMutation({
     mutationFn: async () => {
-      if (!currentGame || !uid) return;
-      return createMiniGame(uid, {
+      if (!currentGame) return;
+      const payload = {
         title: currentGame.title,
         description: currentGame.description,
         prompt: prompt,
@@ -98,10 +93,11 @@ Rules:
         difficulty: currentGame.difficulty,
         thumbnail_color: currentGame.thumbnail_color,
         game_config: currentGame.game_config,
-      });
+      };
+      return base44.entities.MiniGame.create(payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['miniGames', uid] });
+      queryClient.invalidateQueries({ queryKey: ['miniGames'] });
       toast.success('Game saved to your library!');
     },
     onError: () => {
@@ -111,9 +107,9 @@ Rules:
 
   // Delete game
   const deleteMutation = useMutation({
-    mutationFn: (id) => deleteMiniGame(id),
+    mutationFn: (id) => base44.entities.MiniGame.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['miniGames', uid] });
+      queryClient.invalidateQueries({ queryKey: ['miniGames'] });
       toast.success('Game deleted');
     },
   });
