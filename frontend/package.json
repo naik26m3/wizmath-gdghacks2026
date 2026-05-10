@@ -1,17 +1,11 @@
 {
-<<<<<<< HEAD
   "name": "base44-app",
   "private": true,
   "version": "0.0.0",
-=======
-  "name": "wizmath-frontend",
-  "private": true,
->>>>>>> fd93c5f9f9ccf11910c1378fbd675c1f50fa35dd
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-<<<<<<< HEAD
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
@@ -102,17 +96,5 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.2",
     "vite": "^6.1.0"
-=======
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "firebase": "^11.0.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.0.0"
->>>>>>> fd93c5f9f9ccf11910c1378fbd675c1f50fa35dd
   }
 }
