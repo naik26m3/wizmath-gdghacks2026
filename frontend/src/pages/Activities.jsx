@@ -100,7 +100,7 @@ export default function Activities() {
         <div style={{ display:'flex', alignItems:'center', marginLeft:16 }}>
           <button className="nav-link active">Activities</button>
           <Link to="/create" style={{ textDecoration:'none' }}><button className="nav-link">Create</button></Link>
-
+          <Link to="/leaderboard" style={{ textDecoration:'none' }}><button className="nav-link">Leaderboard</button></Link>
         </div>
         <div style={{ flex:1, maxWidth:380, marginLeft:12, display:'flex', alignItems:'center', gap:10, padding:'9px 14px', background:BG3, border:`1px solid ${BORDER}`, borderRadius:7 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#777" strokeWidth="2"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
