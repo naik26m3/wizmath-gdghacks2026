@@ -1,0 +1,96 @@
+{
+  "name": "MiniGame",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Name of the mini-game"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of the game"
+    },
+    "prompt": {
+      "type": "string",
+      "description": "Original natural language prompt from the teacher"
+    },
+    "math_concept": {
+      "type": "string",
+      "enum": [
+        "slope",
+        "vertex",
+        "intercepts",
+        "parabola",
+        "linear",
+        "quadratic",
+        "systems",
+        "other"
+      ],
+      "description": "The math concept being taught"
+    },
+    "game_config": {
+      "type": "object",
+      "description": "GeoGebra configuration and game parameters",
+      "properties": {
+        "equation": {
+          "type": "string"
+        },
+        "graph_type": {
+          "type": "string"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "x_min": {
+          "type": "number"
+        },
+        "x_max": {
+          "type": "number"
+        },
+        "y_min": {
+          "type": "number"
+        },
+        "y_max": {
+          "type": "number"
+        },
+        "challenge_text": {
+          "type": "string"
+        },
+        "target_answer": {
+          "type": "string"
+        }
+      }
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "default": "medium"
+    },
+    "thumbnail_color": {
+      "type": "string",
+      "description": "Accent color for the game card"
+    }
+  },
+  "required": [
+    "title",
+    "prompt"
+  ]
+}

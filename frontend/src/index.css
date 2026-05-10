@@ -1,0 +1,201 @@
+<<<<<<< HEAD
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-heading: 'Fredoka', sans-serif;
+    --font-body: 'Inter', sans-serif;
+
+    --background: 210 20% 97%;
+    --foreground: 222 24% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 24% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 24% 12%;
+    --primary: 142 65% 38%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 16% 93%;
+    --secondary-foreground: 222 24% 20%;
+    --muted: 210 16% 93%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 38 90% 52%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214 16% 88%;
+    --input: 214 16% 88%;
+    --ring: 142 65% 38%;
+    --chart-1: 142 65% 38%;
+    --chart-2: 38 90% 52%;
+    --chart-3: 262 72% 58%;
+    --chart-4: 190 80% 42%;
+    --chart-5: 350 72% 55%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 24% 12%;
+    --sidebar-primary: 142 65% 38%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 16% 93%;
+    --sidebar-accent-foreground: 222 24% 20%;
+    --sidebar-border: 214 16% 88%;
+    --sidebar-ring: 142 65% 38%;
+  }
+
+  .dark {
+    --background: 210 20% 97%;
+    --foreground: 222 24% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 24% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 24% 12%;
+    --primary: 142 65% 38%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 16% 93%;
+    --secondary-foreground: 222 24% 20%;
+    --muted: 210 16% 93%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 38 90% 52%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214 16% 88%;
+    --input: 214 16% 88%;
+    --ring: 142 65% 38%;
+    --chart-1: 142 65% 38%;
+    --chart-2: 38 90% 52%;
+    --chart-3: 262 72% 58%;
+    --chart-4: 190 80% 42%;
+    --chart-5: 350 72% 55%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 24% 12%;
+    --sidebar-primary: 142 65% 38%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 16% 93%;
+    --sidebar-accent-foreground: 222 24% 20%;
+    --sidebar-border: 214 16% 88%;
+    --sidebar-ring: 142 65% 38%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar for the dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(210 16% 93%);
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(214 16% 75%);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(214 16% 60%);
+}
+=======
+:root {
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  color: #0f172a;
+  background: #f1f5f9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+p {
+  margin: 0 0 0.75rem;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 8%);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  border: none;
+  padding: 0.5rem 1rem;
+  background: #2563eb;
+  color: #fff;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.err {
+  color: #b91c1c;
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0;
+}
+
+.leader-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.leader-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.9rem;
+}
+
+.leader-list li:last-child {
+  border-bottom: none;
+}
+>>>>>>> fd93c5f9f9ccf11910c1378fbd675c1f50fa35dd
