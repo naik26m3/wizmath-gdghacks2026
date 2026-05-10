@@ -1,4 +1,4 @@
-// WizMath.dev — interactive landing (Hextech Cinematic refactor)
+// ArcaneMath.dev — interactive landing (Hextech Cinematic refactor)
 const { useState, useEffect, useRef, useMemo } = React;
 
 /* ============================================================
@@ -30,10 +30,10 @@ function Crest() {
         <circle cx="260" cy="20" r="6" fill="#43e2d2"
                 stroke="#010A13" strokeWidth="2"/>
 
-        {/* WIZMATH text */}
+        {/* ARCANEMATH text */}
         <text x="260" y="100" textAnchor="middle"
               fontFamily="Bebas Neue, sans-serif" fontSize="62"
-              letterSpacing="6" fill="url(#hxText)">WIZMATH</text>
+              letterSpacing="6" fill="url(#hxText)">ARCANEMATH</text>
       </svg>
     </div>
   );
@@ -47,7 +47,7 @@ function Nav() {
     <nav className="nav" data-screen-label="Nav">
       <div className="brand">
         <div className="brand-mark"></div>
-        <div className="brand-name">WIZMATH<span className="dot">.</span>DEV</div>
+        <div className="brand-name">ARCANEMATH<span className="dot">.</span>DEV</div>
       </div>
       <button className="gbtn">Sign in</button>
     </nav>

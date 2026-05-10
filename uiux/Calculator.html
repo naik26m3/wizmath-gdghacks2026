@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>WizMath.dev — Calculator</title>
+<title>ArcaneMath.dev — Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +28,7 @@
   .app{ display:grid; grid-template-columns: 84px 1fr 340px; height: 100vh; transition: grid-template-columns .25s ease; }
   .app.ai-collapsed{ grid-template-columns: 84px 1fr 44px; }
 
-  /* ── Right sidebar: Ask AI ── */
+  /* ── Right sidebar: Arcane ── */
   .ai{
     border-left: 1px solid var(--gold-line-25);
     background: linear-gradient(180deg, var(--surface-1), var(--void));
@@ -477,7 +477,7 @@
       <button class="menu-btn" aria-label="Menu"><span></span><span></span><span></span></button>
       <div class="brand" onclick="window.location.href='Activities.html'" style="cursor:pointer">
         <div class="brand-mark"></div>
-        <div class="brand-name">WIZMATH<span class="dot">.</span>DEV</div>
+        <div class="brand-name">ARCANEMATH<span class="dot">.</span>DEV</div>
       </div>
       <button class="mode">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4 L20 20 M20 4 L4 20" opacity=".25"/><path d="M3 18 C8 6, 16 18, 21 6" /></svg>
@@ -675,19 +675,19 @@
 
   </div>
 
-  <!-- Right sidebar: Ask AI -->
-  <aside class="ai" data-screen-label="Ask AI">
+  <!-- Right sidebar: Arcane -->
+  <aside class="ai" data-screen-label="Arcane">
     <div class="ai-head">
       <div class="gem"></div>
-      <div class="ai-title">Ask <span class="tag">AI</span></div>
-      <button class="ai-collapse" id="ai-collapse" aria-label="Collapse Ask AI">
+      <div class="ai-title">Arcane</div>
+      <button class="ai-collapse" id="ai-collapse" aria-label="Collapse Arcane">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6 L15 12 L9 18"/></svg>
       </button>
     </div>
-    <div class="ai-vertical-label">Ask <span class="tag">AI</span></div>
+    <div class="ai-vertical-label">Arcane</div>
     <div class="ai-body">
       <div class="msg ai">
-        <span class="who">Oracle</span>
+        <span class="who">Arcane</span>
         <p>Greetings, apprentice. Plot a function on the canvas, or ask me anything about the spell of mathematics.</p>
       </div>
       <div class="msg user">
@@ -695,7 +695,7 @@
         <p>What does the slope of a line tell me?</p>
       </div>
       <div class="msg ai">
-        <span class="who">Oracle</span>
+        <span class="who">Arcane</span>
         <p>Slope is the line's rate of change — for every step right along x, how far it climbs or falls along y. A slope of 2 means the line rises 2 for every 1 it travels.</p>
         <p>Try graphing <em>y = 2x + 1</em> and watch the rise vs. run.</p>
       </div>
@@ -704,12 +704,12 @@
         <p>And the y-intercept?</p>
       </div>
       <div class="msg ai">
-        <span class="who">Oracle</span>
+        <span class="who">Arcane</span>
         <p>The y-intercept is where the line crosses the vertical axis — the value of y when x is zero. In <em>y = mx + b</em>, that's <em>b</em>.</p>
       </div>
     </div>
     <div class="ai-input-row">
-      <input class="ai-input" type="text" placeholder="Ask the Oracle…" />
+      <input class="ai-input" type="text" placeholder="Ask the Arcane…" />
       <button class="ai-send" aria-label="Send">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 12 L20 4 L14 20 L12 13 Z"/>
@@ -728,7 +728,7 @@
     aiBtn.addEventListener('click', function(){
       var collapsed = ai.classList.toggle('collapsed');
       app.classList.toggle('ai-collapsed', collapsed);
-      aiBtn.setAttribute('aria-label', collapsed ? 'Expand Ask AI' : 'Collapse Ask AI');
+      aiBtn.setAttribute('aria-label', collapsed ? 'Expand Arcane' : 'Collapse Arcane');
     });
     // Clicking anywhere on the collapsed rail expands it
     ai.addEventListener('click', function(e){
