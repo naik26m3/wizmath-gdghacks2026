@@ -53,17 +53,18 @@ function GeoGebraView({ commands, settings }) {
       initialized.current = true;
       const params = {
         appName: 'classic',
-        perspective: 'G',
+        perspective: 'AG',
         width: Math.floor(rect.width),
         height: Math.floor(rect.height),
         showToolBar: false,
         showAlgebraInput: false,
         showMenuBar: false,
-        showResetIcon: false,
+        showResetIcon: true,
         showZoomButtons: true,
-        enableLabelDrags: false,
+        showFullscreenButton: true,
+        enableLabelDrags: true,
         enableShiftDragZoom: true,
-        enableRightClick: false,
+        enableRightClick: true,
         showToolBarHelp: false,
         errorDialogsActive: false,
         useBrowserForJS: true,
@@ -71,6 +72,14 @@ function GeoGebraView({ commands, settings }) {
         borderColor: 'transparent',
         appletOnLoad: (api) => {
           apiRef.current = api;
+          // Set 1:1 aspect-ratio default view based on container size
+          try {
+            const r = containerRef.current.getBoundingClientRect();
+            const aspect = r.width / r.height;
+            const yHalf = 5;
+            const xHalf = yHalf * aspect;
+            api.setCoordSystem(-xHalf, xHalf, -yHalf, yHalf);
+          } catch (e) { console.warn(e); }
           setIsReady(true);
         },
       };
@@ -208,32 +217,26 @@ export default function Activity() {
 
         {/* Content */}
         <div className="slope-content" style={{ overflowY: 'auto', padding: '48px 64px 80px' }}>
-          <h1 className="wiz-font-bebas" style={{ fontSize: 56, lineHeight: 1, letterSpacing: '.06em', color: '#d7e4f1', margin: '0 0 18px' }}>
+          <h1 className="wiz-font-bebas" style={{ fontSize: 56, lineHeight: 1, letterSpacing: '.06em', color: '#d7e4f1', margin: '0 0 28px' }}>
             {activity.title}
           </h1>
 
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 24, maxWidth: 900 }}>
-            <div style={{ flexShrink: 0, width: 32, height: 32, background: 'linear-gradient(135deg,#43e2d2,#005049)', borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, color: '#002a26', boxShadow: '0 0 12px rgba(67,226,210,.35)' }}>i</div>
-            <p style={{ fontFamily: 'Manrope,sans-serif', fontSize: 15, lineHeight: '25px', color: '#bbb', paddingTop: 4, margin: 0 }}>
-              {activity.description}
-            </p>
-          </div>
-
           {/* Activity Panel — GeoGebra applet (graph + sliders) */}
           <section className="slope-panel">
-            <p style={{ fontFamily: 'Manrope,sans-serif', fontSize: 15, color: '#999', margin: '0 0 28px' }}>
-              Use the sliders to explore the activity.
-            </p>
-
             <div style={{ background: BG3, border: `1px solid ${BORDER}`, borderRadius: 8, height: 600, overflow: 'hidden' }}>
               <GeoGebraView commands={activity.commands} settings={activity.settings} />
             </div>
           </section>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, maxWidth: 900 }}>
-            <div style={{ flexShrink: 0, width: 32, height: 32, background: 'linear-gradient(135deg,#43e2d2,#005049)', borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, color: '#002a26' }}>i</div>
-            <h2 className="wiz-font-bebas" style={{ fontSize: 28, letterSpacing: '.06em', textTransform: 'uppercase', color: '#d7e4f1', margin: 0 }}>Putting it all together</h2>
-          </div>
+          {/* Description (below graph) */}
+          {activity.description && (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, maxWidth: 900, marginTop: 24 }}>
+              <div style={{ flexShrink: 0, width: 32, height: 32, background: 'linear-gradient(135deg,#43e2d2,#005049)', borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, color: '#002a26', boxShadow: '0 0 12px rgba(67,226,210,.35)' }}>i</div>
+              <p style={{ fontFamily: 'Manrope,sans-serif', fontSize: 15, lineHeight: '25px', color: '#bbb', paddingTop: 4, margin: 0 }}>
+                {activity.description}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

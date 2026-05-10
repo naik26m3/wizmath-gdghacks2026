@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { publishActivity, getActivity } from '@/lib/activities';
+import { useAuth } from '@/lib/AuthContext';
+import AuthButton from '@/components/wizmath/AuthButton';
 
 const BG = 'rgb(43,42,42)';
 const BG2 = 'rgb(35,34,34)';
@@ -327,6 +329,7 @@ function PublishModal({ onClose, onPublish, isPublishing }) {
 export default function Create() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user, profile, signIn } = useAuth();
   const activityIdToLoad = searchParams.get('id');
 
   const [aiOpen, setAiOpen] = useState(true);
@@ -412,17 +415,46 @@ export default function Create() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activityIdToLoad]);
 
+  const captureThumbnail = () => {
+    return new Promise((resolve) => {
+      const api = apiRef.current;
+      if (!api || typeof api.getScreenshotBase64 !== 'function') {
+        resolve(null);
+        return;
+      }
+      try {
+        api.getScreenshotBase64((base64) => {
+          resolve(base64 ? `data:image/png;base64,${base64}` : null);
+        });
+      } catch (e) {
+        console.warn('Failed to capture thumbnail:', e);
+        resolve(null);
+      }
+    });
+  };
+
   const handlePublish = async ({ title, description }) => {
+    if (!user) {
+      // Trigger sign-in popup; modal stays open so user can hit Publish again afterward
+      await signIn();
+      throw new Error('Please sign in to publish your activity.');
+    }
     setIsPublishing(true);
     try {
       const liveCmds = getLiveCommands();
       if (liveCmds.length === 0) {
         throw new Error('Canvas is empty — create something first.');
       }
+      const thumbnail = await captureThumbnail();
+      const authorName = profile?.displayName || user.displayName || 'Anonymous';
       const { id } = await publishActivity({
         title,
         description,
         commands: liveCmds,
+        thumbnail,
+        authorName,
+        authorUid: user.uid,
+        authorPhotoURL: profile?.photoURL || user.photoURL || null,
       });
       setShowPublishModal(false);
       navigate(`/activities?published=${id}`);
@@ -432,6 +464,8 @@ export default function Create() {
   };
 
   // Read GeoGebra's actual live state (handles manual edits, deletes, etc.)
+  // For sliders, parses the XML to reconstruct the original Slider() command
+  // so they round-trip correctly when published and reloaded.
   const getLiveCommands = useCallback(() => {
     const api = apiRef.current;
     if (!api) return [];
@@ -439,6 +473,29 @@ export default function Create() {
       const names = api.getAllObjectNames();
       const cmds = [];
       for (const name of names) {
+        // Detect sliders via XML — getDefinitionString returns just the value for them.
+        let sliderCmd = null;
+        try {
+          const xml = api.getXML(name) || '';
+          if (xml.includes('<slider')) {
+            const min = parseFloat(xml.match(/min="([^"]*)"/)?.[1] ?? '-5');
+            const max = parseFloat(xml.match(/max="([^"]*)"/)?.[1] ?? '5');
+            const stepStr = xml.match(/animationStep="([^"]*)"/)?.[1] ?? xml.match(/animation\s+step="([^"]*)"/)?.[1] ?? '0.1';
+            const step = parseFloat(stepStr);
+            const speed = parseFloat(xml.match(/speed="([^"]*)"/)?.[1] ?? '1');
+            const widthStr = xml.match(/width="([^"]*)"/)?.[1] ?? '150';
+            const width = parseFloat(widthStr);
+            const horizontal = (xml.match(/horizontal="([^"]*)"/)?.[1] ?? 'true') !== 'false';
+            const isAngle = xml.match(/<sliderAngle/) ? 'true' : 'false';
+            sliderCmd = `${name} = Slider(${min}, ${max}, ${step}, ${speed}, ${width}, ${isAngle}, ${horizontal}, false, false)`;
+          }
+        } catch (e) { /* fall through */ }
+
+        if (sliderCmd) {
+          cmds.push(sliderCmd);
+          continue;
+        }
+
         let def = '';
         try { def = api.getDefinitionString(name) || ''; } catch {}
         if (!def.trim()) {
@@ -485,12 +542,15 @@ export default function Create() {
           <span style={{ marginLeft: 16, color: '#e25c7a', fontSize: 11, fontFamily: 'Space Grotesk,sans-serif', letterSpacing: '.12em', textTransform: 'uppercase' }}>Activity not found</span>
         )}
 
-        <button onClick={() => setShowPublishModal(true)} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 7, color: '#1a1a1a', padding: '8px 18px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase' }}
-          onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.1)'}
-          onMouseLeave={e => e.currentTarget.style.filter = 'none'}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-          Publish
-        </button>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => setShowPublishModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 7, color: '#1a1a1a', padding: '8px 18px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase' }}
+            onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.1)'}
+            onMouseLeave={e => e.currentTarget.style.filter = 'none'}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            Publish
+          </button>
+          <AuthButton />
+        </div>
       </header>
 
       {showPublishModal && (

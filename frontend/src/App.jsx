@@ -12,6 +12,7 @@ import Activities from '@/pages/Activities';
 import Create from '@/pages/Create';
 import Activity from '@/pages/Activity';
 import Slope from '@/pages/Slope';
+import SignIn from '@/pages/SignIn';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -43,6 +44,7 @@ const AuthenticatedApp = () => {
       <Route path="/studio" element={<Studio />} />
       <Route path="/library" element={<Library />} />
       <Route path="/activities" element={<Activities />} />
+      <Route path="/signin" element={<SignIn />} />
       <Route path="/create" element={<Create />} />
       <Route path="/activity/:id" element={<Activity />} />
       <Route path="/slope" element={<Slope />} />

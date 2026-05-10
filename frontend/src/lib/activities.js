@@ -32,6 +32,8 @@ export async function publishActivity({
   settings = null,
   thumbnail = null,
   authorName = 'Anonymous',
+  authorUid = null,
+  authorPhotoURL = null,
 }) {
   ensureReady();
   if (typeof title !== 'string' || title.trim().length === 0) {
@@ -41,7 +43,7 @@ export async function publishActivity({
     throw new Error('Cannot publish an empty canvas.');
   }
 
-  console.log('[publishActivity] sending to Firestore...', { title, commandCount: commands.length });
+  console.log('[publishActivity] sending to Firestore...', { title, commandCount: commands.length, authorName });
   try {
     const ref = await addDoc(collection(db, COLLECTION), {
       title: title.trim(),
@@ -50,6 +52,10 @@ export async function publishActivity({
       settings,
       thumbnail,
       authorName,
+      authorUid,
+      authorPhotoURL,
+      stars: 0,
+      starredBy: [],
       createdAt: serverTimestamp(),
     });
     console.log('[publishActivity] success! doc id:', ref.id);

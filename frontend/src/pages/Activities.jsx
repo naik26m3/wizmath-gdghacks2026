@@ -1,43 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { listActivities } from '@/lib/activities';
+import AuthButton from '@/components/wizmath/AuthButton';
 
 const BG = 'rgb(43,42,42)';
 const BG2 = 'rgb(35,34,34)';
 const BG3 = 'rgb(28,27,27)';
 const BORDER = 'rgba(180,160,100,.22)';
-
-const ACTIVITIES = [
-  {
-    id: 1,
-    title: 'Exploring Slope and y-Intercept',
-    tags: [{ label: 'Grades 9–12', type: 'grade' }],
-    href: '/slope',
-    thumb: (
-      <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
-        <rect width="320" height="200" fill={BG3}/>
-        <g stroke="rgba(255,255,255,.07)" strokeWidth="0.6">
-          <path d="M0 100 H320"/><path d="M160 0 V200"/>
-          <path d="M0 20 H320"/><path d="M0 60 H320"/><path d="M0 140 H320"/><path d="M0 180 H320"/>
-          <path d="M40 0 V200"/><path d="M80 0 V200"/><path d="M120 0 V200"/>
-          <path d="M200 0 V200"/><path d="M240 0 V200"/><path d="M280 0 V200"/>
-        </g>
-        <line x1="0" y1="100" x2="320" y2="100" stroke="rgba(240,191,92,.3)" strokeWidth="1"/>
-        <line x1="160" y1="0" x2="160" y2="200" stroke="rgba(240,191,92,.3)" strokeWidth="1"/>
-        <line x1="40" y1="160" x2="280" y2="40" stroke="#f0bf5c" strokeWidth="2.5" strokeLinecap="round"/>
-        <line x1="200" y1="80" x2="200" y2="120" stroke="#e25c7a" strokeWidth="3" strokeLinecap="round"/>
-        <line x1="160" y1="120" x2="200" y2="120" stroke="#43e2d2" strokeWidth="3" strokeLinecap="round"/>
-        <g fontFamily="Space Grotesk, sans-serif" fontSize="9" fill="#d2c5b1">
-          <text x="234" y="58">Slope</text>
-          <circle cx="285" cy="70" r="3.5" fill="#e25c7a"/>
-          <text x="234" y="80">Run</text>
-          <circle cx="270" cy="88" r="3.5" fill="#43e2d2"/>
-          <text x="234" y="108" fill="#5fc28a">y-intercept</text>
-        </g>
-      </svg>
-    ),
-  },
-];
 
 const TAG_STYLES = {
   exp:   { background: 'rgba(67,226,210,.1)',  color: '#43e2d2', border: '1px solid rgba(67,226,210,.3)' },
@@ -112,7 +81,9 @@ export default function Activities() {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#777" strokeWidth="2"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
           <input placeholder="Search activities…" style={{ flex:1, background:'transparent', border:0, outline:0, color:'#d7e4f1', fontFamily:'Manrope,sans-serif', fontSize:13 }}/>
         </div>
-        <button style={{ marginLeft:'auto', background:'transparent', border:`1px solid ${BORDER}`, borderRadius:7, color:'#f0bf5c', padding:'9px 18px', cursor:'pointer', fontFamily:'Space Grotesk,sans-serif', fontSize:12, fontWeight:600, letterSpacing:'.16em', textTransform:'uppercase' }}>Sign in</button>
+        <div style={{ marginLeft:'auto' }}>
+          <AuthButton />
+        </div>
       </nav>
 
       {/* Just-published banner */}
@@ -128,23 +99,6 @@ export default function Activities() {
         <h1 className="wiz-font-bebas" style={{ fontSize:48, letterSpacing:'.06em', color:'#d7e4f1', margin:'0 0 6px' }}>
           Math <span style={{ color:'#f0bf5c' }}>Activities</span>
         </h1>
-      </div>
-
-      {/* Built-in activities */}
-      <div style={{ maxWidth:1240, margin:'0 auto', padding:'0 40px 40px', display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:24 }}>
-        {ACTIVITIES.map((act) => (
-          <article key={act.id} className="act-card" onClick={() => navigate(act.href)}>
-            <div className="act-thumb">{act.thumb}</div>
-            <div style={{ padding:'16px 18px 20px' }}>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:12 }}>
-                {act.tags.map((t) => (
-                  <span key={t.type} className="act-tag" style={TAG_STYLES[t.type]}>{t.label}</span>
-                ))}
-              </div>
-              <h3 style={{ fontFamily:'Manrope,sans-serif', fontWeight:600, fontSize:16, lineHeight:'24px', color:'#d7e4f1', margin:0 }}>{act.title}</h3>
-            </div>
-          </article>
-        ))}
       </div>
 
       {/* Community Creations (from Firestore) */}
@@ -165,10 +119,14 @@ export default function Activities() {
         )}
         {published.map((act) => (
           <article key={act.id} className="act-card" style={{ outline: act.id === justPublishedId ? '2px solid #43e2d2' : 'none', outlineOffset: -1 }} onClick={() => navigate(`/activity/${act.id}`)}>
-            <div className="act-thumb" style={{ display:'flex', alignItems:'center', justifyContent:'center', background:`linear-gradient(135deg, ${BG3}, ${BG2})` }}>
-              <div style={{ fontFamily:'Bebas Neue,sans-serif', fontSize:42, letterSpacing:'.08em', color:'rgba(67,226,210,.4)' }}>
-                {act.title?.[0]?.toUpperCase() || '?'}
-              </div>
+            <div className="act-thumb" style={{ display:'flex', alignItems:'center', justifyContent:'center', background: act.thumbnail ? '#fff' : `linear-gradient(135deg, ${BG3}, ${BG2})` }}>
+              {act.thumbnail ? (
+                <img src={act.thumbnail} alt={act.title} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
+              ) : (
+                <div style={{ fontFamily:'Bebas Neue,sans-serif', fontSize:42, letterSpacing:'.08em', color:'rgba(67,226,210,.4)' }}>
+                  {act.title?.[0]?.toUpperCase() || '?'}
+                </div>
+              )}
             </div>
             <div style={{ padding:'16px 18px 20px' }}>
               <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:12 }}>
