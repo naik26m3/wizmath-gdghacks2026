@@ -254,7 +254,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
 
         {wager > 0 && xpDelta != null && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginTop: 4 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 16, padding: '8px 18px', background: 'rgba(255,255,255,.03)', border: `1px solid ${BORDER}`, borderRadius: 0, fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, color: '#888', letterSpacing: '.14em', textTransform: 'uppercase', clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px)' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 16, padding: '8px 18px', background: 'rgba(255,255,255,.03)', border: `1px solid ${BORDER}`, borderRadius: 0, fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, color: '#888', letterSpacing: '.14em', textTransform: 'uppercase', clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}>
               <span><span style={{ color: GREEN }}>{score}</span> correct × +{wager} XP</span>
               <span style={{ color: '#444' }}>•</span>
               <span><span style={{ color: RED }}>{wrong}</span> wrong × −{wager} XP</span>
@@ -263,17 +263,17 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
                 background: positive ? 'rgba(95,194,138,.1)' : negative ? 'rgba(226,92,122,.1)' : 'rgba(255,255,255,.04)',
                 border: `1px solid ${positive ? 'rgba(95,194,138,.4)' : negative ? 'rgba(226,92,122,.4)' : BORDER}`,
                 borderRadius: 0,
-                clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px)',
+                clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
                 color: positive ? GREEN : negative ? RED : '#aaa',
                 fontFamily: 'Bebas Neue,sans-serif', fontSize: 26, letterSpacing: '.06em' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               {xpDelta > 0 ? `+${xpDelta} XP earned` : xpDelta < 0 ? `${xpDelta} XP lost` : '0 XP — even break'}
             </div>
           </div>
         )}
         {wager === 0 && xpDelta != null && xpDelta > 0 && (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'rgba(67,226,210,.08)', border: `1px solid rgba(67,226,210,.35)`, borderRadius: 0, color: TEAL, fontFamily: 'Space Grotesk,sans-serif', fontSize: 13, fontWeight: 700, letterSpacing: '.12em', clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px)' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'rgba(67,226,210,.08)', border: `1px solid rgba(67,226,210,.35)`, borderRadius: 0, color: TEAL, fontFamily: 'Space Grotesk,sans-serif', fontSize: 13, fontWeight: 700, letterSpacing: '.12em', clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             +{xpDelta} XP EARNED
           </div>
         )}
@@ -299,7 +299,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {wager > 0 && (
             <span title={`Wagered ${wager} XP per question`}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 0, background: 'rgba(240,191,92,.1)', border: '1px solid rgba(240,191,92,.35)', fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, clipPath: 'polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%, 0 6px)' }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 0, background: 'rgba(240,191,92,.1)', border: '1px solid rgba(240,191,92,.35)', fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, clipPath: 'polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px)' }}>
               ±{wager} XP
             </span>
           )}
@@ -307,7 +307,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
               color: wager > 0 ? (runningDelta > 0 ? GREEN : runningDelta < 0 ? RED : '#aaa') : TEAL }}>
             {wager > 0
               ? `${runningDelta > 0 ? '+' : ''}${runningDelta} XP`
-              : `${score} ⭐ correct`}
+              : `${score} ★ correct`}
           </span>
         </div>
       </div>
@@ -347,7 +347,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
                   fontSize: 14, lineHeight: '20px',
                   transition: 'background .15s, border-color .15s, transform .1s',
                   animationDelay: `${80 + i * 60}ms`,
-                  clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px)',
+                  clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
                 }}
                 onMouseEnter={(e) => { if (!revealed) e.currentTarget.style.borderColor = 'rgba(240,191,92,.5)'; }}
                 onMouseLeave={(e) => { if (!revealed) e.currentTarget.style.borderColor = isPicked ? GOLD : BORDER; }}
@@ -368,7 +368,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
         </div>
 
         {revealed && (
-          <div style={{ marginTop: 18, padding: '12px 14px', background: isCorrect ? 'rgba(95,194,138,.08)' : 'rgba(226,92,122,.06)', border: `1px solid ${isCorrect ? 'rgba(95,194,138,.3)' : 'rgba(226,92,122,.25)'}`, borderRadius: 0, clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px)' }}>
+          <div style={{ marginTop: 18, padding: '12px 14px', background: isCorrect ? 'rgba(95,194,138,.08)' : 'rgba(226,92,122,.06)', border: `1px solid ${isCorrect ? 'rgba(95,194,138,.3)' : 'rgba(226,92,122,.25)'}`, borderRadius: 0, clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
               <div style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: isCorrect ? GREEN : RED }}>
                 {isCorrect ? 'Correct!' : 'Not quite'}
@@ -399,7 +399,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
   );
 }
 
-const CHAMFER_BTN = 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%, 0 8px)';
+const CHAMFER_BTN = 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)';
 
 const btnPrimary = {
   background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)',
@@ -422,7 +422,7 @@ const btnExit = {
   background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 0,
   color: '#aaa', padding: '9px 16px', cursor: 'pointer',
   fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase',
-  clipPath: CHAMFER_BTN, transition: 'border-color .2s, color .2s',
+  clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)', transition: 'border-color .2s, color .2s',
 };
 
 // ─── Main page ──────────────────────────────────────────────────────────────

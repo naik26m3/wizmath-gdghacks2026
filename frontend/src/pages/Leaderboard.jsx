@@ -78,7 +78,7 @@ function PodiumCard({ rank, row, isCreator, isSelf, animDelay = 0 }) {
       avatarPx: 132,
       pillar: 'linear-gradient(180deg, rgba(240,191,92,.18), rgba(240,191,92,.06) 60%, rgba(80,55,15,.7))',
       pillarBorder: 'rgba(240,191,92,.55)',
-      glow: '0 0 36px rgba(240,191,92,.45), 0 0 80px rgba(240,191,92,.18)',
+      glow: 'drop-shadow(0 0 36px rgba(240,191,92,.45)) drop-shadow(0 0 40px rgba(240,191,92,.18))',
       ringGrad: 'conic-gradient(from 30deg, #c89b3c, #f0bf5c 25%, #ffdea4 50%, #f0bf5c 75%, #c89b3c)',
       trophyBg: 'linear-gradient(180deg, #ffdea4, #f0bf5c 50%, #c89b3c)',
       trophyShadow: '0 0 18px rgba(240,191,92,.7)',
@@ -92,7 +92,7 @@ function PodiumCard({ rank, row, isCreator, isSelf, animDelay = 0 }) {
       avatarPx: 110,
       pillar: 'linear-gradient(180deg, rgba(200,210,219,.13), rgba(200,210,219,.04) 60%, rgba(60,68,76,.55))',
       pillarBorder: 'rgba(200,210,219,.32)',
-      glow: '0 0 22px rgba(200,210,219,.28)',
+      glow: 'drop-shadow(0 0 22px rgba(200,210,219,.28))',
       ringGrad: 'conic-gradient(from 30deg, #6b7682, #c8d2db 25%, #ffffff 50%, #c8d2db 75%, #6b7682)',
       trophyBg: 'linear-gradient(180deg, #e6ecf2, #c8d2db 50%, #6b7682)',
       trophyShadow: '0 0 14px rgba(200,210,219,.5)',
@@ -106,7 +106,7 @@ function PodiumCard({ rank, row, isCreator, isSelf, animDelay = 0 }) {
       avatarPx: 110,
       pillar: 'linear-gradient(180deg, rgba(201,138,93,.15), rgba(201,138,93,.04) 60%, rgba(80,45,25,.6))',
       pillarBorder: 'rgba(201,138,93,.4)',
-      glow: '0 0 22px rgba(201,138,93,.32)',
+      glow: 'drop-shadow(0 0 22px rgba(201,138,93,.32))',
       ringGrad: 'conic-gradient(from 30deg, #6b3f25, #c98a5d 25%, #f0c2b0 50%, #c98a5d 75%, #6b3f25)',
       trophyBg: 'linear-gradient(180deg, #f0c2b0, #c98a5d 50%, #6b3f25)',
       trophyShadow: '0 0 14px rgba(201,138,93,.55)',
@@ -203,8 +203,8 @@ function PodiumCard({ rank, row, isCreator, isSelf, animDelay = 0 }) {
         height: config.heightPx,
         background: config.pillar,
         border: `1px solid ${config.pillarBorder}`,
-        borderTopLeftRadius: 10, borderTopRightRadius: 10,
-        boxShadow: config.glow,
+        clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)',
+        filter: config.glow,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         gap: 8,
         paddingTop: 18,
@@ -466,9 +466,9 @@ export default function Leaderboard() {
           clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
           display:inline-flex; align-items:center; justify-content:center;
         }
-        .nav-link { background:none; border:0; cursor:pointer; color:#aaa; font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; padding:10px 14px; border-bottom:2px solid transparent; transition:color .2s,border-color .2s; }
-        .nav-link:hover { color:#d7e4f1; }
-        .nav-link.active { color:${GOLD}; border-bottom-color: rgba(240,191,92,.5); }
+        .nav-link { background:none; border:0; border-bottom:1px solid transparent; cursor:pointer; color:#d2c5b1; font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; padding:10px 14px; transition:color .2s,border-color .2s; }
+        .nav-link:hover { color:${GOLD}; border-bottom-color:rgba(240,191,92,.5); }
+        .nav-link.active { color:${GOLD}; border-bottom-color:rgba(240,191,92,.5); }
 
         /* ── Animations ── */
         @keyframes lb-rise {
@@ -512,15 +512,14 @@ export default function Leaderboard() {
       <Particles />
 
       {/* Nav */}
-      <nav style={{ display:'flex', alignItems:'center', gap:20, padding:'16px 32px', borderBottom:`1px solid ${BORDER}`, background:BG2, position: 'relative', zIndex: 2 }}>
-        <Link to="/activities" style={{ display:'flex', alignItems:'center', gap:12, textDecoration:'none' }}>
+      <nav style={{ display:'flex', alignItems:'center', gap:24, padding:'22px 36px', borderBottom:'1px solid rgba(200,155,60,.10)', background:'transparent', position:'relative', zIndex:2 }}>
+        <Link to="/activities" style={{ display:'flex', alignItems:'center', gap:14, textDecoration:'none' }}>
           <div className="lb-brand-mark"/>
           <span style={{ fontFamily:'Bebas Neue,sans-serif', fontSize:20, letterSpacing:'.18em', color:'#d7e4f1' }}>ARCANEMATH<span style={{ color:GOLD }}>.</span>DEV</span>
         </Link>
-        <div style={{ display:'flex', alignItems:'center', marginLeft:16 }}>
-          <Link to="/activities" style={{ textDecoration:'none' }}><button className="nav-link">Activities</button></Link>
+        <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+          <button className="nav-link active">Charts</button>
           <Link to="/create" style={{ textDecoration:'none' }}><button className="nav-link">Create</button></Link>
-          <button className="nav-link active">Leaderboard</button>
         </div>
         <div style={{ marginLeft:'auto' }}>
           <AuthButton />
@@ -541,7 +540,7 @@ export default function Leaderboard() {
         </div>
 
         {/* Tabs */}
-        <div className="lb-anim-rise" style={{ animationDelay: '60ms', display:'grid', gridTemplateColumns:'1fr 1fr', maxWidth: 520, margin: '0 auto 40px', background: `linear-gradient(180deg, ${BG2}, ${BG3})`, border: `1px solid ${BORDER}`, borderRadius: 0, position: 'relative', overflow: 'hidden', padding: 4 }}>
+        <div className="lb-anim-rise" style={{ animationDelay: '60ms', display:'grid', gridTemplateColumns:'1fr 1fr', maxWidth: 520, margin: '0 auto 40px', background: `linear-gradient(180deg, ${BG2}, ${BG3})`, border: `1px solid ${BORDER}`, position: 'relative', overflow: 'hidden', padding: 4, clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)' }}>
           {[
             { key: 'creators', label: 'Top Creators' },
             { key: 'students', label: 'Top Students' },
@@ -551,12 +550,12 @@ export default function Leaderboard() {
               <button key={t.key} onClick={() => setTab(t.key)}
                 style={{
                   background: active ? 'linear-gradient(180deg, rgba(240,191,92,.18), rgba(200,155,60,.06))' : 'transparent',
-                  border: 0, cursor: 'pointer', padding: '12px 20px',
-                  borderRadius: 0,
+                  border: active ? '1px solid rgba(240,191,92,.4)' : '1px solid transparent',
+                  cursor: 'pointer', padding: '12px 20px',
+                  clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
                   fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase',
                   color: active ? GOLD : '#9b8f7d',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                  boxShadow: active ? 'inset 0 0 0 1px rgba(240,191,92,.4)' : 'none',
                   transition: 'color .2s, background .2s',
                 }}>
                 <div className="lb-hex" style={{ width: 10, height: 10, background: active ? `linear-gradient(135deg, #ffdea4, #c89b3c)` : `linear-gradient(135deg, ${TEAL}, #005049)`, opacity: active ? 1 : 0.5 }}/>
@@ -599,7 +598,7 @@ export default function Leaderboard() {
         {/* Your standing tagline */}
         {status === 'ok' && rows.length > 0 && (
           <div className="lb-anim-rise" style={{ animationDelay: '380ms', textAlign: 'center', margin: '0 auto 32px', maxWidth: 600 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '10px 22px', background: 'rgba(255,255,255,.03)', border: `1px solid ${BORDER}`, borderRadius: 0, fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, color: '#9b8f7d', letterSpacing: '.06em' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '10px 22px', background: 'rgba(255,255,255,.03)', border: `1px solid ${BORDER}`, fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, color: '#9b8f7d', letterSpacing: '.06em', clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}>
               {selfUid && selfRank ? (
                 <>
                   You're ranked <strong style={{ color: GOLD, fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.06em', margin: '0 4px' }}>#{selfRank}</strong>

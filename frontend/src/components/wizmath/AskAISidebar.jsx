@@ -61,7 +61,7 @@ export default function AskAISidebar({ collapsed, onToggle, activity }) {
       borderLeft: `1px solid ${BORDER}`,
       background: BG2,
       display: 'grid',
-      gridTemplateRows: collapsed ? '1fr' : 'auto 1fr auto',
+      gridTemplateRows: collapsed ? 'auto 1fr' : 'auto 1fr auto',
       minHeight: 0,
       position: 'relative',
       transition: 'all .25s',
@@ -89,7 +89,7 @@ export default function AskAISidebar({ collapsed, onToggle, activity }) {
 
       {/* Vertical label when collapsed */}
       {collapsed && (
-        <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', writingMode:'vertical-rl', transform:'rotate(180deg)', fontFamily:'Bebas Neue,sans-serif', fontSize:14, letterSpacing:'.32em', textTransform:'uppercase', color:'#aaa', userSelect:'none', cursor:'pointer' }} onClick={onToggle}>
+        <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'flex-end', writingMode:'vertical-rl', transform:'rotate(180deg)', fontFamily:'Bebas Neue,sans-serif', fontSize:14, letterSpacing:'.32em', textTransform:'uppercase', color:'#aaa', userSelect:'none', cursor:'pointer' }} onClick={onToggle}>
           Ask <span style={{ color:'#43e2d2' }}>Arcane</span>
         </div>
       )}

@@ -95,16 +95,16 @@
   100% { opacity: 1; transform: translateY(0); }
 }
 .wiz-rise {
-  animation: wiz-rise .55s cubic-bezier(.2,.8,.2,1) both;
+  animation: wiz-rise .3s cubic-bezier(.2,.8,.2,1) both;
 }
-.wiz-rise-d1  { animation-delay:  60ms; }
-.wiz-rise-d2  { animation-delay: 120ms; }
-.wiz-rise-d3  { animation-delay: 180ms; }
-.wiz-rise-d4  { animation-delay: 240ms; }
-.wiz-rise-d5  { animation-delay: 300ms; }
-.wiz-rise-d6  { animation-delay: 360ms; }
-.wiz-rise-d7  { animation-delay: 420ms; }
-.wiz-rise-d8  { animation-delay: 480ms; }
+.wiz-rise-d1  { animation-delay:  35ms; }
+.wiz-rise-d2  { animation-delay:  70ms; }
+.wiz-rise-d3  { animation-delay: 105ms; }
+.wiz-rise-d4  { animation-delay: 140ms; }
+.wiz-rise-d5  { animation-delay: 175ms; }
+.wiz-rise-d6  { animation-delay: 210ms; }
+.wiz-rise-d7  { animation-delay: 245ms; }
+.wiz-rise-d8  { animation-delay: 280ms; }
 @media (prefers-reduced-motion: reduce) {
   .wiz-rise, .wiz-rise-d1, .wiz-rise-d2, .wiz-rise-d3, .wiz-rise-d4,
   .wiz-rise-d5, .wiz-rise-d6, .wiz-rise-d7, .wiz-rise-d8 {

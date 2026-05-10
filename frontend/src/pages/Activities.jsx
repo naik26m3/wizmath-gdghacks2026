@@ -98,7 +98,7 @@ export default function Activities() {
           <span className="wiz-font-bebas" style={{ fontSize:20, letterSpacing:'.18em', color:'#d7e4f1' }}>ARCANEMATH<span style={{ color:'#f0bf5c' }}>.</span>DEV</span>
         </Link>
         <div style={{ display:'flex', alignItems:'center', gap:4 }}>
-          <button className="nav-link active">Charts</button>
+          <Link to="/leaderboard" style={{ textDecoration:'none' }}><button className="nav-link">Charts</button></Link>
           <Link to="/create" style={{ textDecoration:'none' }}><button className="nav-link">Create</button></Link>
         </div>
         <div style={{ flex:1, maxWidth:380, marginLeft:8, display:'flex', alignItems:'center', gap:10, padding:'9px 14px', background:BG3, border:`1px solid ${BORDER}`, clipPath:'polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)' }}>

@@ -786,28 +786,29 @@ export default function Activity() {
       `}</style>
 
       <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', minWidth: 0, minHeight: 0 }}>
-        {/* Nav — 3-column grid: brand+links | big Play button | auth */}
-        <nav style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '22px 36px', borderBottom: '1px solid rgba(200,155,60,.10)', background: 'transparent', flexShrink: 0 }}>
+        {/* Nav */}
+        <nav style={{ display: 'flex', alignItems: 'center', position: 'relative', padding: '22px 36px', borderBottom: '1px solid rgba(200,155,60,.10)', background: 'transparent', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <Link to="/activities" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none' }}>
               <div className="wiz-brand-mark"/>
               <span className="wiz-font-bebas" style={{ fontSize: 20, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
             </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Link to="/activities" style={{ textDecoration: 'none' }}><button className="nav-link active">Charts</button></Link>
+              <Link to="/leaderboard" style={{ textDecoration: 'none' }}><button className="nav-link active">Charts</button></Link>
               <Link to="/create" style={{ textDecoration: 'none' }}><button className="nav-link">Create</button></Link>
             </div>
           </div>
 
           <button className="act-play-btn" title="Test your understanding — wager XP to begin"
-            onClick={() => setShowWagerModal(true)}>
+            onClick={() => setShowWagerModal(true)}
+            style={{ position: 'absolute', left: '50vw', transform: 'translateX(-50%)', top: 0, bottom: 0, height: 'auto', margin: 0 }}>
             Play
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
               <line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>
             </svg>
           </button>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ marginLeft: 'auto' }}>
             <AuthButton />
           </div>
         </nav>
@@ -889,7 +890,7 @@ export default function Activity() {
           )}
 
           {/* Activity Panel — GeoGebra applet (graph + sliders) */}
-          <section className="slope-panel wiz-rise wiz-rise-d2">
+          <section className="slope-panel wiz-rise wiz-rise-d2" style={{ maxWidth: aiCollapsed ? 'calc(100vw - 320px - 128px)' : 'none' }}>
             <div style={{ background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, height: 600, overflow: 'hidden' }}>
               <GeoGebraView commands={activity.commands} settings={activity.settings} geogebraXML={activity.geogebraXML} />
             </div>

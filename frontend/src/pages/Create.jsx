@@ -146,7 +146,7 @@ function GeoGebraCanvas({ onReady }) {
 }
 
 // ─── AI Chat Panel ───────────────────────────────────────────────────────────
-function AIChatPanel({ onCommands, getCurrentCommands, onCollapse }) {
+function AIChatPanel({ onCommands, getCurrentCommands, collapsed, onToggle }) {
   const [messages, setMessages] = useState([
     { role: 'ai', text: 'Hi! Describe what you want to graph.' }
   ]);
@@ -190,65 +190,92 @@ function AIChatPanel({ onCommands, getCurrentCommands, onCollapse }) {
   };
 
   return (
-    <aside className="wiz-rise wiz-rise-d2" style={{ background: BG2, borderLeft: `1px solid ${BORDER}`, display: 'grid', gridTemplateRows: 'auto 1fr auto', overflow: 'hidden', height: '100%' }}>
+    <aside className="wiz-rise wiz-rise-d2" style={{ background: BG2, borderLeft: `1px solid ${BORDER}`, display: 'grid', gridTemplateRows: collapsed ? 'auto 1fr' : 'auto 1fr auto', overflow: 'hidden', height: '100%', transition: 'all .25s' }}>
+      <style>{`@keyframes ask-bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }`}</style>
+
       {/* Header */}
-      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ width: 8, height: 8, borderRadius: 0, background: '#43e2d2', boxShadow: '0 0 6px #43e2d2' }}/>
-        <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 14, letterSpacing: '.18em', color: '#d7e4f1' }}>
-          AI <span style={{ color: '#43e2d2' }}>Arcane</span>
-        </span>
-        <span style={{ marginLeft: 4, fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, color: '#555', fontWeight: 600, letterSpacing: '.1em' }}>GEOGEBRA</span>
-        <button onClick={onCollapse} style={{ marginLeft: 'auto', background: 'transparent', border: 0, cursor: 'pointer', color: '#555', fontSize: 16, width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 0}}
-          onMouseEnter={e => e.currentTarget.style.color = '#aaa'}
-          onMouseLeave={e => e.currentTarget.style.color = '#555'}>✕</button>
-      </div>
-
-      {/* Messages */}
-      <div style={{ overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {messages.map((msg, i) => (
-          <div key={i} style={{ maxWidth: '95%', alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-            <div style={{ fontSize: 10, fontFamily: 'Space Grotesk,sans-serif', fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 4, color: msg.role === 'user' ? '#f0bf5c' : (msg.error ? '#e25c7a' : '#43e2d2') }}>
-              {msg.role === 'user' ? 'You' : 'Arcane'}
-            </div>
-            <div style={{ padding: '9px 12px', background: msg.role === 'user' ? 'rgba(240,191,92,.08)' : (msg.error ? 'rgba(226,92,122,.06)' : 'rgba(67,226,210,.06)'), border: `1px solid ${msg.role === 'user' ? 'rgba(200,155,60,.2)' : (msg.error ? 'rgba(226,92,122,.25)' : 'rgba(67,226,210,.15)')}`, borderRadius: 0, fontSize: 13, lineHeight: '20px', color: '#d7e4f1', fontFamily: 'Manrope,sans-serif' }}>
-              {msg.text}
-              {msg.commands?.length > 0 && (
-                <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 3, fontFamily: 'monospace', fontSize: 10, color: '#888', borderTop: '1px solid rgba(255,255,255,.05)', paddingTop: 8 }}>
-                  {msg.commands.slice(0, 4).map((c, j) => (
-                    <div key={j} style={{ wordBreak: 'break-all' }}>{c}</div>
-                  ))}
-                  {msg.commands.length > 4 && <div style={{ color: '#555' }}>…{msg.commands.length - 4} more</div>}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-        {loading && (
-          <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 8, color: '#43e2d2', fontSize: 12, fontFamily: 'Manrope,sans-serif', opacity: 0.7 }}>
-            <div style={{ display: 'flex', gap: 3 }}>
-              {[0,1,2].map(i => (
-                <div key={i} style={{ width: 5, height: 5, borderRadius: 0, background: '#43e2d2', animation: `bounce 1s ${i*0.15}s infinite` }}/>
-              ))}
-            </div>
-            Arcane is conjuring…
-          </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: collapsed ? '14px 0' : '12px 14px', borderBottom: collapsed ? 'none' : `1px solid ${BORDER}`, justifyContent: collapsed ? 'center' : 'flex-start' }}>
+        {!collapsed && (
+          <>
+            <div style={{ width: 8, height: 8, borderRadius: 0, background: '#43e2d2', boxShadow: '0 0 6px #43e2d2' }}/>
+            <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 14, letterSpacing: '.18em', color: '#d7e4f1' }}>
+              Arcane <span style={{ color: '#43e2d2' }}>AI</span>
+            </span>
+          </>
         )}
-        <div ref={bottomRef}/>
-      </div>
-
-      {/* Input */}
-      <div style={{ padding: '10px 12px', borderTop: `1px solid ${BORDER}`, display: 'flex', gap: 8 }}>
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && send()}
-          placeholder="Describe what to graph…"
-          style={{ flex: 1, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#d7e4f1', padding: '9px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, outline: 0 }}
-        />
-        <button onClick={send} disabled={loading} style={{ width: 38, background: 'linear-gradient(180deg,#43e2d2,#005049)', border: 0, borderRadius: 0, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.5 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#002a26" strokeWidth="2.5"><path d="M4 12 L20 4 L14 20 L12 13 Z"/></svg>
+        <button onClick={onToggle} style={{ marginLeft: collapsed ? 0 : 'auto', width: 24, height: 24, background: 'transparent', border: 0, cursor: 'pointer', color: '#555', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 0, transition: 'color .2s, transform .25s', transform: collapsed ? 'rotate(180deg)' : 'none' }}
+          onMouseEnter={e => e.currentTarget.style.color = '#aaa'}
+          onMouseLeave={e => e.currentTarget.style.color = '#555'}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 6 L15 12 L9 18"/></svg>
         </button>
       </div>
+
+      {/* Vertical label when collapsed */}
+      {collapsed && (
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontFamily: 'Bebas Neue,sans-serif', fontSize: 14, letterSpacing: '.32em', textTransform: 'uppercase', color: '#aaa', userSelect: 'none', cursor: 'pointer' }} onClick={onToggle}>
+          Ask <span style={{ color: '#43e2d2' }}>Arcane</span>
+        </div>
+      )}
+
+      {!collapsed && (
+        <>
+          {/* Messages */}
+          <div style={{ overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {messages.map((msg, i) => (
+              <div key={i} style={{ maxWidth: '95%', alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div style={{ fontSize: 10, fontFamily: 'Space Grotesk,sans-serif', fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 4, color: msg.role === 'user' ? '#f0bf5c' : (msg.error ? '#e25c7a' : '#43e2d2') }}>
+                  {msg.role === 'user' ? 'You' : 'Arcane'}
+                </div>
+                <div style={{
+                  padding: '9px 12px',
+                  background: msg.role === 'user' ? 'rgba(240,191,92,.08)' : (msg.error ? 'rgba(226,92,122,.06)' : 'rgba(67,226,210,.06)'),
+                  border: `1px solid ${msg.role === 'user' ? 'rgba(200,155,60,.2)' : (msg.error ? 'rgba(226,92,122,.25)' : 'rgba(67,226,210,.15)')}`,
+                  borderRadius: 0,
+                  clipPath: msg.role === 'user'
+                    ? 'polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)'
+                    : 'polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
+                  fontSize: 13, lineHeight: '20px', color: '#d7e4f1', fontFamily: 'Manrope,sans-serif', whiteSpace: 'pre-wrap',
+                }}>
+                  {msg.text}
+                  {msg.commands?.length > 0 && (
+                    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 3, fontFamily: 'monospace', fontSize: 10, color: '#888', borderTop: '1px solid rgba(255,255,255,.05)', paddingTop: 8 }}>
+                      {msg.commands.slice(0, 4).map((c, j) => (
+                        <div key={j} style={{ wordBreak: 'break-all' }}>{c}</div>
+                      ))}
+                      {msg.commands.length > 4 && <div style={{ color: '#555' }}>…{msg.commands.length - 4} more</div>}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            {loading && (
+              <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 8, color: '#43e2d2', fontSize: 12, fontFamily: 'Manrope,sans-serif', opacity: 0.7 }}>
+                <div style={{ display: 'flex', gap: 3 }}>
+                  {[0,1,2].map(i => (
+                    <div key={i} style={{ width: 5, height: 5, borderRadius: 0, background: '#43e2d2', animation: `ask-bounce 1s ${i*0.15}s infinite` }}/>
+                  ))}
+                </div>
+                Arcane is conjuring…
+              </div>
+            )}
+            <div ref={bottomRef}/>
+          </div>
+
+          {/* Input */}
+          <div style={{ padding: '10px 12px', borderTop: `1px solid ${BORDER}`, display: 'flex', gap: 8 }}>
+            <input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && send()}
+              placeholder="Describe what to graph…"
+              style={{ flex: 1, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#d7e4f1', padding: '9px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, outline: 0, clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+            />
+            <button onClick={send} disabled={loading} style={{ width: 38, background: 'linear-gradient(180deg,#43e2d2,#005049)', border: 0, borderRadius: 0, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.5 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#002a26" strokeWidth="2.5"><path d="M4 12 L20 4 L14 20 L12 13 Z"/></svg>
+            </button>
+          </div>
+        </>
+      )}
     </aside>
   );
 }
@@ -672,31 +699,41 @@ export default function Create() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
         @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-        .wiz-brand-mark { width:30px; height:30px; position:relative; background:conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
-        .wiz-brand-mark::after { content:''; position:absolute; inset:4px; background:${BG2}; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+        .wiz-brand-mark { width:34px; height:34px; position:relative; background:conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); box-shadow:0 0 16px rgba(240,191,92,.25); }
+        .wiz-brand-mark::after { content:''; position:absolute; inset:4px; background:${BG}; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
         .wiz-brand-mark::before { content:''; position:absolute; inset:0; z-index:1; background:radial-gradient(circle at 50% 50%,#43e2d2 0 20%,transparent 22%); filter:drop-shadow(0 0 5px #43e2d2); }
+        .wiz-font-bebas { font-family:'Bebas Neue',sans-serif; }
+        .nav-link { background:none;border:0;border-bottom:1px solid transparent;cursor:pointer;color:#d2c5b1;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;transition:color .2s,border-color .2s; }
+        .nav-link:hover { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
+        .nav-link.active { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
+        .publish-btn { position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:8px; background:linear-gradient(105deg,#6b4a0e 0%,#c89b3c 18%,#f0bf5c 38%,#fff4c2 50%,#f0bf5c 62%,#c89b3c 82%,#6b4a0e 100%); background-size:220% 100%; border:none; border-radius:0; color:#010A13; padding:10px 18px; cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px); filter:drop-shadow(0 0 6px rgba(240,191,92,.4)); transition:filter .3s, background-position .5s; }
+        .publish-btn::before { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg,rgba(255,255,220,.28) 0%,rgba(255,255,220,.06) 50%,transparent 100%); }
+        .publish-btn::after { content:''; position:absolute; top:-10%; left:-80%; width:40%; height:120%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent); transform:skewX(-8deg); transition:none; }
+        .publish-btn:hover { background-position:100% 0; filter:drop-shadow(0 0 12px rgba(240,191,92,.9)) drop-shadow(0 0 28px rgba(240,191,92,.4)); }
+        .publish-btn:hover::after { left:130%; transition:left .55s ease; }
+        .publish-btn:active { filter:drop-shadow(0 0 6px rgba(240,191,92,.8)); }
       `}</style>
 
-      {/* Header — click the logo to go back to Activities */}
-      <header className="wiz-rise" style={{ display: 'flex', alignItems: 'center', padding: '10px 20px', borderBottom: `1px solid ${BORDER}`, background: BG2 }}>
-        <Link to="/activities" title="Back to Activities" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 0, transition: 'background .2s' }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(240,191,92,.06)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+      {/* Header */}
+      <header className="wiz-rise" style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '22px 36px', borderBottom: '1px solid rgba(200,155,60,.10)', background: 'transparent', flexShrink: 0 }}>
+        <Link to="/activities" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none' }}>
           <div className="wiz-brand-mark"/>
-          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
+          <span className="wiz-font-bebas" style={{ fontSize: 20, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
         </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <Link to="/leaderboard" style={{ textDecoration: 'none' }}><button className="nav-link">Charts</button></Link>
+          <button className="nav-link active">Create</button>
+        </div>
 
         {loadStatus === 'loading' && (
-          <span style={{ marginLeft: 16, color: '#888', fontSize: 11, fontFamily: 'Space Grotesk,sans-serif', letterSpacing: '.12em', textTransform: 'uppercase' }}>Loading activity…</span>
+          <span style={{ color: '#888', fontSize: 11, fontFamily: 'Space Grotesk,sans-serif', letterSpacing: '.12em', textTransform: 'uppercase' }}>Loading activity…</span>
         )}
         {loadStatus === 'not-found' && (
-          <span style={{ marginLeft: 16, color: '#e25c7a', fontSize: 11, fontFamily: 'Space Grotesk,sans-serif', letterSpacing: '.12em', textTransform: 'uppercase' }}>Activity not found</span>
+          <span style={{ color: '#e25c7a', fontSize: 11, fontFamily: 'Space Grotesk,sans-serif', letterSpacing: '.12em', textTransform: 'uppercase' }}>Activity not found</span>
         )}
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={() => setShowPublishModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '8px 18px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase' }}
-            onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.1)'}
-            onMouseLeave={e => e.currentTarget.style.filter = 'none'}>
+          <button onClick={() => setShowPublishModal(true)} className="publish-btn">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
             Publish
           </button>
@@ -714,28 +751,19 @@ export default function Create() {
       )}
 
       {/* Body: GeoGebra | Chat */}
-      <div style={{ display: 'grid', gridTemplateColumns: aiOpen ? '1fr 360px' : '1fr', minHeight: 0, overflow: 'hidden' }}>
-        {/* GeoGebra Canvas (with its own native algebra panel built in) */}
+      <div style={{ display: 'grid', gridTemplateColumns: aiOpen ? '1fr 360px' : '1fr 44px', minHeight: 0, overflow: 'hidden' }}>
+        {/* GeoGebra Canvas */}
         <div className="wiz-rise wiz-rise-d1" style={{ position: 'relative', minWidth: 0, minHeight: 0 }}>
           <GeoGebraCanvas onReady={handleReady}/>
-
-          {/* Floating button to reopen chat when closed */}
-          {!aiOpen && (
-            <button onClick={() => setAiOpen(true)} style={{ position: 'absolute', top: 16, right: 16, display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(67,226,210,.08)', border: '1px solid rgba(67,226,210,.4)', borderRadius: 0, color: '#43e2d2', padding: '8px 16px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.12em', backdropFilter: 'blur(6px)', zIndex: 10 }}>
-              <div style={{ width: 7, height: 7, borderRadius: 0, background: '#43e2d2', boxShadow: '0 0 5px #43e2d2' }}/>
-              Ask Arcane AI
-            </button>
-          )}
         </div>
 
-        {/* AI Chat (right side) */}
-        {aiOpen && (
-          <AIChatPanel
-            onCommands={handleApplyCommands}
-            getCurrentCommands={getLiveCommands}
-            onCollapse={() => setAiOpen(false)}
-          />
-        )}
+        {/* AI Chat (right side — always mounted, collapses to 44px strip) */}
+        <AIChatPanel
+          collapsed={!aiOpen}
+          onToggle={() => setAiOpen(v => !v)}
+          onCommands={handleApplyCommands}
+          getCurrentCommands={getLiveCommands}
+        />
       </div>
     </div>
   );
