@@ -1,0 +1,25 @@
+rules_version = '2';
+
+// Authenticated users only; each user may write their own user + leaderboard row.
+// XP is client-authoritative for the hackathon (see BLUEPRINT — no Cloud Functions).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    match /leaderboard/{userId} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
