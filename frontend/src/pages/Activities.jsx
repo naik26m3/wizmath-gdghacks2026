@@ -81,28 +81,27 @@ export default function Activities() {
         .wiz-brand-mark { width:34px;height:34px;position:relative;background:conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);box-shadow:0 0 16px rgba(240,191,92,.25); }
         .wiz-brand-mark::after { content:'';position:absolute;inset:4px;background:${BG};clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
         .wiz-brand-mark::before { content:'';position:absolute;inset:0;z-index:1;background:radial-gradient(circle at 50% 50%,#43e2d2 0 20%,transparent 22%);filter:drop-shadow(0 0 5px #43e2d2); }
-        .act-card { background:${BG2}; border:1px solid ${BORDER}; border-radius: 0; cursor:pointer; transition:transform .15s,border-color .2s,box-shadow .2s; overflow:hidden; }
-        .act-card:hover { transform:translateY(-3px); border-color:rgba(240,191,92,.45); box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 24px rgba(67,226,210,.06); }
+        .act-card { background:${BG2}; border:1px solid ${BORDER}; cursor:pointer; transition:transform .15s,border-color .2s,filter .2s; overflow:hidden; clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px); }
+        .act-card:hover { transform:translateY(-3px); border-color:rgba(240,191,92,.45); filter:drop-shadow(0 8px 24px rgba(0,0,0,.5)) drop-shadow(0 0 16px rgba(67,226,210,.08)); }
         .act-thumb { width:100%; aspect-ratio:16/10; overflow:hidden; background:${BG3}; }
         .act-thumb svg { width:100%; height:100%; display:block; }
-        .act-tag { display:inline-flex; align-items:center; padding:4px 10px; border-radius: 0; font-family:'Space Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
-        .nav-link { background:none;border:0;cursor:pointer;color:#aaa;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s; }
-        .nav-link:hover { color:#d7e4f1; }
+        .act-tag { display:inline-flex; align-items:center; padding:4px 10px; font-family:'Space Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px); }
+        .nav-link { background:none;border:0;border-bottom:1px solid transparent;cursor:pointer;color:#d2c5b1;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;transition:color .2s,border-color .2s; }
+        .nav-link:hover { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
         .nav-link.active { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
       `}</style>
 
       {/* Nav */}
-      <nav style={{ display:'flex', alignItems:'center', gap:20, padding:'16px 32px', borderBottom:`1px solid ${BORDER}`, background:BG2 }}>
-        <Link to="/activities" style={{ display:'flex', alignItems:'center', gap:12, textDecoration:'none' }}>
+      <nav style={{ display:'flex', alignItems:'center', gap:24, padding:'22px 36px', borderBottom:'1px solid rgba(200,155,60,.10)', background:'transparent' }}>
+        <Link to="/activities" style={{ display:'flex', alignItems:'center', gap:14, textDecoration:'none' }}>
           <div className="wiz-brand-mark"/>
           <span className="wiz-font-bebas" style={{ fontSize:20, letterSpacing:'.18em', color:'#d7e4f1' }}>ARCANEMATH<span style={{ color:'#f0bf5c' }}>.</span>DEV</span>
         </Link>
-        <div style={{ display:'flex', alignItems:'center', marginLeft:16 }}>
-          <button className="nav-link active">Activities</button>
+        <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+          <button className="nav-link active">Charts</button>
           <Link to="/create" style={{ textDecoration:'none' }}><button className="nav-link">Create</button></Link>
-          <Link to="/leaderboard" style={{ textDecoration:'none' }}><button className="nav-link">Leaderboard</button></Link>
         </div>
-        <div style={{ flex:1, maxWidth:380, marginLeft:12, display:'flex', alignItems:'center', gap:10, padding:'9px 14px', background:BG3, border:`1px solid ${BORDER}`, borderRadius: 0}}>
+        <div style={{ flex:1, maxWidth:380, marginLeft:8, display:'flex', alignItems:'center', gap:10, padding:'9px 14px', background:BG3, border:`1px solid ${BORDER}`, clipPath:'polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)' }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#777" strokeWidth="2"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
           <input placeholder="Search activities…" style={{ flex:1, background:'transparent', border:0, outline:0, color:'#d7e4f1', fontFamily:'Manrope,sans-serif', fontSize:13 }}/>
         </div>
@@ -113,18 +112,11 @@ export default function Activities() {
 
       {/* Just-published banner */}
       {justPublishedId && (
-        <div style={{ maxWidth:1240, margin:'24px auto 0', padding:'12px 20px', background:'rgba(67,226,210,.08)', border:`1px solid rgba(67,226,210,.3)`, borderRadius: 0, color:'#43e2d2', fontFamily:'Space Grotesk,sans-serif', fontSize:13, display:'flex', alignItems:'center', gap:10 }}>
-          <div style={{ width:8, height:8, borderRadius: 0, background:'#43e2d2', boxShadow:'0 0 6px #43e2d2' }}/>
+        <div style={{ maxWidth:1240, margin:'24px auto 0', padding:'12px 20px', background:'rgba(67,226,210,.08)', border:`1px solid rgba(67,226,210,.3)`, color:'#43e2d2', fontFamily:'Space Grotesk,sans-serif', fontSize:13, display:'flex', alignItems:'center', gap:10, clipPath:'polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)' }}>
+          <div style={{ width:8, height:8, background:'#43e2d2', boxShadow:'0 0 6px #43e2d2', transform:'rotate(45deg)', flexShrink:0 }}/>
           Activity published! Scroll down to find it under <strong style={{ marginLeft:4 }}>Community Creations</strong>.
         </div>
       )}
-
-      {/* Header */}
-      <div className="wiz-rise" style={{ padding:'48px 40px 28px', maxWidth:1240, margin:'0 auto' }}>
-        <h1 className="wiz-font-bebas" style={{ fontSize:48, letterSpacing:'.06em', color:'#d7e4f1', margin:'0 0 6px' }}>
-          Math <span style={{ color:'#f0bf5c' }}>Activities</span>
-        </h1>
-      </div>
 
       {/* Community Creations (from Firestore) */}
       <div className="wiz-rise wiz-rise-d1" style={{ maxWidth:1240, margin:'24px auto 0', padding:'0 40px 12px', display:'flex', alignItems:'baseline', gap:14 }}>
@@ -138,7 +130,7 @@ export default function Activities() {
 
       <div style={{ maxWidth:1240, margin:'0 auto', padding:'0 40px 80px', display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:24 }}>
         {published.length === 0 && pubStatus === 'ok' && (
-          <div style={{ gridColumn:'1 / -1', padding:'40px', textAlign:'center', color:'#555', fontFamily:'Manrope,sans-serif', fontSize:14, border:`1px dashed ${BORDER}`, borderRadius: 0}}>
+          <div style={{ gridColumn:'1 / -1', padding:'40px', textAlign:'center', color:'#555', fontFamily:'Manrope,sans-serif', fontSize:14, border:`1px dashed ${BORDER}`, clipPath:'polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)' }}>
             No community activities yet. <Link to="/create" style={{ color:'#f0bf5c', textDecoration:'none', fontWeight:600 }}>Create the first one →</Link>
           </div>
         )}
@@ -174,9 +166,9 @@ export default function Activities() {
               {act.authorName && (
                 <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:10, paddingTop:10, borderTop:`1px solid ${BORDER}` }}>
                   {act.authorPhotoURL ? (
-                    <img src={act.authorPhotoURL} alt={act.authorName} referrerPolicy="no-referrer" style={{ width:20, height:20, borderRadius: 0, display:'block' }}/>
+                    <img src={act.authorPhotoURL} alt={act.authorName} referrerPolicy="no-referrer" style={{ width:20, height:20, display:'block' }}/>
                   ) : (
-                    <div style={{ width:20, height:20, borderRadius: 0, background:'linear-gradient(135deg,#43e2d2,#005049)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11 }}>
+                    <div style={{ width:20, height:20, background:'linear-gradient(135deg,#43e2d2,#005049)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11 }}>
                       {act.authorName?.[0]?.toUpperCase() || '?'}
                     </div>
                   )}
