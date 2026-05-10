@@ -1,6 +1,6 @@
 {
   "firestore": {
-    "rules": "firestore.rules",
+    "rules": "firestore.test.rules",
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
@@ -12,5 +12,13 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "emulators": {
+    "auth": { "port": 9299 },
+    "firestore": { "port": 8280 },
+    "hub": { "port": 5500 },
+    "logging": { "port": 5600 },
+    "ui": { "enabled": true, "port": 5100 },
+    "singleProjectMode": true
   }
 }

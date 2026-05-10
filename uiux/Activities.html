@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>WizMath.dev — Activities</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --void:        #010A13;
+    --surface:     #08151e;
+    --surface-1:   #091428;
+    --surface-2:   #111d26;
+    --surface-3:   #15212a;
+    --surface-4:   #1f2b35;
+
+    --gold:        #f0bf5c;
+    --gold-deep:   #c89b3c;
+    --gold-fixed:  #ffdea4;
+
+    --teal:        #43e2d2;
+    --teal-dim:    #00c6b7;
+    --teal-deep:   #005049;
+
+    --shadow-blue: #8ecefb;
+    --error:       #ffb4ab;
+    --magenta:     #d97464;
+
+    --on-surface:  #d7e4f1;
+    --on-variant:  #d2c5b1;
+    --outline:     #9b8f7d;
+
+    --gold-line-10: rgba(200,155,60,.10);
+    --gold-line-25: rgba(200,155,60,.25);
+    --gold-line-50: rgba(240,191,92,.5);
+    --teal-line-15: rgba(67,226,210,.15);
+    --teal-line-35: rgba(67,226,210,.35);
+  }
+  *{box-sizing:border-box}
+  html, body{ margin:0; padding:0; }
+  body{
+    font-family:'Manrope', system-ui, sans-serif;
+    background: var(--void); color: var(--on-surface);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height:100vh;
+  }
+  .backdrop{
+    position: fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(900px 540px at 50% -10%, rgba(240,191,92,.04), transparent 60%),
+      radial-gradient(800px 600px at 100% 100%, rgba(67,226,210,.03), transparent 65%),
+      var(--void);
+  }
+  .grain{
+    position: fixed; inset:0; pointer-events:none; z-index:1; opacity:.07;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.06) 0 1px, transparent 1px 3px);
+    mix-blend-mode: overlay;
+  }
+  main{ position: relative; z-index: 2; }
+  ::-webkit-scrollbar{ width: 8px; }
+  ::-webkit-scrollbar-thumb{ background: var(--gold-line-25); }
+
+  /* ── Nav (logo · links · search · sign in) ── */
+  .nav{
+    display:flex; align-items:center; gap: 24px;
+    padding: 22px 36px;
+    border-bottom: 1px solid var(--gold-line-10);
+  }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{
+    width:34px; height:34px; position:relative;
+    background: conic-gradient(from 30deg, var(--gold-deep), var(--gold) 25%, var(--gold-fixed) 50%, var(--gold) 75%, var(--gold-deep));
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    box-shadow: 0 0 16px rgba(240,191,92,.25);
+  }
+  .brand-mark::after{
+    content:""; position:absolute; inset:4px;
+    background: var(--void);
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  }
+  .brand-mark::before{
+    content:""; position:absolute; inset:0; z-index:1;
+    background: radial-gradient(circle at 50% 50%, var(--teal) 0 20%, transparent 22%);
+    filter: drop-shadow(0 0 5px var(--teal));
+  }
+  .brand-name{
+    font-family:'Bebas Neue', sans-serif; font-size:20px; letter-spacing:.18em;
+    color: var(--on-surface);
+  }
+  .brand-name .dot{ color: var(--gold); }
+
+  .nav-links{ display:flex; align-items:center; gap: 4px; margin-left: 16px; }
+  .nav-link{
+    display:inline-flex; align-items:center; gap:6px;
+    background: none; border: 0; cursor: pointer;
+    color: var(--on-variant);
+    font-family:'Space Grotesk', sans-serif; font-size:12px; font-weight:600;
+    letter-spacing:.18em; text-transform:uppercase;
+    padding: 10px 14px;
+    border-bottom: 1px solid transparent;
+    transition: color .2s, border-color .2s;
+  }
+  .nav-link:hover{ color: var(--gold); border-bottom-color: var(--gold-line-50); }
+  .nav-link .caret{ width:6px; height:6px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); }
+
+  .search{
+    --c: 8px;
+    flex: 1; max-width: 420px; margin-left: 12px;
+    display:flex; align-items:center; gap:10px;
+    padding: 10px 16px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    border: 1px solid var(--gold-line-25);
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .search:focus-within{ border-color: var(--gold); box-shadow: 0 0 18px rgba(240,191,92,.18); }
+  .search svg{ width:16px; height:16px; color: var(--outline); flex: 0 0 auto; }
+  .search input{
+    flex:1; background: transparent; border:0; outline: 0;
+    color: var(--on-surface);
+    font-family:'Manrope', sans-serif; font-size: 13px;
+  }
+  .search input::placeholder{ color: var(--outline); }
+
+  .signin{
+    --c: 10px;
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--gold-line-50);
+    color: var(--gold);
+    padding: 10px 18px; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:12px;
+    letter-spacing:.16em; text-transform:uppercase;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    transition: background .2s, color .2s;
+  }
+  .signin:hover{ background: var(--gold); color: #1a1100; }
+
+  /* ── Card grid ── */
+  .grid{
+    max-width: 1240px; margin: 0 auto;
+    padding: 64px 36px 96px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  .card{
+    position: relative;
+    background: linear-gradient(180deg, var(--surface-1), var(--void));
+    border: 1px solid var(--gold-line-25);
+    padding: 18px;
+    transition: transform .15s, border-color .2s, box-shadow .2s;
+    cursor: pointer;
+  }
+  .card::before{
+    content:""; position:absolute; left:0; right:0; top:0; height:1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .card:hover{
+    transform: translateY(-2px);
+    border-color: var(--gold-line-50);
+    box-shadow: 0 0 32px rgba(67,226,210,.08), 0 0 0 1px var(--gold-line-25);
+  }
+
+  .thumb{
+    width: 100%; aspect-ratio: 16 / 10;
+    background: linear-gradient(180deg, #f8fafc, #e8eef5);
+    border: 1px solid var(--gold-line-25);
+    overflow: hidden; position: relative;
+  }
+  .thumb svg{ width:100%; height:100%; display:block; }
+
+  .tags{
+    display:flex; align-items:center; gap: 10px;
+    margin: 16px 0 12px;
+  }
+  .tag{
+    --c: 6px;
+    display:inline-flex; align-items:center;
+    padding: 6px 12px;
+    font-family:'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing:.16em; text-transform:uppercase;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+  }
+  .tag.exp{
+    background: rgba(67,226,210,.15);
+    color: var(--teal);
+    border: 1px solid var(--teal-line-35);
+  }
+  .tag.prac{
+    background: rgba(217,116,100,.18);
+    color: var(--magenta);
+    border: 1px solid rgba(217,116,100,.45);
+  }
+  .tag.grade{
+    background: rgba(155,143,125,.10);
+    color: var(--outline);
+    border: 1px solid rgba(155,143,125,.25);
+  }
+
+  .title{
+    font-family:'Manrope', sans-serif; font-weight: 600;
+    font-size: 18px; line-height: 26px;
+    color: var(--on-surface);
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 960px){
+    .grid{ grid-template-columns: repeat(2, 1fr); padding: 48px 24px; gap: 22px; }
+    .nav{ padding: 16px 22px; gap: 16px; flex-wrap: wrap; }
+    .search{ order: 4; max-width: 100%; flex-basis: 100%; margin: 0; }
+  }
+  @media (max-width: 560px){
+    .grid{ grid-template-columns: 1fr; }
+    .nav-links{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="backdrop"></div>
+<div class="grain"></div>
+
+<main>
+  <nav class="nav" data-screen-label="Nav">
+    <div class="brand" onclick="window.location.href='Activities.html'" style="cursor:pointer">
+      <div class="brand-mark"></div>
+      <div class="brand-name">WIZMATH<span class="dot">.</span>DEV</div>
+    </div>
+    <div class="nav-links">
+      <button class="nav-link" onclick="window.location.href='leaderboard.html'">Charts <span class="caret"></span></button>
+      <button class="nav-link" onclick="window.location.href='Calculator.html'">Create <span class="caret"></span></button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="16" y1="16" x2="21" y2="21"></line>
+      </svg>
+      <input type="text" placeholder="Search" />
+    </div>
+    <button class="signin">Sign in</button>
+  </nav>
+
+  <section class="grid" data-screen-label="Activities">
+
+    <!-- 1 · Exploring Slope and y-Intercept -->
+    <article class="card" onclick="window.location.href='Slope.html'">
+      <div class="thumb">
+        <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- grid -->
+          <g stroke="#dbe2ec" stroke-width="0.6">
+            <path d="M0 100 H320"/><path d="M160 0 V200"/>
+            <g opacity="0.5">
+              <path d="M0 20 H320"/><path d="M0 60 H320"/><path d="M0 140 H320"/><path d="M0 180 H320"/>
+              <path d="M40 0 V200"/><path d="M80 0 V200"/><path d="M120 0 V200"/>
+              <path d="M200 0 V200"/><path d="M240 0 V200"/><path d="M280 0 V200"/>
+            </g>
+          </g>
+          <!-- diagonal reference (dashed) -->
+          <line x1="40" y1="180" x2="280" y2="20" stroke="#9aa6b5" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <!-- main line -->
+          <line x1="40" y1="160" x2="280" y2="40" stroke="#5b3aa8" stroke-width="2.5"/>
+          <!-- rise marker -->
+          <line x1="200" y1="80" x2="200" y2="120" stroke="#e23b5b" stroke-width="3"/>
+          <!-- run marker -->
+          <line x1="160" y1="120" x2="200" y2="120" stroke="#3d72e0" stroke-width="3"/>
+          <!-- sliders -->
+          <g font-family="Manrope, sans-serif" font-size="9" fill="#3a3a3a">
+            <text x="240" y="58">Slope</text>
+            <line x1="240" y1="68" x2="305" y2="68" stroke="#e6c0c0" stroke-width="2"/>
+            <circle cx="285" cy="68" r="3.5" fill="#e23b5b"/>
+            <text x="234" y="62" font-weight="700">Rise</text>
+            <line x1="240" y1="80" x2="305" y2="80" stroke="#c0d0e8" stroke-width="2"/>
+            <circle cx="270" cy="80" r="3.5" fill="#3d72e0"/>
+            <text x="234" y="74" font-weight="700">Run</text>
+            <text x="240" y="100" fill="#1f8a5b">y-intercept</text>
+            <line x1="280" y1="115" x2="280" y2="160" stroke="#bfe0c7" stroke-width="2"/>
+            <circle cx="280" cy="138" r="3.5" fill="#1f8a5b"/>
+          </g>
+        </svg>
+      </div>
+      <div class="tags">
+        <span class="tag exp">Exploration</span>
+        <span class="tag grade">Grades 9–12</span>
+      </div>
+      <h3 class="title">Exploring Slope and y-Intercept</h3>
+    </article>
+
+    <!-- 2 · Exploring Slopes in Graphs and Functions -->
+    <article class="card" onclick="window.location.href='Slope.html'">
+      <div class="thumb">
+        <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <g stroke="#dbe2ec" stroke-width="0.6">
+            <path d="M0 100 H320"/><path d="M160 0 V200"/>
+            <g opacity="0.5">
+              <path d="M40 0 V200"/><path d="M80 0 V200"/><path d="M120 0 V200"/>
+              <path d="M200 0 V200"/><path d="M240 0 V200"/><path d="M280 0 V200"/>
+              <path d="M0 40 H320"/><path d="M0 60 H320"/><path d="M0 140 H320"/><path d="M0 160 H320"/>
+            </g>
+          </g>
+          <!-- dashed reference line -->
+          <line x1="40" y1="20" x2="280" y2="180" stroke="#9aa6b5" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <!-- main line (negative slope) -->
+          <line x1="40" y1="40" x2="280" y2="160" stroke="#5b3aa8" stroke-width="2.5"/>
+          <!-- markers -->
+          <line x1="180" y1="100" x2="180" y2="120" stroke="#e23b5b" stroke-width="3"/>
+          <line x1="160" y1="100" x2="180" y2="100" stroke="#3d72e0" stroke-width="3"/>
+          <!-- side panel -->
+          <g font-family="Manrope, sans-serif" font-size="10" fill="#3a3a3a">
+            <text x="234" y="44" font-style="italic">g(x) = 1x</text>
+            <text x="240" y="72" font-weight="600">Slope</text>
+            <text x="298" y="72">−2</text>
+            <text x="234" y="88">Rise</text>
+            <line x1="240" y1="92" x2="305" y2="92" stroke="#e6c0c0" stroke-width="2"/>
+            <circle cx="262" cy="92" r="3.5" fill="#e23b5b"/>
+            <text x="234" y="106">Run</text>
+            <line x1="240" y1="110" x2="305" y2="110" stroke="#c0d0e8" stroke-width="2"/>
+            <circle cx="290" cy="110" r="3.5" fill="#3d72e0"/>
+            <text x="240" y="134" font-weight="600">Line</text>
+            <text x="240" y="150" font-style="italic">f(x) = −²⁄₂ x = −1x</text>
+          </g>
+        </svg>
+      </div>
+      <div class="tags">
+        <span class="tag exp">Exploration</span>
+        <span class="tag grade">Grades 9–12</span>
+      </div>
+      <h3 class="title">Exploring Slopes in Graphs and Functions</h3>
+    </article>
+
+    <!-- 3 · Changing the Slope -->
+    <article class="card" onclick="window.location.href='Slope.html'">
+      <div class="thumb">
+        <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <text x="14" y="22" font-family="Manrope, sans-serif" font-size="9" fill="#3a3a3a">Watch the animation, then complete the sentence.</text>
+          <!-- play button -->
+          <polygon points="14,32 14,52 30,42" fill="#3a3a3a"/>
+          <!-- prompt with dropdowns -->
+          <g font-family="Manrope, sans-serif" font-size="9" fill="#3a3a3a">
+            <text x="14" y="68">The line gets closer to the</text>
+            <rect x="116" y="58" width="42" height="13" fill="#fff" stroke="#7c5cd1" stroke-width="0.8"/>
+            <text x="120" y="68" fill="#5b3aa8" font-style="italic">x − axis</text>
+            <text x="14" y="84">and the slope gets</text>
+            <rect x="80" y="74" width="38" height="13" fill="#fff" stroke="#7c5cd1" stroke-width="0.8"/>
+            <text x="84" y="84" fill="#5b3aa8">closer to</text>
+            <text x="124" y="84">0.</text>
+            <text x="14" y="106" fill="#1f8a5b">✓ Correct</text>
+          </g>
+          <!-- mini graph right -->
+          <g transform="translate(180, 30)">
+            <g stroke="#dbe2ec" stroke-width="0.5">
+              <path d="M0 60 H130"/><path d="M65 0 V120"/>
+              <g opacity="0.4">
+                <path d="M20 0 V120"/><path d="M45 0 V120"/><path d="M85 0 V120"/><path d="M110 0 V120"/>
+                <path d="M0 30 H130"/><path d="M0 90 H130"/>
+              </g>
+            </g>
+            <line x1="6" y1="20" x2="124" y2="100" stroke="#9aa6b5" stroke-width="1" stroke-dasharray="3 3"/>
+            <line x1="6" y1="50" x2="124" y2="70" stroke="#3d72e0" stroke-width="2"/>
+          </g>
+          <text x="180" y="180" font-family="Manrope, sans-serif" font-size="9" fill="#3a3a3a">Number correct: 1</text>
+          <!-- new problem button -->
+          <rect x="240" y="170" width="68" height="18" fill="#5b3aa8"/>
+          <text x="274" y="183" text-anchor="middle" font-family="Manrope, sans-serif" font-size="8" font-weight="700" fill="#fff" letter-spacing="0.5">NEW PROBLEM</text>
+        </svg>
+      </div>
+      <div class="tags">
+        <span class="tag prac">Practice</span>
+        <span class="tag grade">Grades 9–12</span>
+      </div>
+      <h3 class="title">Changing the Slope</h3>
+    </article>
+
+    <!-- 4 · Exploring y-Intercepts in Graphs and Functions -->
+    <article class="card" onclick="window.location.href='Slope.html'">
+      <div class="thumb">
+        <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <text x="14" y="22" font-family="Manrope, sans-serif" font-size="9" fill="#3a3a3a">Use the slider to explore the y-intercept.</text>
+          <g stroke="#dbe2ec" stroke-width="0.6">
+            <path d="M0 110 H320"/><path d="M120 0 V200"/>
+            <g opacity="0.5">
+              <path d="M0 50 H320"/><path d="M0 80 H320"/><path d="M0 140 H320"/><path d="M0 170 H320"/>
+              <path d="M40 0 V200"/><path d="M80 0 V200"/>
+              <path d="M160 0 V200"/><path d="M200 0 V200"/><path d="M240 0 V200"/>
+            </g>
+          </g>
+          <!-- dashed -->
+          <line x1="40" y1="170" x2="240" y2="40" stroke="#9aa6b5" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <!-- solid line y = x + 2 -->
+          <line x1="40" y1="140" x2="240" y2="20" stroke="#5b3aa8" stroke-width="2.5"/>
+          <!-- y-intercept dot -->
+          <circle cx="120" cy="80" r="4" fill="#1f8a5b"/>
+          <!-- right side: y label, slider, equation -->
+          <g font-family="Manrope, sans-serif" font-size="9" fill="#3a3a3a">
+            <text x="138" y="14" font-style="italic">y = x</text>
+            <text x="246" y="50" font-style="italic">y-intercept</text>
+            <text x="252" y="62">+</text>
+            <line x1="270" y1="70" x2="270" y2="135" stroke="#bfe0c7" stroke-width="2.5"/>
+            <circle cx="270" cy="100" r="4" fill="#1f8a5b"/>
+            <text x="262" y="110" font-weight="700" fill="#1f8a5b">2</text>
+            <text x="252" y="148">−</text>
+            <text x="190" y="158" font-style="italic" fill="#5b3aa8">y = x + 2</text>
+          </g>
+        </svg>
+      </div>
+      <div class="tags">
+        <span class="tag exp">Exploration</span>
+        <span class="tag grade">Grades 9–12</span>
+      </div>
+      <h3 class="title">Exploring y-Intercepts in Graphs and Functions</h3>
+    </article>
+
+    <!-- 5 · Changing the y-Intercept -->
+    <article class="card" onclick="window.location.href='Slope.html'">
+      <div class="thumb">
+        <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <text x="14" y="22" font-family="Manrope, sans-serif" font-size="9" fill="#3a3a3a">Watch the animation, then complete the sentence.</text>
+          <polygon points="14,32 14,52 30,42" fill="#3a3a3a"/>
+          <g font-family="Manrope, sans-serif" font-size="9" fill="#3a3a3a">
+            <text x="14" y="68">The line moves</text>
+            <rect x="78" y="58" width="42" height="13" fill="#fff" stroke="#7c5cd1" stroke-width="0.8"/>
+            <text x="14" y="84">and the y-intercept</text>
+            <rect x="86" y="74" width="42" height="13" fill="#fff" stroke="#7c5cd1" stroke-width="0.8"/>
+            <rect x="14" y="96" width="48" height="14" fill="#fff" stroke="#5b3aa8" stroke-width="0.8"/>
+            <text x="38" y="106" text-anchor="middle" font-weight="600" fill="#5b3aa8">CHECK (3)</text>
+          </g>
+          <!-- mini graph right -->
+          <g transform="translate(170, 30)">
+            <g stroke="#dbe2ec" stroke-width="0.5">
+              <path d="M0 60 H140"/><path d="M70 0 V120"/>
+              <g opacity="0.4">
+                <path d="M20 0 V120"/><path d="M45 0 V120"/><path d="M95 0 V120"/><path d="M120 0 V120"/>
+                <path d="M0 30 H140"/><path d="M0 90 H140"/>
+              </g>
+            </g>
+            <text x="120" y="14" font-family="Manrope, sans-serif" font-size="8" font-style="italic" fill="#3a3a3a">y</text>
+            <line x1="6" y1="40" x2="134" y2="100" stroke="#9aa6b5" stroke-width="1" stroke-dasharray="3 3"/>
+            <line x1="6" y1="68" x2="134" y2="78" stroke="#3d72e0" stroke-width="2"/>
+          </g>
+          <text x="14" y="180" font-family="Manrope, sans-serif" font-size="9" fill="#3a3a3a">Number correct: 0</text>
+        </svg>
+      </div>
+      <div class="tags">
+        <span class="tag prac">Practice</span>
+        <span class="tag grade">Grades 9–12</span>
+      </div>
+      <h3 class="title">Changing the y-Intercept</h3>
+    </article>
+
+  </section>
+</main>
+
+<script src="auth.js" defer></script>
+</body>
+</html>

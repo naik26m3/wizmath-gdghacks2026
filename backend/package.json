@@ -1,0 +1,17 @@
+{
+  "name": "wizmath-backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "firebase emulators:exec --only auth,firestore 'vitest run'",
+    "test:watch": "vitest",
+    "emulators": "firebase emulators:start --only auth,firestore"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.0.0",
+    "firebase-tools": "^13.29.1",
+    "vitest": "^2.1.8"
+  }
+}
