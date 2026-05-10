@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>WizMath.dev — Leaderboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#010A13; --surface:#08151e; --surface-1:#091428; --surface-2:#111d26; --surface-3:#15212a; --surface-4:#1f2b35;
+    --gold:#f0bf5c; --gold-deep:#c89b3c; --gold-fixed:#ffdea4;
+    --teal:#43e2d2; --teal-dim:#00c6b7; --teal-deep:#005049;
+    --on-surface:#d7e4f1; --on-variant:#d2c5b1; --outline:#9b8f7d;
+    --gold-line-10:rgba(200,155,60,.10); --gold-line-25:rgba(200,155,60,.25); --gold-line-50:rgba(240,191,92,.5);
+    --teal-line-25:rgba(67,226,210,.25); --teal-line-35:rgba(67,226,210,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    font-family:'Manrope',system-ui,sans-serif;
+    background:var(--void);color:var(--on-surface);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+
+  /* ── Nav ── */
+  .nav{
+    display:flex; align-items:center; gap: 24px;
+    padding: 22px 36px;
+    border-bottom: 1px solid var(--gold-line-10);
+  }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{
+    width:34px; height:34px; position:relative;
+    background: conic-gradient(from 30deg, var(--gold-deep), var(--gold) 25%, var(--gold-fixed) 50%, var(--gold) 75%, var(--gold-deep));
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    box-shadow: 0 0 18px rgba(240,191,92,.25);
+  }
+  .brand-mark::after{
+    content:""; position:absolute; inset:4px;
+    background: var(--void);
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  }
+  .brand-mark::before{
+    content:""; position:absolute; inset:0; z-index:1;
+    background: radial-gradient(circle at 50% 50%, var(--teal) 0 20%, transparent 22%);
+    filter: drop-shadow(0 0 6px var(--teal));
+  }
+  .brand-name{ font-family:'Bebas Neue', sans-serif; font-size:20px; letter-spacing:.18em; color: var(--on-surface); }
+  .brand-name .dot{ color: var(--gold); }
+
+  .gbtn{
+    --c: 10px;
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--gold-line-50);
+    color: var(--gold);
+    padding: 10px 18px; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:12px;
+    letter-spacing:.16em; text-transform:uppercase;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    transition: background .2s, color .2s;
+  }
+  .gbtn:hover{ background: var(--gold); color: #1a1100; }
+
+  .wrap{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 60px 40px 80px;
+    position: relative;
+  }
+
+  /* Faint hex pattern bg */
+  .wrap::before{
+    content:""; position: fixed; inset: 0;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(67,226,210,.06), transparent 60%),
+      radial-gradient(900px 600px at 50% 110%, rgba(240,191,92,.05), transparent 60%);
+    pointer-events:none; z-index: -1;
+  }
+
+  .head{
+    text-align: center;
+    margin-bottom: 36px;
+    position: relative;
+  }
+  .eyebrow{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 12px; font-weight: 700;
+    letter-spacing:.32em; text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 14px;
+  }
+  .title{
+    font-family:'Bebas Neue', sans-serif;
+    font-size: 76px; line-height: 1;
+    letter-spacing:.06em; text-transform: uppercase;
+    color: var(--on-surface);
+    margin: 0;
+  }
+  .title .gold{ color: var(--gold); }
+  .title-frame{
+    display:inline-block;
+    padding: 12px 48px;
+    position: relative;
+  }
+  .title-frame::before, .title-frame::after{
+    content:""; position:absolute; top:0; bottom:0; width:24px;
+    border: 1px solid var(--gold);
+  }
+  .title-frame::before{ left:0; border-right:0; }
+  .title-frame::after{ right:0; border-left:0; }
+
+  /* ── Tabs ── */
+  .tabs{
+    --c: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    background: linear-gradient(180deg, var(--surface-1), var(--surface));
+    border: 1px solid var(--gold-line-25);
+    margin: 0 auto 22px;
+    max-width: 720px;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    position: relative;
+  }
+  .tabs::before{
+    content:""; position:absolute; left:0; right:0; top:0; height:1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 25%, var(--gold-fixed) 50%, var(--gold) 75%, transparent);
+  }
+  .tab{
+    background: transparent; border: 0; cursor: pointer;
+    padding: 18px 24px;
+    font-family:'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing:.18em; text-transform: uppercase;
+    color: var(--on-variant);
+    display:flex; align-items:center; justify-content:center; gap: 12px;
+    transition: color .2s, background .2s;
+  }
+  .tab:hover{ color: var(--gold); }
+  .tab.active{
+    color: var(--gold);
+    background: linear-gradient(180deg, rgba(240,191,92,.12), rgba(200,155,60,.04));
+    box-shadow: inset 0 -2px 0 var(--gold);
+  }
+  .tab .gem{
+    width: 14px; height: 14px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-deep));
+    clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+    opacity:.6;
+  }
+  .tab.active .gem{
+    background: linear-gradient(135deg, var(--gold-fixed), var(--gold-deep));
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(240,191,92,.6);
+  }
+
+  /* ── Filter pills ── */
+  .filters{
+    display:flex; gap: 10px; justify-content: center;
+    margin: 0 auto 30px;
+  }
+  .pill{
+    --c: 8px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    border: 1px solid var(--gold-line-25);
+    color: var(--on-variant);
+    cursor: pointer;
+    padding: 10px 22px;
+    font-family:'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600;
+    letter-spacing:.18em; text-transform: uppercase;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+    transition: color .15s, border-color .15s, background .2s, box-shadow .2s;
+  }
+  .pill:hover{ color: var(--gold); border-color: var(--gold-line-50); }
+  .pill.active{
+    background: linear-gradient(180deg, rgba(67,226,210,.18), rgba(0,80,73,.4));
+    border-color: var(--teal-line-35);
+    color: var(--teal);
+    box-shadow: 0 0 18px rgba(67,226,210,.18);
+  }
+
+  /* ── Leaderboard ── */
+  .board{
+    --c: 14px;
+    position: relative;
+    background: linear-gradient(180deg, var(--surface-1), var(--surface));
+    border: 1px solid var(--gold-line-25);
+    padding: 8px 0 0;
+    clip-path: polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+  }
+  .board::before{
+    content:""; position:absolute; left:0; right:0; top:0; height:1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 25%, var(--gold-fixed) 50%, var(--gold) 75%, transparent);
+  }
+
+  .col-head{
+    display: grid;
+    grid-template-columns: 80px 1fr 160px 140px;
+    align-items: center;
+    padding: 18px 32px 14px;
+    border-bottom: 1px solid var(--gold-line-10);
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing:.22em; text-transform: uppercase;
+    color: var(--outline);
+  }
+  .col-head .right{ text-align: right; }
+
+  .row{
+    display: grid;
+    grid-template-columns: 80px 1fr 160px 140px;
+    align-items: center;
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--gold-line-10);
+    transition: background .2s;
+  }
+  .row:last-child{ border-bottom: 0; }
+  .row:hover{ background: rgba(240,191,92,.04); }
+
+  .rank{
+    font-family:'Bebas Neue', sans-serif;
+    font-size: 30px; letter-spacing:.04em;
+    color: var(--outline);
+    display:flex; align-items:center; gap: 10px;
+  }
+  .row.top1 .rank,
+  .row.top2 .rank,
+  .row.top3 .rank{ color: var(--gold); }
+  .crest{
+    width: 26px; height: 26px;
+    background: linear-gradient(180deg, var(--surface-3), var(--surface-1));
+    border: 1px solid var(--gold-line-25);
+    clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+    display:none;
+  }
+  .row.top1 .crest, .row.top2 .crest, .row.top3 .crest{
+    display:block;
+    background: linear-gradient(180deg, var(--gold-fixed), var(--gold-deep));
+    box-shadow: 0 0 12px rgba(240,191,92,.4);
+  }
+  .row.top2 .crest{ background: linear-gradient(180deg, #c8d2db, #6b7682); box-shadow: 0 0 10px rgba(200,210,219,.3); }
+  .row.top3 .crest{ background: linear-gradient(180deg, #c98a5d, #6b3f25); box-shadow: 0 0 10px rgba(201,138,93,.35); }
+
+  .who{ display:flex; align-items:center; gap: 16px; }
+  .avatar{
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--surface-3), var(--surface-1));
+    border: 1px solid var(--gold-line-25);
+    clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:'Bebas Neue', sans-serif; font-size: 18px;
+    color: var(--gold);
+    flex: 0 0 auto;
+  }
+  .row.top1 .avatar{ border-color: var(--gold); box-shadow: 0 0 14px rgba(240,191,92,.4); }
+  .name{
+    font-family:'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing:.08em; text-transform: uppercase;
+    color: var(--on-surface);
+  }
+  .handle{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 11px; font-weight: 600; letter-spacing:.16em;
+    color: var(--outline);
+    margin-top: 2px;
+  }
+
+  .meta{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 12px; font-weight: 600; letter-spacing:.16em; text-transform: uppercase;
+    color: var(--on-variant);
+  }
+  .meta .v{ color: var(--teal); }
+
+  .score{
+    text-align: right;
+    font-family:'Bebas Neue', sans-serif;
+    font-size: 28px; letter-spacing:.04em;
+    color: var(--gold);
+  }
+  .score .unit{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing:.22em;
+    color: var(--outline);
+    margin-left: 6px;
+  }
+</style>
+</head>
+<body>
+<nav class="nav" data-screen-label="Nav">
+  <div class="brand" onclick="window.location.href='Activities.html'" style="cursor:pointer">
+    <div class="brand-mark"></div>
+    <div class="brand-name">WIZMATH<span class="dot">.</span>DEV</div>
+  </div>
+  <button class="gbtn">Sign in</button>
+</nav>
+
+<div class="wrap" data-screen-label="Leaderboard">
+
+  <div class="head">
+    <div class="eyebrow">— Hall of Honor —</div>
+    <div class="title-frame">
+      <h1 class="title">Leader<span class="gold">board</span></h1>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="contributors" role="tab" aria-selected="true">
+      <span class="gem"></span> Top Contributors
+    </button>
+    <button class="tab" data-tab="students" role="tab" aria-selected="false">
+      <span class="gem"></span> Top Students
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <button class="pill active" data-range="month">This Month</button>
+    <button class="pill" data-range="all">All Time</button>
+  </div>
+
+  <!-- Board -->
+  <section class="board">
+    <div class="col-head">
+      <div>Rank</div>
+      <div>Name</div>
+      <div class="meta-head" id="meta-head">Contributions</div>
+      <div class="right">Score</div>
+    </div>
+
+    <!-- Top Contributors / Month -->
+    <div class="board-pane" data-pane="contributors-month">
+      <div class="row top1">
+        <div class="rank">01 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">A</div>
+          <div>
+            <div class="name">Aelar Vael</div>
+            <div class="handle">@aelar</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">142</span> commits</div>
+        <div class="score">9 820 <span class="unit">XP</span></div>
+      </div>
+      <div class="row top2">
+        <div class="rank">02 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">M</div>
+          <div>
+            <div class="name">Mira Solnoct</div>
+            <div class="handle">@mira</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">118</span> commits</div>
+        <div class="score">8 410 <span class="unit">XP</span></div>
+      </div>
+      <div class="row top3">
+        <div class="rank">03 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">K</div>
+          <div>
+            <div class="name">Kael Drennox</div>
+            <div class="handle">@kael</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">96</span> commits</div>
+        <div class="score">7 245 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">04</div>
+        <div class="who">
+          <div class="avatar">S</div>
+          <div>
+            <div class="name">Sera Voryn</div>
+            <div class="handle">@sera</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">81</span> commits</div>
+        <div class="score">6 180 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">05</div>
+        <div class="who">
+          <div class="avatar">T</div>
+          <div>
+            <div class="name">Toren Kysar</div>
+            <div class="handle">@toren</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">74</span> commits</div>
+        <div class="score">5 612 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">06</div>
+        <div class="who">
+          <div class="avatar">L</div>
+          <div>
+            <div class="name">Lyra Mernoch</div>
+            <div class="handle">@lyra</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">68</span> commits</div>
+        <div class="score">5 088 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">07</div>
+        <div class="who">
+          <div class="avatar">D</div>
+          <div>
+            <div class="name">Darius Ohms</div>
+            <div class="handle">@darius</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">59</span> commits</div>
+        <div class="score">4 502 <span class="unit">XP</span></div>
+      </div>
+    </div>
+
+    <!-- Top Contributors / All Time -->
+    <div class="board-pane" data-pane="contributors-all" hidden>
+      <div class="row top1">
+        <div class="rank">01 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">M</div>
+          <div>
+            <div class="name">Mira Solnoct</div>
+            <div class="handle">@mira</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">2 184</span> commits</div>
+        <div class="score">142 880 <span class="unit">XP</span></div>
+      </div>
+      <div class="row top2">
+        <div class="rank">02 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">A</div>
+          <div>
+            <div class="name">Aelar Vael</div>
+            <div class="handle">@aelar</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">1 906</span> commits</div>
+        <div class="score">128 410 <span class="unit">XP</span></div>
+      </div>
+      <div class="row top3">
+        <div class="rank">03 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">G</div>
+          <div>
+            <div class="name">Garen Mehlin</div>
+            <div class="handle">@garen</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">1 612</span> commits</div>
+        <div class="score">109 240 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">04</div>
+        <div class="who">
+          <div class="avatar">K</div>
+          <div>
+            <div class="name">Kael Drennox</div>
+            <div class="handle">@kael</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">1 488</span> commits</div>
+        <div class="score">98 715 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">05</div>
+        <div class="who">
+          <div class="avatar">L</div>
+          <div>
+            <div class="name">Lyra Mernoch</div>
+            <div class="handle">@lyra</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">1 244</span> commits</div>
+        <div class="score">86 902 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">06</div>
+        <div class="who">
+          <div class="avatar">S</div>
+          <div>
+            <div class="name">Sera Voryn</div>
+            <div class="handle">@sera</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">1 102</span> commits</div>
+        <div class="score">74 318 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">07</div>
+        <div class="who">
+          <div class="avatar">T</div>
+          <div>
+            <div class="name">Toren Kysar</div>
+            <div class="handle">@toren</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">988</span> commits</div>
+        <div class="score">66 240 <span class="unit">XP</span></div>
+      </div>
+    </div>
+
+    <!-- Top Students / Month -->
+    <div class="board-pane" data-pane="students-month" hidden>
+      <div class="row top1">
+        <div class="rank">01 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">E</div>
+          <div>
+            <div class="name">Elen Mosswick</div>
+            <div class="handle">@elen</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">187</span> spells cast</div>
+        <div class="score">12 480 <span class="unit">XP</span></div>
+      </div>
+      <div class="row top2">
+        <div class="rank">02 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">R</div>
+          <div>
+            <div class="name">Rin Hollowfen</div>
+            <div class="handle">@rin</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">164</span> spells cast</div>
+        <div class="score">10 920 <span class="unit">XP</span></div>
+      </div>
+      <div class="row top3">
+        <div class="rank">03 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">J</div>
+          <div>
+            <div class="name">Jora Kethlin</div>
+            <div class="handle">@jora</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">141</span> spells cast</div>
+        <div class="score">9 305 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">04</div>
+        <div class="who">
+          <div class="avatar">N</div>
+          <div>
+            <div class="name">Niven Aurelis</div>
+            <div class="handle">@niven</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">122</span> spells cast</div>
+        <div class="score">8 015 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">05</div>
+        <div class="who">
+          <div class="avatar">P</div>
+          <div>
+            <div class="name">Petr Volstan</div>
+            <div class="handle">@petr</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">108</span> spells cast</div>
+        <div class="score">7 240 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">06</div>
+        <div class="who">
+          <div class="avatar">Q</div>
+          <div>
+            <div class="name">Quill Tarsen</div>
+            <div class="handle">@quill</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">94</span> spells cast</div>
+        <div class="score">6 410 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">07</div>
+        <div class="who">
+          <div class="avatar">U</div>
+          <div>
+            <div class="name">Ula Brighten</div>
+            <div class="handle">@ula</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">82</span> spells cast</div>
+        <div class="score">5 588 <span class="unit">XP</span></div>
+      </div>
+    </div>
+
+    <!-- Top Students / All Time -->
+    <div class="board-pane" data-pane="students-all" hidden>
+      <div class="row top1">
+        <div class="rank">01 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">R</div>
+          <div>
+            <div class="name">Rin Hollowfen</div>
+            <div class="handle">@rin</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">3 412</span> spells cast</div>
+        <div class="score">214 880 <span class="unit">XP</span></div>
+      </div>
+      <div class="row top2">
+        <div class="rank">02 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">E</div>
+          <div>
+            <div class="name">Elen Mosswick</div>
+            <div class="handle">@elen</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">3 088</span> spells cast</div>
+        <div class="score">198 220 <span class="unit">XP</span></div>
+      </div>
+      <div class="row top3">
+        <div class="rank">03 <span class="crest"></span></div>
+        <div class="who">
+          <div class="avatar">N</div>
+          <div>
+            <div class="name">Niven Aurelis</div>
+            <div class="handle">@niven</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">2 740</span> spells cast</div>
+        <div class="score">176 340 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">04</div>
+        <div class="who">
+          <div class="avatar">J</div>
+          <div>
+            <div class="name">Jora Kethlin</div>
+            <div class="handle">@jora</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">2 484</span> spells cast</div>
+        <div class="score">158 902 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">05</div>
+        <div class="who">
+          <div class="avatar">P</div>
+          <div>
+            <div class="name">Petr Volstan</div>
+            <div class="handle">@petr</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">2 188</span> spells cast</div>
+        <div class="score">142 015 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">06</div>
+        <div class="who">
+          <div class="avatar">Q</div>
+          <div>
+            <div class="name">Quill Tarsen</div>
+            <div class="handle">@quill</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">1 942</span> spells cast</div>
+        <div class="score">128 660 <span class="unit">XP</span></div>
+      </div>
+      <div class="row">
+        <div class="rank">07</div>
+        <div class="who">
+          <div class="avatar">U</div>
+          <div>
+            <div class="name">Ula Brighten</div>
+            <div class="handle">@ula</div>
+          </div>
+        </div>
+        <div class="meta"><span class="v">1 706</span> spells cast</div>
+        <div class="score">114 220 <span class="unit">XP</span></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  (function(){
+    var state = { tab: 'contributors', range: 'month' };
+    var tabs = document.querySelectorAll('.tab');
+    var pills = document.querySelectorAll('.pill');
+    var panes = document.querySelectorAll('.board-pane');
+    var metaHead = document.getElementById('meta-head');
+
+    function render(){
+      tabs.forEach(function(t){
+        var on = t.dataset.tab === state.tab;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      pills.forEach(function(p){
+        p.classList.toggle('active', p.dataset.range === state.range);
+      });
+      var key = state.tab + '-' + state.range;
+      panes.forEach(function(pane){
+        pane.hidden = pane.dataset.pane !== key;
+      });
+      metaHead.textContent = state.tab === 'contributors' ? 'Contributions' : 'Activity';
+    }
+
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(){ state.tab = t.dataset.tab; render(); });
+    });
+    pills.forEach(function(p){
+      p.addEventListener('click', function(){ state.range = p.dataset.range; render(); });
+    });
+  })();
+</script>
+<script src="auth.js" defer></script>
+</body>
+</html>
