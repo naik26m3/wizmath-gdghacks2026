@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import AskAISidebar from '@/components/wizmath/AskAISidebar';
 import StarButton from '@/components/wizmath/StarButton';
+import AuthButton from '@/components/wizmath/AuthButton';
 import { getActivity, toggleStar, updateActivity, deleteActivity, recordActivityView } from '@/lib/activities';
 import { useAuth } from '@/lib/AuthContext';
 import { awardXp } from '@/lib/userProfile';
@@ -184,61 +185,126 @@ function WagerModal({ open, onClose, onConfirm, isSignedIn, currentXp, onSignIn 
   const stepUp = () => setWager((w) => Math.min(safeXp, w + 5));
   const setMax = () => setWager(Math.floor(safeXp / 5) * 5);
 
-  return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.62)', backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 24 }}>
-      <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true"
-        style={{ background: '#111d26', border: '1px solid rgba(180,160,100,.3)', borderRadius: 0, padding: 30, width: 'min(460px, 100%)', boxShadow: '0 30px 60px rgba(0,0,0,.55)', position: 'relative' }}>
-        {/* Top accent */}
-        <div style={{ position: 'absolute', left: 22, right: 22, top: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(240,191,92,.6),transparent)' }} />
+  const CHAMP = 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)';
+  const CHAMP_SM = 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)';
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <div style={{ width: 8, height: 8, borderRadius: 0, background: '#f0bf5c', boxShadow: '0 0 6px #f0bf5c' }}/>
-          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, letterSpacing: '.18em', color: '#d7e4f1' }}>
-            WAGER YOUR <span style={{ color: '#f0bf5c' }}>XP</span>
-          </span>
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'rgba(1,8,16,0.55)',
+        backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'wagerBackdropIn .22s ease',
+      }}
+    >
+      <style>{`
+        @keyframes wagerBackdropIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes wagerCardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .wager-close-btn:hover { border-color: rgba(240,191,92,.5) !important; color: #f0bf5c !important; }
+        .wager-cancel-btn:hover { background: rgba(255,255,255,.04) !important; border-color: rgba(200,155,60,.45) !important; color: #d7e4f1 !important; }
+      `}</style>
+
+      <div
+        role="dialog" aria-modal="true" aria-label="Wager your XP"
+        onClick={e => e.stopPropagation()}
+        style={{
+          position: 'relative',
+          width: 460, maxWidth: 'calc(100vw - 32px)',
+          background: 'rgba(6,12,20,0.94)',
+          border: '1px solid rgba(240,191,92,0.28)',
+          borderRadius: 4,
+          padding: '36px 40px 28px',
+          boxShadow: '0 0 0 1px rgba(67,226,210,0.06) inset, 0 8px 48px rgba(0,0,0,.7), 0 0 80px rgba(67,226,210,0.04)',
+          fontFamily: 'Manrope,system-ui,sans-serif',
+          color: '#c8b97a',
+          animation: 'wagerCardIn .22s ease',
+        }}
+      >
+        {/* Corner accents */}
+        <div style={{ position: 'absolute', top: -1, left: -1, width: 14, height: 14, borderTop: '1px solid rgba(240,191,92,.5)', borderLeft: '1px solid rgba(240,191,92,.5)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: -1, right: -1, width: 14, height: 14, borderBottom: '1px solid rgba(240,191,92,.5)', borderRight: '1px solid rgba(240,191,92,.5)', pointerEvents: 'none' }} />
+
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="wager-close-btn"
+          aria-label="Close"
+          style={{
+            position: 'absolute', top: 10, right: 10,
+            width: 28, height: 28, borderRadius: '50%',
+            background: 'transparent', border: '1px solid rgba(240,191,92,.15)',
+            color: 'rgba(200,185,122,.5)', fontSize: 18, lineHeight: 1, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'border-color .15s, color .15s',
+          }}
+        >&times;</button>
+
+        {/* Hex brand mark */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+          <svg width="56" height="64" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="wagerGlow" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#43e2d2" floodOpacity="0.6"/>
+              </filter>
+            </defs>
+            <polygon points="28,2 54,16 54,48 28,62 2,48 2,16" fill="none" stroke="#f0bf5c" strokeWidth="1.5" opacity=".8"/>
+            <polygon points="28,8 48,19.5 48,44.5 28,56 8,44.5 8,19.5" fill="none" stroke="rgba(240,191,92,.25)" strokeWidth="1"/>
+            <circle cx="28" cy="32" r="8" fill="#43e2d2" filter="url(#wagerGlow)"/>
+            <circle cx="28" cy="32" r="4" fill="#010A13"/>
+            <circle cx="28" cy="32" r="2" fill="#43e2d2"/>
+          </svg>
         </div>
+
+        <h2 style={{
+          fontFamily: 'Bebas Neue,Space Grotesk,sans-serif',
+          fontSize: 26, fontWeight: 400, letterSpacing: '.12em',
+          color: '#c8b97a', margin: '0 0 6px', lineHeight: 1.2, textAlign: 'center',
+        }}>
+          WAGER YOUR <span style={{ color: '#f0bf5c' }}>XP</span>
+        </h2>
 
         {!isSignedIn ? (
           <>
-            <p style={{ color: '#d7e4f1', fontSize: 14, fontFamily: 'Manrope,sans-serif', margin: '0 0 8px', lineHeight: '22px' }}>
+            <p style={{ fontSize: 13, lineHeight: 1.6, color: 'rgba(200,185,122,.55)', margin: '0 0 26px', textAlign: 'center' }}>
               Sign in to wager XP and earn rewards from your answers.
             </p>
-            <p style={{ color: '#888', fontSize: 12, fontFamily: 'Manrope,sans-serif', margin: '0 0 22px', lineHeight: '18px' }}>
-              You'll need a Google account — same one you use to publish activities.
-            </p>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={onClose} style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '10px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase' }}>
+              <button onClick={onClose} className="wager-cancel-btn"
+                style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', clipPath: CHAMP_SM, transition: 'background .15s, border-color .15s, color .15s' }}>
                 Cancel
               </button>
-              <button onClick={() => { onClose(); onSignIn?.(); }} style={{ flex: 1, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '10px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase' }}>
+              <button onClick={() => { onClose(); onSignIn?.(); }}
+                style={{ flex: 1, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', clipPath: CHAMP_SM }}>
                 Sign in to Play
               </button>
             </div>
           </>
         ) : !canWager ? (
           <>
-            <p style={{ color: '#d7e4f1', fontSize: 14, fontFamily: 'Manrope,sans-serif', margin: '0 0 6px', lineHeight: '22px' }}>
-              You need at least <strong style={{ color: '#f0bf5c' }}>{MIN_WAGER} XP</strong> to wager.
-            </p>
-            <p style={{ color: '#888', fontSize: 13, fontFamily: 'Manrope,sans-serif', margin: '0 0 6px', lineHeight: '20px' }}>
+            <p style={{ fontSize: 13, lineHeight: 1.6, color: 'rgba(200,185,122,.55)', margin: '0 0 16px', textAlign: 'center' }}>
+              You need at least <strong style={{ color: '#f0bf5c' }}>{MIN_WAGER} XP</strong> to wager.<br/>
               Your balance: <strong style={{ color: '#d7e4f1' }}>{safeXp} XP</strong>
             </p>
-            <p style={{ color: '#888', fontSize: 12, fontFamily: 'Manrope,sans-serif', margin: '0 0 22px', lineHeight: '18px' }}>
-              Earn XP by publishing activities, getting stars on your work, and stacking views — then come back to wager.
+            <p style={{ fontSize: 12, lineHeight: 1.6, color: 'rgba(200,185,122,.35)', margin: '0 0 24px', textAlign: 'center' }}>
+              Earn XP by publishing activities, getting stars, and stacking views.
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={onClose} style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '10px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase' }}>
+              <button onClick={onClose} className="wager-cancel-btn"
+                style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', clipPath: CHAMP_SM, transition: 'background .15s, border-color .15s, color .15s' }}>
                 Cancel
               </button>
-              <button onClick={() => onConfirm(0)} style={{ flex: 1, background: 'linear-gradient(180deg,#43e2d2,#005049)', border: 0, borderRadius: 0, color: '#002a26', padding: '10px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase' }}>
-                Play Free (No Wager)
+              <button onClick={() => onConfirm(0)}
+                style={{ flex: 1, background: 'linear-gradient(180deg,#43e2d2,#005049)', border: 0, borderRadius: 0, color: '#002a26', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', clipPath: CHAMP_SM }}>
+                Play Free
               </button>
             </div>
           </>
         ) : (
           <>
             {/* Balance */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '10px 14px', background: 'rgba(67,226,210,.06)', border: '1px solid rgba(67,226,210,.2)', borderRadius: 0, marginBottom: 18 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '10px 14px', background: 'rgba(67,226,210,.06)', border: '1px solid rgba(67,226,210,.2)', borderRadius: 0, marginBottom: 18, marginTop: 10, clipPath: CHAMP_SM }}>
               <span style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#888' }}>Your balance</span>
               <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, letterSpacing: '.06em', color: '#43e2d2' }}>{safeXp} XP</span>
             </div>
@@ -249,55 +315,55 @@ function WagerModal({ open, onClose, onConfirm, isSignedIn, currentXp, onSignIn 
             </label>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
               <button onClick={stepDown} disabled={clampedWager <= MIN_WAGER}
-                style={{ width: 36, height: 36, background: '#091428', border: '1px solid rgba(180,160,100,.3)', borderRadius: 0, color: '#f0bf5c', cursor: clampedWager <= MIN_WAGER ? 'not-allowed' : 'pointer', fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, opacity: clampedWager <= MIN_WAGER ? 0.4 : 1 }}>−</button>
+                style={{ width: 36, height: 36, background: 'rgba(6,12,20,.8)', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#f0bf5c', cursor: clampedWager <= MIN_WAGER ? 'not-allowed' : 'pointer', fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, opacity: clampedWager <= MIN_WAGER ? 0.4 : 1, clipPath: CHAMP_SM }}>−</button>
               <input
                 type="number"
                 value={clampedWager}
                 onChange={(e) => setWager(parseInt(e.target.value, 10) || MIN_WAGER)}
-                min={MIN_WAGER}
-                max={safeXp}
-                step={5}
-                style={{ flex: 1, textAlign: 'center', background: '#091428', border: '1px solid rgba(180,160,100,.3)', borderRadius: 0, color: '#f0bf5c', padding: '8px 10px', fontFamily: 'Bebas Neue,sans-serif', fontSize: 26, letterSpacing: '.06em', outline: 0 }}
+                min={MIN_WAGER} max={safeXp} step={5}
+                style={{ flex: 1, textAlign: 'center', background: 'rgba(6,12,20,.8)', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#f0bf5c', padding: '8px 10px', fontFamily: 'Bebas Neue,sans-serif', fontSize: 26, letterSpacing: '.06em', outline: 0, clipPath: CHAMP_SM }}
               />
               <button onClick={stepUp} disabled={clampedWager >= safeXp}
-                style={{ width: 36, height: 36, background: '#091428', border: '1px solid rgba(180,160,100,.3)', borderRadius: 0, color: '#f0bf5c', cursor: clampedWager >= safeXp ? 'not-allowed' : 'pointer', fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, opacity: clampedWager >= safeXp ? 0.4 : 1 }}>+</button>
+                style={{ width: 36, height: 36, background: 'rgba(6,12,20,.8)', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#f0bf5c', cursor: clampedWager >= safeXp ? 'not-allowed' : 'pointer', fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, opacity: clampedWager >= safeXp ? 0.4 : 1, clipPath: CHAMP_SM }}>+</button>
               <button onClick={setMax}
-                style={{ background: 'transparent', border: '1px solid rgba(180,160,100,.3)', borderRadius: 0, color: '#aaa', padding: '8px 10px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase' }}>
+                style={{ background: 'transparent', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#aaa', padding: '8px 10px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', clipPath: CHAMP_SM }}>
                 Max
               </button>
             </div>
             <input
-              type="range"
-              min={MIN_WAGER}
-              max={safeXp}
-              step={5}
-              value={clampedWager}
+              type="range" min={MIN_WAGER} max={safeXp} step={5} value={clampedWager}
               onChange={(e) => setWager(parseInt(e.target.value, 10))}
               style={{ width: '100%', accentColor: '#f0bf5c', marginBottom: 16 }}
             />
 
             {/* Payoff preview */}
-            <div style={{ display: 'flex', gap: 10, marginBottom: 22 }}>
-              <div style={{ flex: 1, padding: '10px 12px', background: 'rgba(95,194,138,.08)', border: '1px solid rgba(95,194,138,.3)', borderRadius: 0, textAlign: 'center' }}>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+              <div style={{ flex: 1, padding: '10px 12px', background: 'rgba(95,194,138,.08)', border: '1px solid rgba(95,194,138,.3)', borderRadius: 0, textAlign: 'center', clipPath: CHAMP_SM }}>
                 <div style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#5fc28a', marginBottom: 4 }}>Each correct</div>
                 <div style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, letterSpacing: '.04em', color: '#5fc28a' }}>+{clampedWager} XP</div>
               </div>
-              <div style={{ flex: 1, padding: '10px 12px', background: 'rgba(226,92,122,.08)', border: '1px solid rgba(226,92,122,.3)', borderRadius: 0, textAlign: 'center' }}>
+              <div style={{ flex: 1, padding: '10px 12px', background: 'rgba(226,92,122,.08)', border: '1px solid rgba(226,92,122,.3)', borderRadius: 0, textAlign: 'center', clipPath: CHAMP_SM }}>
                 <div style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#e25c7a', marginBottom: 4 }}>Each wrong</div>
                 <div style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, letterSpacing: '.04em', color: '#e25c7a' }}>−{clampedWager} XP</div>
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={onClose} style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase' }}>
+              <button onClick={onClose} className="wager-cancel-btn"
+                style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', clipPath: CHAMP_SM, transition: 'background .15s, border-color .15s, color .15s' }}>
                 Cancel
               </button>
-              <button onClick={() => onConfirm(clampedWager)} style={{ flex: 1.4, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', boxShadow: '0 0 16px rgba(240,191,92,.3)' }}>
+              <button onClick={() => onConfirm(clampedWager)}
+                style={{ flex: 1.4, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', clipPath: CHAMP_SM, filter: 'drop-shadow(0 0 10px rgba(240,191,92,.35))' }}>
                 Begin Quest
               </button>
             </div>
           </>
         )}
+
+        <p style={{ margin: '20px 0 0', fontSize: 11, lineHeight: 1.6, color: 'rgba(200,185,122,.35)', textAlign: 'center' }}>
+          Each correct answer earns XP · each wrong answer costs XP
+        </p>
       </div>
     </div>
   );
@@ -594,8 +660,9 @@ export default function Activity() {
         .wiz-brand-mark { width:32px; height:32px; position:relative; background:conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
         .wiz-brand-mark::after { content:''; position:absolute; inset:4px; background:${BG}; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
         .wiz-brand-mark::before { content:''; position:absolute; inset:0; z-index:1; background:radial-gradient(circle at 50% 50%,#43e2d2 0 20%,transparent 22%); filter:drop-shadow(0 0 5px #43e2d2); }
-        .nav-link { background:none;border:0;cursor:pointer;color:#aaa;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;border-bottom:2px solid transparent;transition:color .2s; }
-        .nav-link:hover { color:#d7e4f1; }
+        .nav-link { background:none;border:0;border-bottom:1px solid transparent;cursor:pointer;color:#d2c5b1;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;transition:color .2s,border-color .2s; }
+        .nav-link:hover { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
+        .nav-link.active { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
 
         /* ── Play button (Slope-style gold, full nav-height, with sheen + shimmer) ── */
         .act-play-btn { --c:20px;
@@ -685,6 +752,7 @@ export default function Activity() {
           border: 1px solid ${BORDER};
           border-left: 3px solid #f0bf5c;
           border-radius: 0;
+          clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
           overflow-x: auto;
         }
         .md-body pre code {
@@ -698,6 +766,7 @@ export default function Activity() {
           border: 1px solid rgba(240,191,92,.25);
           border-left: 3px solid #f0bf5c;
           border-radius: 0;
+          clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
           color: #d7e4f1;
           font-style: normal;
           position: relative;
@@ -717,17 +786,16 @@ export default function Activity() {
       `}</style>
 
       <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', minWidth: 0, minHeight: 0 }}>
-        {/* Nav — 3-column grid: brand+links | big Play button | back link */}
-        <nav style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '18px 32px', borderBottom: `1px solid ${BORDER}`, background: BG2, flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            <Link to="/activities" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
+        {/* Nav — 3-column grid: brand+links | big Play button | auth */}
+        <nav style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '22px 36px', borderBottom: '1px solid rgba(200,155,60,.10)', background: 'transparent', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <Link to="/activities" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none' }}>
               <div className="wiz-brand-mark"/>
-              <span className="wiz-font-bebas" style={{ fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
+              <span className="wiz-font-bebas" style={{ fontSize: 20, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
             </Link>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <Link to="/activities" style={{ textDecoration: 'none' }}><button className="nav-link" style={{ color: '#f0bf5c', borderBottomColor: 'rgba(240,191,92,.5)' }}>Activities</button></Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Link to="/activities" style={{ textDecoration: 'none' }}><button className="nav-link active">Charts</button></Link>
               <Link to="/create" style={{ textDecoration: 'none' }}><button className="nav-link">Create</button></Link>
-              <Link to="/leaderboard" style={{ textDecoration: 'none' }}><button className="nav-link">Leaderboard</button></Link>
             </div>
           </div>
 
@@ -740,14 +808,7 @@ export default function Activity() {
           </button>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Link to="/activities" style={{ textDecoration: 'none' }}>
-              <button style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 0, color: '#aaa', padding: '8px 14px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', transition: 'border-color .2s, color .2s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(240,191,92,.45)'; e.currentTarget.style.color = '#d7e4f1'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = '#aaa'; }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-                Back to Activities
-              </button>
-            </Link>
+            <AuthButton />
           </div>
         </nav>
 
@@ -759,21 +820,21 @@ export default function Activity() {
             </h1>
             <div style={{ flexShrink: 0, paddingTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
               <div title={`${viewCount} ${viewCount === 1 ? 'view' : 'views'}`}
-                style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.12)', borderRadius: 0, color:'#aaa', padding:'7px 12px', fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:700, letterSpacing:'.04em' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.12)', borderRadius: 0, color:'#aaa', padding:'7px 12px', fontFamily:'Space Grotesk,sans-serif', fontSize:12, fontWeight:700, letterSpacing:'.04em', clipPath:'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 {viewCount}
               </div>
               {isAuthor && (
                 <>
                   <button onClick={() => setShowEditModal(true)} title="Edit title and description"
-                    style={{ display:'inline-flex', alignItems:'center', gap:6, background:'transparent', border:'1px solid rgba(180,160,100,.35)', borderRadius: 0, color:'#d2c5b1', padding:'7px 12px', cursor:'pointer', fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:600, letterSpacing:'.14em', textTransform:'uppercase', transition:'border-color .15s, color .15s' }}
+                    style={{ display:'inline-flex', alignItems:'center', gap:6, background:'transparent', border:'1px solid rgba(180,160,100,.35)', borderRadius: 0, color:'#d2c5b1', padding:'7px 12px', cursor:'pointer', fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:600, letterSpacing:'.14em', textTransform:'uppercase', transition:'border-color .15s, color .15s', clipPath:'polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)' }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor='rgba(240,191,92,.6)'; e.currentTarget.style.color='#f0bf5c'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor='rgba(180,160,100,.35)'; e.currentTarget.style.color='#d2c5b1'; }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     Edit
                   </button>
                   <button onClick={() => setShowDeleteModal(true)} title="Delete this activity"
-                    style={{ display:'inline-flex', alignItems:'center', gap:6, background:'transparent', border:'1px solid rgba(226,92,122,.35)', borderRadius: 0, color:'#e25c7a', padding:'7px 12px', cursor:'pointer', fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:600, letterSpacing:'.14em', textTransform:'uppercase', transition:'background .15s, border-color .15s' }}
+                    style={{ display:'inline-flex', alignItems:'center', gap:6, background:'transparent', border:'1px solid rgba(226,92,122,.35)', borderRadius: 0, color:'#e25c7a', padding:'7px 12px', cursor:'pointer', fontFamily:'Space Grotesk,sans-serif', fontSize:11, fontWeight:600, letterSpacing:'.14em', textTransform:'uppercase', transition:'background .15s, border-color .15s', clipPath:'polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)' }}
                     onMouseEnter={(e) => { e.currentTarget.style.background='rgba(226,92,122,.08)'; e.currentTarget.style.borderColor='rgba(226,92,122,.6)'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.borderColor='rgba(226,92,122,.35)'; }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
@@ -837,7 +898,7 @@ export default function Activity() {
           {/* Description (below graph) — rendered as GitHub-flavored Markdown */}
           {activity.description && (
             <div className="wiz-rise wiz-rise-d3" style={{ display: 'flex', alignItems: 'flex-start', gap: 14, maxWidth: 900, marginTop: 24 }}>
-              <div style={{ flexShrink: 0, width: 32, height: 32, background: 'linear-gradient(135deg,#43e2d2,#005049)', borderRadius: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, color: '#002a26', boxShadow: '0 0 12px rgba(67,226,210,.35)', marginTop: 4 }}>i</div>
+              <div style={{ flexShrink: 0, width: 32, height: 32, background: 'linear-gradient(135deg,#43e2d2,#005049)', borderRadius: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, color: '#002a26', filter: 'drop-shadow(0 0 8px rgba(67,226,210,.35))', marginTop: 4, clipPath:'polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)' }}>i</div>
               <div className="md-body" style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
                 <ReactMarkdown
                   allowedElements={['p','strong','em','a','h1','h2','h3','ul','ol','li','code','pre','blockquote','br','hr']}

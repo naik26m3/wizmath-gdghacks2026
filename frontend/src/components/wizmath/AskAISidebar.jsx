@@ -76,9 +76,8 @@ export default function AskAISidebar({ collapsed, onToggle, activity }) {
           <>
             <div style={{ width: 8, height: 8, borderRadius: 0, background: '#43e2d2', boxShadow: '0 0 6px #43e2d2' }}/>
             <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 14, letterSpacing: '.18em', color: '#d7e4f1' }}>
-              AI <span style={{ color: '#43e2d2' }}>Arcane</span>
+              Arcane <span style={{ color: '#43e2d2' }}>AI</span>
             </span>
-            <span style={{ marginLeft: 4, fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, color: '#555', fontWeight: 600, letterSpacing: '.1em' }}>TUTOR</span>
           </>
         )}
         <button onClick={onToggle} style={{ marginLeft: collapsed ? 0 : 'auto', width: 24, height: 24, background: 'transparent', border: 0, cursor: 'pointer', color: '#555', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 0, transition: 'color .2s, transform .25s', transform: collapsed ? 'rotate(180deg)' : 'none' }}
@@ -91,7 +90,7 @@ export default function AskAISidebar({ collapsed, onToggle, activity }) {
       {/* Vertical label when collapsed */}
       {collapsed && (
         <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', writingMode:'vertical-rl', transform:'rotate(180deg)', fontFamily:'Bebas Neue,sans-serif', fontSize:14, letterSpacing:'.32em', textTransform:'uppercase', color:'#aaa', userSelect:'none', cursor:'pointer' }} onClick={onToggle}>
-          Ask <span style={{ color:'#43e2d2', marginLeft:4 }}>Arcane</span>
+          Ask <span style={{ color:'#43e2d2' }}>Arcane</span>
         </div>
       )}
 
@@ -111,6 +110,9 @@ export default function AskAISidebar({ collapsed, onToggle, activity }) {
                     : (msg.error ? 'rgba(226,92,122,.06)' : 'rgba(67,226,210,.06)'),
                   border: `1px solid ${msg.role === 'user' ? 'rgba(200,155,60,.2)' : (msg.error ? 'rgba(226,92,122,.25)' : 'rgba(67,226,210,.15)')}`,
                   borderRadius: 0,
+                  clipPath: msg.role === 'user'
+                    ? 'polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)'
+                    : 'polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
                   fontSize: 13, lineHeight: '20px',
                   color: '#d7e4f1', fontFamily: 'Manrope,sans-serif',
                   whiteSpace: 'pre-wrap',
@@ -139,9 +141,9 @@ export default function AskAISidebar({ collapsed, onToggle, activity }) {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && send()}
               placeholder="Ask Arcane…"
-              style={{ flex: 1, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#d7e4f1', padding: '9px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, outline: 0 }}
+              style={{ flex: 1, background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, color: '#d7e4f1', padding: '9px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, outline: 0, clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
             />
-            <button onClick={send} disabled={loading} style={{ width: 38, background: 'linear-gradient(180deg,#43e2d2,#005049)', border: 0, borderRadius: 0, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.5 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <button onClick={send} disabled={loading} style={{ width: 38, background: 'linear-gradient(180deg,#43e2d2,#005049)', border: 0, borderRadius: 0, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.5 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#002a26" strokeWidth="2.5"><path d="M4 12 L20 4 L14 20 L12 13 Z"/></svg>
             </button>
           </div>

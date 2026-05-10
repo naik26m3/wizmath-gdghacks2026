@@ -723,7 +723,7 @@ export default function Create() {
           {!aiOpen && (
             <button onClick={() => setAiOpen(true)} style={{ position: 'absolute', top: 16, right: 16, display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(67,226,210,.08)', border: '1px solid rgba(67,226,210,.4)', borderRadius: 0, color: '#43e2d2', padding: '8px 16px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.12em', backdropFilter: 'blur(6px)', zIndex: 10 }}>
               <div style={{ width: 7, height: 7, borderRadius: 0, background: '#43e2d2', boxShadow: '0 0 5px #43e2d2' }}/>
-              Ask AI Arcane
+              Ask Arcane AI
             </button>
           )}
         </div>

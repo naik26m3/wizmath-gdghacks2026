@@ -254,7 +254,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
 
         {wager > 0 && xpDelta != null && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginTop: 4 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 16, padding: '8px 18px', background: 'rgba(255,255,255,.03)', border: `1px solid ${BORDER}`, borderRadius: 0, fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, color: '#888', letterSpacing: '.14em', textTransform: 'uppercase' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 16, padding: '8px 18px', background: 'rgba(255,255,255,.03)', border: `1px solid ${BORDER}`, borderRadius: 0, fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, color: '#888', letterSpacing: '.14em', textTransform: 'uppercase', clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px)' }}>
               <span><span style={{ color: GREEN }}>{score}</span> correct × +{wager} XP</span>
               <span style={{ color: '#444' }}>•</span>
               <span><span style={{ color: RED }}>{wrong}</span> wrong × −{wager} XP</span>
@@ -263,6 +263,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
                 background: positive ? 'rgba(95,194,138,.1)' : negative ? 'rgba(226,92,122,.1)' : 'rgba(255,255,255,.04)',
                 border: `1px solid ${positive ? 'rgba(95,194,138,.4)' : negative ? 'rgba(226,92,122,.4)' : BORDER}`,
                 borderRadius: 0,
+                clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px)',
                 color: positive ? GREEN : negative ? RED : '#aaa',
                 fontFamily: 'Bebas Neue,sans-serif', fontSize: 26, letterSpacing: '.06em' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
@@ -271,7 +272,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
           </div>
         )}
         {wager === 0 && xpDelta != null && xpDelta > 0 && (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'rgba(67,226,210,.08)', border: `1px solid rgba(67,226,210,.35)`, borderRadius: 0, color: TEAL, fontFamily: 'Space Grotesk,sans-serif', fontSize: 13, fontWeight: 700, letterSpacing: '.12em' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'rgba(67,226,210,.08)', border: `1px solid rgba(67,226,210,.35)`, borderRadius: 0, color: TEAL, fontFamily: 'Space Grotesk,sans-serif', fontSize: 13, fontWeight: 700, letterSpacing: '.12em', clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px)' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
             +{xpDelta} XP EARNED
           </div>
@@ -298,7 +299,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {wager > 0 && (
             <span title={`Wagered ${wager} XP per question`}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 0, background: 'rgba(240,191,92,.1)', border: '1px solid rgba(240,191,92,.35)', fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 0, background: 'rgba(240,191,92,.1)', border: '1px solid rgba(240,191,92,.35)', fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, clipPath: 'polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%, 0 6px)' }}>
               ±{wager} XP
             </span>
           )}
@@ -346,6 +347,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
                   fontSize: 14, lineHeight: '20px',
                   transition: 'background .15s, border-color .15s, transform .1s',
                   animationDelay: `${80 + i * 60}ms`,
+                  clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px)',
                 }}
                 onMouseEnter={(e) => { if (!revealed) e.currentTarget.style.borderColor = 'rgba(240,191,92,.5)'; }}
                 onMouseLeave={(e) => { if (!revealed) e.currentTarget.style.borderColor = isPicked ? GOLD : BORDER; }}
@@ -366,7 +368,7 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
         </div>
 
         {revealed && (
-          <div style={{ marginTop: 18, padding: '12px 14px', background: isCorrect ? 'rgba(95,194,138,.08)' : 'rgba(226,92,122,.06)', border: `1px solid ${isCorrect ? 'rgba(95,194,138,.3)' : 'rgba(226,92,122,.25)'}`, borderRadius: 0}}>
+          <div style={{ marginTop: 18, padding: '12px 14px', background: isCorrect ? 'rgba(95,194,138,.08)' : 'rgba(226,92,122,.06)', border: `1px solid ${isCorrect ? 'rgba(95,194,138,.3)' : 'rgba(226,92,122,.25)'}`, borderRadius: 0, clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
               <div style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: isCorrect ? GREEN : RED }}>
                 {isCorrect ? 'Correct!' : 'Not quite'}
@@ -397,11 +399,14 @@ function QuestionPanel({ questions, onComplete, onBack, xpDelta = null, wager = 
   );
 }
 
+const CHAMFER_BTN = 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%, 0 8px)';
+
 const btnPrimary = {
   background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)',
   border: 0, borderRadius: 0, color: '#1a1a1a',
   padding: '11px 18px', cursor: 'pointer',
   fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase',
+  clipPath: CHAMFER_BTN,
 };
 
 const btnSecondary = {
@@ -409,6 +414,15 @@ const btnSecondary = {
   border: `1px solid ${BORDER}`, borderRadius: 0, color: '#aaa',
   padding: '11px 18px', cursor: 'pointer',
   fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase',
+  clipPath: CHAMFER_BTN,
+};
+
+const btnExit = {
+  display: 'inline-flex', alignItems: 'center', gap: 7,
+  background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 0,
+  color: '#aaa', padding: '9px 16px', cursor: 'pointer',
+  fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase',
+  clipPath: CHAMFER_BTN, transition: 'border-color .2s, color .2s',
 };
 
 // ─── Main page ──────────────────────────────────────────────────────────────
@@ -466,33 +480,27 @@ export default function Play() {
     <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', height: '100vh', width: '100vw', fontFamily: 'Manrope,sans-serif', background: BG, color: '#d7e4f1', overflow: 'hidden' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-        .play-brand-mark { width:30px; height:30px; position:relative; background:conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
-        .play-brand-mark::after { content:''; position:absolute; inset:4px; background:${BG2}; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+        .play-brand-mark { width:34px; height:34px; position:relative; background:conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); box-shadow:0 0 16px rgba(240,191,92,.25); }
+        .play-brand-mark::after { content:''; position:absolute; inset:4px; background:${BG}; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
         .play-brand-mark::before { content:''; position:absolute; inset:0; z-index:1; background:radial-gradient(circle at 50% 50%,#43e2d2 0 20%,transparent 22%); filter:drop-shadow(0 0 5px #43e2d2); }
+        .wiz-font-bebas { font-family:'Bebas Neue',sans-serif; }
+        .play-nav-link { background:none;border:0;border-bottom:1px solid transparent;cursor:pointer;color:#d2c5b1;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;transition:color .2s,border-color .2s; }
+        .play-nav-link:hover { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
       `}</style>
 
       {/* Header */}
-      <header className="wiz-rise" style={{ display: 'flex', alignItems: 'center', padding: '10px 20px', borderBottom: `1px solid ${BORDER}`, background: BG2, gap: 16 }}>
-        <Link to="/activities" title="Back to Activities" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
+      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '22px 36px', borderBottom: '1px solid rgba(200,155,60,.10)', background: 'transparent', flexShrink: 0 }}>
+        <Link to="/activities" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none' }}>
           <div className="play-brand-mark"/>
-          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: GOLD }}>.</span>DEV</span>
+          <span className="wiz-font-bebas" style={{ fontSize: 20, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: GOLD }}>.</span>DEV</span>
         </Link>
-        <div style={{ width: 1, height: 22, background: BORDER }}/>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: 'Manrope,sans-serif', fontSize: 14, fontWeight: 600, color: '#d7e4f1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {activity?.title || 'Loading…'}
-          </div>
-          <div style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, color: '#666', letterSpacing: '.16em', textTransform: 'uppercase' }}>Quest Mode</div>
-        </div>
-        {wager > 0 && (
-          <div title={`Each correct: +${wager} XP   Each wrong: −${wager} XP`}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: 'rgba(240,191,92,.08)', border: `1px solid rgba(240,191,92,.4)`, borderRadius: 0, color: GOLD, fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
-            Wager ±{wager} XP
-          </div>
-        )}
         <Link to={id ? `/activity/${id}` : '/activities'} style={{ textDecoration: 'none' }}>
-          <button style={btnSecondary}>← Exit</button>
+          <button style={btnExit}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(240,191,92,.45)'; e.currentTarget.style.color = '#d7e4f1'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = '#aaa'; }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Exit
+          </button>
         </Link>
       </header>
 

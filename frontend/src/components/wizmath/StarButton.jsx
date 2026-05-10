@@ -10,10 +10,12 @@
  *   stopPropagation (bool) — prevent parent click handler (for cards)
  */
 export default function StarButton({ isStarred, count = 0, onClick, size = 'md', stopPropagation = false }) {
-  const dim = size === 'sm' ? 14 : 18;
+  const dim = size === 'sm' ? 14 : 16;
   const padY = size === 'sm' ? 5 : 7;
-  const padX = size === 'sm' ? 9 : 14;
-  const fontSize = size === 'sm' ? 11 : 13;
+  const padX = size === 'sm' ? 9 : 12;
+  const fontSize = size === 'sm' ? 11 : 12;
+  const chamferPx = size === 'sm' ? 6 : 8;
+  const clipPath = `polygon(${chamferPx}px 0, 100% 0, 100% calc(100% - ${chamferPx}px), calc(100% - ${chamferPx}px) 100%, 0 100%, 0 ${chamferPx}px)`;
 
   const handleClick = (e) => {
     if (stopPropagation) {
@@ -32,6 +34,7 @@ export default function StarButton({ isStarred, count = 0, onClick, size = 'md',
         background: isStarred ? 'rgba(240,191,92,.14)' : 'rgba(255,255,255,.04)',
         border: `1px solid ${isStarred ? 'rgba(240,191,92,.5)' : 'rgba(255,255,255,.12)'}`,
         borderRadius: 0,
+        clipPath,
         color: isStarred ? '#f0bf5c' : '#aaa',
         padding: `${padY}px ${padX}px`,
         cursor: 'pointer',
