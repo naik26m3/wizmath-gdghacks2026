@@ -522,52 +522,113 @@ export default function Create() {
     }
   };
 
-  // Read GeoGebra's actual live state (handles manual edits, deletes, etc.)
-  // For sliders, parses the XML to reconstruct the original Slider() command
-  // so they round-trip correctly when published and reloaded.
+  // Read GeoGebra's actual live state in a form that round-trips cleanly.
+  //
+  // Preference order per object:
+  //   1) Slider XML reconstruction   — preserves min/max/step/speed
+  //   2) getCommandString            — keeps "Derivative(f, x)" / "Tangent(P, f)"
+  //                                    / "Slope(t)" intact (the dependency form)
+  //   3) getDefinitionString         — fallback for primitives (points, equations)
+  //   4) getValueString              — last-resort literal value
+  //
+  // After all object commands, we emit SetColor(...) for every named object so
+  // the replayed canvas matches the thumbnail's colors. Style-only attributes
+  // (line thickness, point size) are NOT yet captured.
   const getLiveCommands = useCallback(() => {
+    /** @type {any} */
     const api = apiRef.current;
     if (!api) return [];
-    try {
-      const names = api.getAllObjectNames();
-      const cmds = [];
-      for (const name of names) {
-        // Detect sliders via XML — getDefinitionString returns just the value for them.
-        let sliderCmd = null;
-        try {
-          const xml = api.getXML(name) || '';
-          if (xml.includes('<slider')) {
-            const min = parseFloat(xml.match(/min="([^"]*)"/)?.[1] ?? '-5');
-            const max = parseFloat(xml.match(/max="([^"]*)"/)?.[1] ?? '5');
-            const stepStr = xml.match(/animationStep="([^"]*)"/)?.[1] ?? xml.match(/animation\s+step="([^"]*)"/)?.[1] ?? '0.1';
-            const step = parseFloat(stepStr);
-            const speed = parseFloat(xml.match(/speed="([^"]*)"/)?.[1] ?? '1');
-            const widthStr = xml.match(/width="([^"]*)"/)?.[1] ?? '150';
-            const width = parseFloat(widthStr);
-            const horizontal = (xml.match(/horizontal="([^"]*)"/)?.[1] ?? 'true') !== 'false';
-            const isAngle = xml.match(/<sliderAngle/) ? 'true' : 'false';
-            sliderCmd = `${name} = Slider(${min}, ${max}, ${step}, ${speed}, ${width}, ${isAngle}, ${horizontal}, false, false)`;
-          }
-        } catch (e) { /* fall through */ }
 
-        if (sliderCmd) {
-          cmds.push(sliderCmd);
-          continue;
-        }
+    /** @param {string} s */
+    const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-        let def = '';
-        try { def = api.getDefinitionString(name) || ''; } catch {}
-        if (!def.trim()) {
-          try { def = api.getValueString(name) || ''; } catch {}
-          if (def) { cmds.push(def); continue; }
-        }
-        // If the definition is an equation (contains "="), use ":" as separator
-        if (def.includes('=')) {
-          cmds.push(`${name}: ${def}`);
-        } else {
-          cmds.push(`${name} = ${def}`);
-        }
+    // Read a single object as a replay-safe command, or null to skip it.
+    /** @param {string} name */
+    const readCommand = (name) => {
+      let xml = '';
+      try { xml = api.getXML(name) || ''; } catch {}
+
+      // Sliders — reconstruct from XML so all knobs round-trip
+      if (xml.includes('<slider')) {
+        const min = parseFloat(xml.match(/min="([^"]*)"/)?.[1] ?? '-5');
+        const max = parseFloat(xml.match(/max="([^"]*)"/)?.[1] ?? '5');
+        const stepStr = xml.match(/animationStep="([^"]*)"/)?.[1] ?? xml.match(/animation\s+step="([^"]*)"/)?.[1] ?? '0.1';
+        const step = parseFloat(stepStr);
+        const speed = parseFloat(xml.match(/speed="([^"]*)"/)?.[1] ?? '1');
+        const width = parseFloat(xml.match(/width="([^"]*)"/)?.[1] ?? '150');
+        const horizontal = (xml.match(/horizontal="([^"]*)"/)?.[1] ?? 'true') !== 'false';
+        const isAngle = xml.match(/<sliderAngle/) ? 'true' : 'false';
+        return `${name} = Slider(${min}, ${max}, ${step}, ${speed}, ${width}, ${isAngle}, ${horizontal}, false, false)`;
       }
+
+      // Walk the fidelity ladder until we get a non-empty expression.
+      // getCommandString is critical for derived objects: Derivative,
+      // Tangent, Slope, Length, Angle, etc. — the others would collapse
+      // these to their evaluated number/equation, breaking the dependency.
+      let expr = '';
+      try { expr = (api.getCommandString?.(name, false) || '').trim(); } catch {}
+      if (!expr) {
+        try { expr = (api.getDefinitionString?.(name, false) || '').trim(); } catch {}
+      }
+      if (!expr) {
+        try { expr = (api.getValueString?.(name, false) || '').trim(); } catch {}
+      }
+      if (!expr) return null;
+
+      // Strip any leading "name =" / "name :" the API might have included.
+      expr = expr.replace(new RegExp(`^${escapeRe(name)}\\s*[:=]\\s*`), '').trim();
+      if (!expr) return null;
+
+      let type = '';
+      try { type = (api.getObjectType?.(name) || '').toLowerCase(); } catch {}
+
+      // Functions need explicit f(x) syntax — without it, a fresh evalCommand
+      // can interpret "f = sin(x)" as a number when x is undefined.
+      if (type === 'function') {
+        return `${name}(x) = ${expr}`;
+      }
+      // Implicit equations (lines, conics) use the colon separator.
+      if ((type === 'line' || type === 'conic' || type === 'implicitpoly') && expr.includes('=')) {
+        return `${name}: ${expr}`;
+      }
+      return `${name} = ${expr}`;
+    };
+
+    // Convert "#RRGGBB" to a SetColor RGB triple in 0-1 range. GeoGebra accepts
+    // both named colors and 0-1 RGB; the latter is unambiguous across versions.
+    /** @param {string} hex */
+    const hexToRgbArgs = (hex) => {
+      const h = (hex || '').trim().replace('#', '');
+      if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+      const r = (parseInt(h.slice(0, 2), 16) / 255).toFixed(3);
+      const g = (parseInt(h.slice(2, 4), 16) / 255).toFixed(3);
+      const b = (parseInt(h.slice(4, 6), 16) / 255).toFixed(3);
+      return `${r}, ${g}, ${b}`;
+    };
+
+    try {
+      const names = api.getAllObjectNames() || [];
+      const cmds = [];
+      const colored = []; // [{ name, hex }]
+
+      for (const name of names) {
+        const cmd = readCommand(name);
+        if (cmd) cmds.push(cmd);
+
+        // Capture color while we're iterating
+        try {
+          const c = api.getColor?.(name);
+          if (c) colored.push({ name, hex: c });
+        } catch {}
+      }
+
+      // Emit color settings AFTER all definitions so dependencies resolve first.
+      for (const { name, hex } of colored) {
+        const rgb = hexToRgbArgs(hex);
+        if (rgb) cmds.push(`SetColor(${name}, ${rgb})`);
+      }
+
+      console.log('[Create] captured', cmds.length, 'commands:', cmds);
       return cmds;
     } catch (e) {
       console.warn('Failed to read live GeoGebra state:', e);
