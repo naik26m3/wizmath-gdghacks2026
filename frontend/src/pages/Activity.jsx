@@ -64,7 +64,6 @@ function EditActivityModal({ activity, onClose, onSave, isSaving }) {
         onError={setError}
         onSubmitShortcut={handleSubmit}
         disabled={isSaving}
-        rows={10}
       />
 
       <ModalError>{error}</ModalError>
@@ -512,7 +511,10 @@ export default function Activity() {
   const viewCount = activity.views || 0;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: aiCollapsed ? '1fr 44px' : '1fr 320px', height: '100vh', fontFamily: 'Manrope,sans-serif', background: BG, color: '#d7e4f1', overflow: 'hidden' }}>
+    // Rows first, then columns — the header spans the full viewport so its
+    // midpoint (and the centred Play button) can't move when the AI sidebar
+    // opens. Matches the Create and Play pages.
+    <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', height: '100vh', width: '100vw', fontFamily: 'Manrope,sans-serif', background: BG, color: '#d7e4f1', overflow: 'hidden' }}>
       <style>{`
         .wiz-font-bebas { font-family:'Bebas Neue',sans-serif; }
         .activity-scroll::-webkit-scrollbar { width:6px; }
@@ -640,28 +642,28 @@ export default function Activity() {
         }
       `}</style>
 
-      <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', minWidth: 0, minHeight: 0 }}>
-        <TopNav
-          brandTo="/activities"
-          links={[
-            { to: '/activities', label: 'Activities' },
-            { to: '/leaderboard', label: 'Charts' },
-            { to: '/create', label: 'Create' },
-          ]}
-          center={
-            <button className="act-play-btn" title="Test your understanding — wager XP to begin"
-              onClick={() => setShowWagerModal(true)}>
-              Play
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
-                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>
-              </svg>
-            </button>
-          }
-          right={<AuthButton />}
-        />
+      <TopNav
+        brandTo="/activities"
+        links={[
+          { to: '/activities', label: 'Activities' },
+          { to: '/leaderboard', label: 'Charts' },
+          { to: '/create', label: 'Create' },
+        ]}
+        center={
+          <button className="act-play-btn" title="Test your understanding — wager XP to begin"
+            onClick={() => setShowWagerModal(true)}>
+            Play
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>
+            </svg>
+          </button>
+        }
+        right={<AuthButton />}
+      />
 
-        {/* Content */}
-        <div className="activity-scroll" style={{ overflowY: 'auto', padding: '48px 64px 80px' }}>
+      {/* Body: content | Ask AI */}
+      <div style={{ display: 'grid', gridTemplateColumns: aiCollapsed ? '1fr 44px' : '1fr 320px', minHeight: 0, overflow: 'hidden' }}>
+        <div className="activity-scroll" style={{ overflowY: 'auto', minWidth: 0, padding: '48px 64px 80px' }}>
           <div className="wiz-rise" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, marginBottom: 12 }}>
             <h1 className="wiz-font-bebas" style={{ fontSize: 56, lineHeight: 1, letterSpacing: '.06em', color: '#d7e4f1', margin: 0, flex: 1, minWidth: 0 }}>
               {activity.title}
@@ -737,7 +739,7 @@ export default function Activity() {
           )}
 
           {/* Activity Panel — GeoGebra applet (graph + sliders) */}
-          <section className="activity-panel wiz-rise wiz-rise-d2" style={{ maxWidth: aiCollapsed ? 'calc(100vw - 320px - 128px)' : 'none' }}>
+          <section className="activity-panel wiz-rise wiz-rise-d2">
             <div style={{ background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, height: 600, overflow: 'hidden' }}>
               <GeoGebraView commands={activity.commands} settings={activity.settings} geogebraXML={activity.geogebraXML} />
             </div>
@@ -758,10 +760,9 @@ export default function Activity() {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Ask AI */}
-      <AskAISidebar collapsed={aiCollapsed} onToggle={() => setAiCollapsed(!aiCollapsed)} activity={activity} />
+        <AskAISidebar collapsed={aiCollapsed} onToggle={() => setAiCollapsed(!aiCollapsed)} activity={activity} />
+      </div>
     </div>
   );
 }
