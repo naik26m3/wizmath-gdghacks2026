@@ -1,5 +1,8 @@
-// 30px hex avatar with thin gold border. Accepts either a `src` (image) or a
+import { hexBox } from './tokens';
+
+// Hex avatar with a thin gold border. Accepts either a `src` (image) or a
 // `gradient` (CSS background string). Falls back to a teal/gold gradient.
+// `size` is the height; the width is derived so the hexagon stays regular.
 export default function HexAvatar({
   src, alt = '', gradient, size = 30, border = true, className = '', style = {},
 }) {
@@ -9,7 +12,7 @@ export default function HexAvatar({
     <span
       className={`hx-hex inline-block ${className}`}
       style={{
-        width: size, height: size,
+        ...hexBox(size),
         background: bg, backgroundSize: 'cover', backgroundPosition: 'center',
         border: border ? '1.5px solid #f0bf5c' : 'none',
         ...style,

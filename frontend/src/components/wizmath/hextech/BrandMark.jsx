@@ -9,22 +9,18 @@
 // The inner cut-out is scaled about the centre rather than inset by a uniform
 // box amount — a uniform `inset` on a hexagon yields a rim that reads thicker
 // on the flat left/right edges than at the top/bottom points.
-export const HEX_RATIO = 2 / Math.sqrt(3); // height / width ≈ 1.1547
+import { HEX_RATIO, hexBox } from './tokens';
 
 export default function BrandMark({ size = 38, rim = 4, className = '', style }) {
-  const height = size;
-  const width = size / HEX_RATIO;
-
   return (
     <div
       className={`hx-brand-mark ${className}`}
       style={{
-        width,
-        height,
+        ...hexBox(size),
         // Scaling the inner hexagon about the centre keeps the rim even:
         // insetX = rim, insetY = rim × (height / width).
         '--rim-x': `${rim}px`,
-        '--rim-y': `${rim * HEX_RATIO}px`,
+        '--rim-y': `${(rim * HEX_RATIO).toFixed(2)}px`,
         ...style,
       }}
       aria-hidden="true"

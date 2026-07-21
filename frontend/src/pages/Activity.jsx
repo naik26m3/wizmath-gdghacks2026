@@ -576,11 +576,12 @@ export default function Activity() {
         .md-body ul, .md-body ol { margin: 4px 0 16px; padding-left: 8px; list-style: none; }
         .md-body li { position: relative; padding: 4px 0 4px 22px; color:#cdd6e0; }
         .md-body ul > li::before {
-          content:''; position:absolute; left:2px; top:13px;
-          width:8px; height:8px;
+          content:''; position:absolute; left:2px; top:12px;
+          /* 8 tall / 6.93 wide — the ratio that keeps this hexagon regular. */
+          width:6.93px; height:8px;
           background: linear-gradient(135deg,#f0bf5c,#c89b3c);
           clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
-          box-shadow: 0 0 6px rgba(240,191,92,.4);
+          filter: drop-shadow(0 0 5px rgba(240,191,92,.4));
         }
         .md-body ol { counter-reset: md-ol; }
         .md-body ol > li { padding-left: 32px; counter-increment: md-ol; }

@@ -4,7 +4,7 @@ import { collection, query, orderBy, limit as fbLimit, getDocs } from 'firebase/
 import { listActivities } from '@/lib/activities';
 import { db, isFirebaseConfigured } from '@/lib/firebase';
 import AuthButton from '@/components/wizmath/AuthButton';
-import { TopNav } from '@/components/wizmath/hextech';
+import { TopNav, HEX_CLIP, hexBox, hexInset } from '@/components/wizmath/hextech';
 import { useAuth } from '@/lib/AuthContext';
 
 const BG = '#010A13';
@@ -52,7 +52,7 @@ function Particles() {
         <div key={p.id} className="lb-particle"
           style={{
             left: `${p.left}%`,
-            width: p.size, height: p.size,
+            ...hexBox(p.size),
             animationDuration: `${p.duration}s`,
             animationDelay: `${p.delay}s`,
             background: p.isTeal ? TEAL : GOLD,
@@ -137,37 +137,37 @@ function PodiumCard({ rank, row, isCreator, isSelf, animDelay = 0 }) {
         </svg>
       )}
 
-      {/* Avatar (hex) */}
-      <div className={config.crown ? 'lb-pulse-glow' : ''} style={{ position: 'relative', width: config.avatarPx, height: config.avatarPx }}>
+      {/* Avatar (hex) — avatarPx is the height; hexBox derives the width so the
+          hexagon is regular, and hexInset keeps each ring an even thickness. */}
+      <div className={config.crown ? 'lb-pulse-glow' : ''} style={{ position: 'relative', ...hexBox(config.avatarPx) }}>
         {/* Ring */}
         <div style={{
           position: 'absolute', inset: 0,
           background: config.ringGrad,
-          clipPath: 'polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)',
+          clipPath: HEX_CLIP,
           filter: `drop-shadow(0 0 8px ${rank === 1 ? GOLD : rank === 2 ? '#c8d2db' : '#c98a5d'}80)`,
         }}/>
         {/* Inset bg */}
         <div style={{
-          position: 'absolute', inset: 4,
+          position: 'absolute', inset: hexInset(4),
           background: BG2,
-          clipPath: 'polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)',
+          clipPath: HEX_CLIP,
         }}/>
         {/* Photo or initial */}
         {photo ? (
           <img src={photo} alt={name} referrerPolicy="no-referrer"
             style={{
-              position: 'absolute', inset: 6,
-              width: 'calc(100% - 12px)', height: 'calc(100% - 12px)',
+              position: 'absolute', inset: hexInset(6),
               objectFit: 'cover',
-              clipPath: 'polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)',
+              clipPath: HEX_CLIP,
             }}/>
         ) : (
           <div style={{
-            position: 'absolute', inset: 6,
+            position: 'absolute', inset: hexInset(6),
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontFamily: 'Bebas Neue,sans-serif', fontSize: rank === 1 ? 48 : 38, color: GOLD,
             background: `linear-gradient(135deg,${BG3},${BG})`,
-            clipPath: 'polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)',
+            clipPath: HEX_CLIP,
           }}>
             {initial}
           </div>
@@ -322,9 +322,9 @@ function TableRow({ rank, row, isCreator, isSelf, animDelay }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
         {photo ? (
           <img src={photo} alt={name} referrerPolicy="no-referrer" className="lb-hex"
-            style={{ width: 38, height: 38, objectFit: 'cover', flexShrink: 0 }}/>
+            style={{ ...hexBox(38), objectFit: 'cover', flexShrink: 0 }}/>
         ) : (
-          <div className="lb-hex" style={{ width: 38, height: 38, background: `linear-gradient(135deg,${BG3},${BG2})`, border: `1px solid ${BORDER}`, fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, color: GOLD, flexShrink: 0 }}>{initial}</div>
+          <div className="lb-hex" style={{ ...hexBox(38), background: `linear-gradient(135deg,${BG3},${BG2})`, border: `1px solid ${BORDER}`, fontFamily: 'Bebas Neue,sans-serif', fontSize: 16, color: GOLD, flexShrink: 0 }}>{initial}</div>
         )}
         <div style={{ minWidth: 0 }}>
           <div style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.08em', textTransform: 'uppercase', color: '#d7e4f1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -547,7 +547,7 @@ export default function Leaderboard() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                   transition: 'color .2s, background .2s',
                 }}>
-                <div className="lb-hex" style={{ width: 10, height: 10, background: active ? `linear-gradient(135deg, #ffdea4, #c89b3c)` : `linear-gradient(135deg, ${TEAL}, #005049)`, opacity: active ? 1 : 0.5 }}/>
+                <div className="lb-hex" style={{ ...hexBox(10), background: active ? `linear-gradient(135deg, #ffdea4, #c89b3c)` : `linear-gradient(135deg, ${TEAL}, #005049)`, opacity: active ? 1 : 0.5 }}/>
                 {t.label}
               </button>
             );

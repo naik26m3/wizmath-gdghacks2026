@@ -1,7 +1,7 @@
 // Barrel exports for the Hextech UI primitives. Import from
 // '@/components/wizmath/hextech' on any page.
 export { default as Backdrop } from './Backdrop';
-export { default as BrandMark, HEX_RATIO } from './BrandMark';
+export { default as BrandMark } from './BrandMark';
 export { default as BrandWordmark } from './BrandWordmark';
 export { default as Crest } from './Crest';
 export { default as EyebrowDivider } from './EyebrowDivider';
@@ -21,4 +21,7 @@ export {
   fieldStyle,
 } from './Modal';
 
-export { chamfer, chamferTLBR, color, font, microLabel, NAV_HEIGHT } from './tokens';
+export {
+  chamfer, chamferTLBR, color, font, microLabel,
+  HEX_CLIP, HEX_RATIO, hexBox, hexInset, MODAL_WIDTH, NAV_HEIGHT,
+} from './tokens';
