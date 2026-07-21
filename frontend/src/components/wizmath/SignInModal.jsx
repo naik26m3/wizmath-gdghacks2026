@@ -16,7 +16,6 @@ export default function SignInModal() {
       onClose={closeSignInModal}
       label="Sign in to ArcaneMath"
       glyph="gem"
-      size="compact"
       title="WELCOME TO"
       titleAccent="ARCANEMATH"
       subtitle="Sign in to publish your own activities and explore creations from the community."

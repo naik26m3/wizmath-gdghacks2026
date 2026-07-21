@@ -308,7 +308,6 @@ function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
       onClose={onClose}
       label="Publish activity"
       glyph="publish"
-      size="form"
       title="PUBLISH"
       titleAccent="ACTIVITY"
       subtitle="Share your interactive on the Activities page so others can explore it."

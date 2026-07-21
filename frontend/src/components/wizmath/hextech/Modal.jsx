@@ -32,7 +32,6 @@ export default function Modal({
   titleAccent,
   subtitle,
   footnote,
-  size = 'compact',
   tone = 'gold',
   label,
   children,
@@ -77,7 +76,12 @@ export default function Modal({
         position: 'fixed', inset: 0, zIndex: 9999,
         background: 'rgba(1,8,16,0.55)',
         backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        display: 'flex',
+        // Any overflow belongs to the overlay, never the card — so the card
+        // itself never grows a scrollbar. `overflow-x: hidden` is explicit
+        // because setting only one axis to a non-`visible` value silently
+        // promotes the other from `visible` to `auto`.
+        overflowY: 'auto', overflowX: 'hidden',
         padding: 16,
       }}
     >
@@ -91,9 +95,12 @@ export default function Modal({
         onClick={(e) => e.stopPropagation()}
         style={{
           position: 'relative',
-          width: MODAL_WIDTH[size] ?? MODAL_WIDTH.compact,
-          maxWidth: '100%', maxHeight: 'calc(100vh - 32px)',
-          overflowY: 'auto',
+          width: MODAL_WIDTH,
+          maxWidth: '100%',
+          // `margin: auto` centres in both axes while there's room and simply
+          // stops centring when there isn't — unlike `align-items: center`,
+          // which would push the card's top out of reach on a short viewport.
+          margin: 'auto',
           background: color.card,
           border: `1px solid ${t.border}`,
           borderRadius: 4,
