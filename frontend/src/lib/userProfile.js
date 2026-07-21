@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, serverTimestamp, writeBatch } from 'firebase/firestore'
+import { doc, getDoc, serverTimestamp, writeBatch } from 'firebase/firestore'
 import { db } from './firebase.js'
 import { xpToLevel } from './xp.js'
 

@@ -1,9 +1,14 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import AskAISidebar from '@/components/wizmath/AskAISidebar';
 import StarButton from '@/components/wizmath/StarButton';
 import AuthButton from '@/components/wizmath/AuthButton';
+import ActivityMetaFields from '@/components/wizmath/ActivityMetaFields';
+import {
+  TopNav, Modal, ModalActions, ModalButton, ModalError, FieldLabel,
+  chamferTLBR, color, microLabel,
+} from '@/components/wizmath/hextech';
 import { getActivity, toggleStar, updateActivity, deleteActivity, recordActivityView } from '@/lib/activities';
 import { useAuth } from '@/lib/AuthContext';
 import { awardXp } from '@/lib/userProfile';
@@ -15,7 +20,6 @@ function EditActivityModal({ activity, onClose, onSave, isSaving }) {
   const [title, setTitle] = useState(activity?.title || '');
   const [description, setDescription] = useState(activity?.description || '');
   const [error, setError] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleSubmit = async () => {
     if (!title.trim()) {
@@ -30,122 +34,77 @@ function EditActivityModal({ activity, onClose, onSave, isSaving }) {
     }
   };
 
-  const handleAutoGenerate = async () => {
-    if (!title.trim()) {
-      setError('Enter a title first.');
-      return;
+  const autoGenerate = async (titleArg, hintArg) => {
+    const res = await fetch(BACKEND_URL_DESCRIBE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: titleArg, commands: activity?.commands || [], userHint: hintArg }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Backend ${res.status}`);
     }
-    setError('');
-    setIsGenerating(true);
-    try {
-      const res = await fetch(BACKEND_URL_DESCRIBE, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title.trim(), commands: activity?.commands || [], userHint: description.trim() }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `Backend ${res.status}`);
-      }
-      const data = await res.json();
-      if (data.description) setDescription(data.description);
-    } catch (e) {
-      setError(`Auto-generate failed: ${e.message || 'try again'}`);
-    } finally {
-      setIsGenerating(false);
-    }
+    const data = await res.json();
+    return data.description || '';
   };
 
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(6px)' }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#111d26', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, padding: 28, width: 'min(440px, 90vw)', boxShadow: '0 30px 60px rgba(0,0,0,.5)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <div style={{ width: 8, height: 8, borderRadius: 0, background: '#f0bf5c', boxShadow: '0 0 6px #f0bf5c' }}/>
-          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#d7e4f1' }}>
-            EDIT <span style={{ color: '#f0bf5c' }}>ACTIVITY</span>
-          </span>
-        </div>
+    <Modal
+      onClose={onClose}
+      label="Edit activity"
+      glyph="edit"
+      size="form"
+      title="EDIT"
+      titleAccent="ACTIVITY"
+      subtitle="Update the title and description students see on this page."
+    >
+      <ActivityMetaFields
+        title={title} onTitleChange={setTitle}
+        description={description} onDescriptionChange={setDescription}
+        onAutoGenerate={autoGenerate}
+        onError={setError}
+        onSubmitShortcut={handleSubmit}
+        disabled={isSaving}
+        rows={10}
+      />
 
-        <label style={{ display: 'block', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#888', marginBottom: 6 }}>Title *</label>
-        <input
-          autoFocus
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          maxLength={80}
-          style={{ width: '100%', background: '#091428', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 14, outline: 0, marginBottom: 16, boxSizing: 'border-box' }}
-        />
+      <ModalError>{error}</ModalError>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <label style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#888' }}>Description</label>
-          <button
-            type="button"
-            onClick={handleAutoGenerate}
-            disabled={isGenerating || isSaving}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: isGenerating ? 'rgba(67,226,210,.06)' : 'transparent',
-              border: '1px solid rgba(67,226,210,.35)', borderRadius: 0, color: '#43e2d2',
-              padding: '4px 10px', cursor: (isGenerating || isSaving) ? 'not-allowed' : 'pointer',
-              fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase',
-              opacity: (isGenerating || isSaving) ? 0.6 : 1,
-            }}
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
-            {isGenerating ? 'Generating…' : 'Auto-Generate'}
-          </button>
-        </div>
-        <textarea
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          maxLength={3500}
-          rows={10}
-          style={{ width: '100%', background: '#091428', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, lineHeight: '20px', outline: 0, marginBottom: 8, boxSizing: 'border-box', resize: 'vertical' }}
-        />
-
-        {error && (
-          <div style={{ color: '#e25c7a', fontSize: 12, fontFamily: 'Manrope,sans-serif', margin: '8px 0' }}>⚠ {error}</div>
-        )}
-
-        <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-          <button onClick={onClose} disabled={isSaving} style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '10px', cursor: isSaving ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', opacity: isSaving ? 0.5 : 1 }}>
-            Cancel
-          </button>
-          <button onClick={handleSubmit} disabled={isSaving} style={{ flex: 1, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '10px', cursor: isSaving ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', opacity: isSaving ? 0.7 : 1 }}>
-            {isSaving ? 'Saving…' : 'Save Changes'}
-          </button>
-        </div>
-      </div>
-    </div>
+      <ModalActions>
+        <ModalButton onClick={onClose} disabled={isSaving}>Cancel</ModalButton>
+        <ModalButton variant="primary" flex={1.4} onClick={handleSubmit} disabled={isSaving}>
+          {isSaving ? 'Saving…' : 'Save Changes'}
+        </ModalButton>
+      </ModalActions>
+    </Modal>
   );
 }
 
 // ─── Delete Confirmation Modal ──────────────────────────────────────────────
 function DeleteConfirmModal({ title, onCancel, onConfirm, isDeleting }) {
   return (
-    <div onClick={onCancel} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(6px)' }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#111d26', border: '1px solid rgba(226,92,122,.4)', borderRadius: 0, padding: 28, width: 'min(420px, 90vw)', boxShadow: '0 30px 60px rgba(0,0,0,.6)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <div style={{ width: 8, height: 8, borderRadius: 0, background: '#e25c7a', boxShadow: '0 0 6px #e25c7a' }}/>
-          <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 18, letterSpacing: '.18em', color: '#e25c7a' }}>
-            DELETE ACTIVITY?
-          </span>
-        </div>
-        <p style={{ color: '#d7e4f1', fontSize: 14, fontFamily: 'Manrope,sans-serif', margin: '0 0 8px', lineHeight: '22px' }}>
-          You're about to delete <strong style={{ color: '#f0bf5c' }}>"{title}"</strong>. This action cannot be undone.
-        </p>
-        <p style={{ color: '#888', fontSize: 12, fontFamily: 'Manrope,sans-serif', margin: '0 0 22px', lineHeight: '18px' }}>
-          The activity, its star count, and any references to it will be permanently removed.
-        </p>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={onCancel} disabled={isDeleting} style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '10px', cursor: isDeleting ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', opacity: isDeleting ? 0.5 : 1 }}>
-            Cancel
-          </button>
-          <button onClick={onConfirm} disabled={isDeleting} style={{ flex: 1, background: 'linear-gradient(180deg,#e25c7a,#a83456)', border: 0, borderRadius: 0, color: '#fff', padding: '10px', cursor: isDeleting ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', opacity: isDeleting ? 0.7 : 1 }}>
-            {isDeleting ? 'Deleting…' : 'Delete Forever'}
-          </button>
-        </div>
-      </div>
-    </div>
+    <Modal
+      onClose={onCancel}
+      label="Delete activity"
+      glyph="danger"
+      tone="danger"
+      size="compact"
+      title="DELETE"
+      titleAccent="ACTIVITY?"
+      footnote="The activity, its star count, and any references to it will be permanently removed."
+    >
+      <p style={{ color: '#d7e4f1', fontSize: 14, margin: '0 0 4px', lineHeight: '22px', textAlign: 'center' }}>
+        You're about to delete <strong style={{ color: '#f0bf5c' }}>"{title}"</strong>.
+        <br/>This action cannot be undone.
+      </p>
+
+      <ModalActions>
+        <ModalButton onClick={onCancel} disabled={isDeleting}>Cancel</ModalButton>
+        <ModalButton variant="danger" flex={1.4} onClick={onConfirm} disabled={isDeleting}>
+          {isDeleting ? 'Deleting…' : 'Delete Forever'}
+        </ModalButton>
+      </ModalActions>
+    </Modal>
   );
 }
 
@@ -170,14 +129,6 @@ function WagerModal({ open, onClose, onConfirm, isSignedIn, currentXp, onSignIn 
     setWager(safeXp >= MIN_WAGER ? MIN_WAGER : 0);
   }, [open, safeXp]);
 
-  // Esc to close
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
-
   if (!open) return null;
 
   const clampedWager = Math.max(MIN_WAGER, Math.min(safeXp, Math.floor(wager / 5) * 5));
@@ -185,187 +136,103 @@ function WagerModal({ open, onClose, onConfirm, isSignedIn, currentXp, onSignIn 
   const stepUp = () => setWager((w) => Math.min(safeXp, w + 5));
   const setMax = () => setWager(Math.floor(safeXp / 5) * 5);
 
-  const CHAMP = 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)';
-  const CHAMP_SM = 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)';
+  const CHAMP_SM = chamferTLBR(8);
+  const stepBtn = {
+    width: 36, height: 36, background: 'rgba(6,12,20,.8)',
+    border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#f0bf5c',
+    fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, clipPath: CHAMP_SM,
+  };
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(1,8,16,0.55)',
-        backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        animation: 'wagerBackdropIn .22s ease',
-      }}
+    <Modal
+      onClose={onClose}
+      label="Wager your XP"
+      glyph="gem"
+      size="compact"
+      title="WAGER YOUR"
+      titleAccent="XP"
+      subtitle={
+        !isSignedIn ? 'Sign in to wager XP and earn rewards from your answers.' : undefined
+      }
+      footnote="Each correct answer earns XP · each wrong answer costs XP"
     >
-      <style>{`
-        @keyframes wagerBackdropIn { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes wagerCardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        .wager-close-btn:hover { border-color: rgba(240,191,92,.5) !important; color: #f0bf5c !important; }
-        .wager-cancel-btn:hover { background: rgba(255,255,255,.04) !important; border-color: rgba(200,155,60,.45) !important; color: #d7e4f1 !important; }
-      `}</style>
+      {!isSignedIn ? (
+        <ModalActions>
+          <ModalButton onClick={onClose}>Cancel</ModalButton>
+          <ModalButton variant="primary" onClick={() => { onClose(); onSignIn?.(); }}>
+            Sign in to Play
+          </ModalButton>
+        </ModalActions>
+      ) : !canWager ? (
+        <>
+          <p style={{ fontSize: 13, lineHeight: 1.6, color: 'rgba(200,185,122,.55)', margin: '0 0 16px', textAlign: 'center' }}>
+            You need at least <strong style={{ color: '#f0bf5c' }}>{MIN_WAGER} XP</strong> to wager.<br/>
+            Your balance: <strong style={{ color: '#d7e4f1' }}>{safeXp} XP</strong>
+          </p>
+          <p style={{ fontSize: 12, lineHeight: 1.6, color: 'rgba(200,185,122,.35)', margin: '0 0 8px', textAlign: 'center' }}>
+            Earn XP by publishing activities, getting stars, and stacking views.
+          </p>
+          <ModalActions>
+            <ModalButton onClick={onClose}>Cancel</ModalButton>
+            <ModalButton variant="teal" onClick={() => onConfirm(0)}>Play Free</ModalButton>
+          </ModalActions>
+        </>
+      ) : (
+        <>
+          {/* Balance */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '10px 14px', background: 'rgba(67,226,210,.06)', border: '1px solid rgba(67,226,210,.2)', borderRadius: 0, marginBottom: 18, clipPath: CHAMP_SM }}>
+            <span style={{ ...microLabel, letterSpacing: '.16em', color: color.textMuted }}>Your balance</span>
+            <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, letterSpacing: '.06em', color: '#43e2d2' }}>{safeXp} XP</span>
+          </div>
 
-      <div
-        role="dialog" aria-modal="true" aria-label="Wager your XP"
-        onClick={e => e.stopPropagation()}
-        style={{
-          position: 'relative',
-          width: 460, maxWidth: 'calc(100vw - 32px)',
-          background: 'rgba(6,12,20,0.94)',
-          border: '1px solid rgba(240,191,92,0.28)',
-          borderRadius: 4,
-          padding: '36px 40px 28px',
-          boxShadow: '0 0 0 1px rgba(67,226,210,0.06) inset, 0 8px 48px rgba(0,0,0,.7), 0 0 80px rgba(67,226,210,0.04)',
-          fontFamily: 'Manrope,system-ui,sans-serif',
-          color: '#c8b97a',
-          animation: 'wagerCardIn .22s ease',
-        }}
-      >
-        {/* Corner accents */}
-        <div style={{ position: 'absolute', top: -1, left: -1, width: 14, height: 14, borderTop: '1px solid rgba(240,191,92,.5)', borderLeft: '1px solid rgba(240,191,92,.5)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: -1, right: -1, width: 14, height: 14, borderBottom: '1px solid rgba(240,191,92,.5)', borderRight: '1px solid rgba(240,191,92,.5)', pointerEvents: 'none' }} />
-
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="wager-close-btn"
-          aria-label="Close"
-          style={{
-            position: 'absolute', top: 10, right: 10,
-            width: 28, height: 28, borderRadius: '50%',
-            background: 'transparent', border: '1px solid rgba(240,191,92,.15)',
-            color: 'rgba(200,185,122,.5)', fontSize: 18, lineHeight: 1, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'border-color .15s, color .15s',
-          }}
-        >&times;</button>
-
-        {/* Hex brand mark */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-          <svg width="56" height="64" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <filter id="wagerGlow" x="-30%" y="-30%" width="160%" height="160%">
-                <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#43e2d2" floodOpacity="0.6"/>
-              </filter>
-            </defs>
-            <polygon points="28,2 54,16 54,48 28,62 2,48 2,16" fill="none" stroke="#f0bf5c" strokeWidth="1.5" opacity=".8"/>
-            <polygon points="28,8 48,19.5 48,44.5 28,56 8,44.5 8,19.5" fill="none" stroke="rgba(240,191,92,.25)" strokeWidth="1"/>
-            <circle cx="28" cy="32" r="8" fill="#43e2d2" filter="url(#wagerGlow)"/>
-            <circle cx="28" cy="32" r="4" fill="#010A13"/>
-            <circle cx="28" cy="32" r="2" fill="#43e2d2"/>
-          </svg>
-        </div>
-
-        <h2 style={{
-          fontFamily: 'Bebas Neue,Space Grotesk,sans-serif',
-          fontSize: 26, fontWeight: 400, letterSpacing: '.12em',
-          color: '#c8b97a', margin: '0 0 6px', lineHeight: 1.2, textAlign: 'center',
-        }}>
-          WAGER YOUR <span style={{ color: '#f0bf5c' }}>XP</span>
-        </h2>
-
-        {!isSignedIn ? (
-          <>
-            <p style={{ fontSize: 13, lineHeight: 1.6, color: 'rgba(200,185,122,.55)', margin: '0 0 26px', textAlign: 'center' }}>
-              Sign in to wager XP and earn rewards from your answers.
-            </p>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={onClose} className="wager-cancel-btn"
-                style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', clipPath: CHAMP_SM, transition: 'background .15s, border-color .15s, color .15s' }}>
-                Cancel
-              </button>
-              <button onClick={() => { onClose(); onSignIn?.(); }}
-                style={{ flex: 1, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', clipPath: CHAMP_SM }}>
-                Sign in to Play
-              </button>
-            </div>
-          </>
-        ) : !canWager ? (
-          <>
-            <p style={{ fontSize: 13, lineHeight: 1.6, color: 'rgba(200,185,122,.55)', margin: '0 0 16px', textAlign: 'center' }}>
-              You need at least <strong style={{ color: '#f0bf5c' }}>{MIN_WAGER} XP</strong> to wager.<br/>
-              Your balance: <strong style={{ color: '#d7e4f1' }}>{safeXp} XP</strong>
-            </p>
-            <p style={{ fontSize: 12, lineHeight: 1.6, color: 'rgba(200,185,122,.35)', margin: '0 0 24px', textAlign: 'center' }}>
-              Earn XP by publishing activities, getting stars, and stacking views.
-            </p>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={onClose} className="wager-cancel-btn"
-                style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', clipPath: CHAMP_SM, transition: 'background .15s, border-color .15s, color .15s' }}>
-                Cancel
-              </button>
-              <button onClick={() => onConfirm(0)}
-                style={{ flex: 1, background: 'linear-gradient(180deg,#43e2d2,#005049)', border: 0, borderRadius: 0, color: '#002a26', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', clipPath: CHAMP_SM }}>
-                Play Free
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Balance */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '10px 14px', background: 'rgba(67,226,210,.06)', border: '1px solid rgba(67,226,210,.2)', borderRadius: 0, marginBottom: 18, marginTop: 10, clipPath: CHAMP_SM }}>
-              <span style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#888' }}>Your balance</span>
-              <span style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, letterSpacing: '.06em', color: '#43e2d2' }}>{safeXp} XP</span>
-            </div>
-
-            {/* Wager picker */}
-            <label style={{ display: 'block', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#888', marginBottom: 8 }}>
-              Wager amount
-            </label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-              <button onClick={stepDown} disabled={clampedWager <= MIN_WAGER}
-                style={{ width: 36, height: 36, background: 'rgba(6,12,20,.8)', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#f0bf5c', cursor: clampedWager <= MIN_WAGER ? 'not-allowed' : 'pointer', fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, opacity: clampedWager <= MIN_WAGER ? 0.4 : 1, clipPath: CHAMP_SM }}>−</button>
-              <input
-                type="number"
-                value={clampedWager}
-                onChange={(e) => setWager(parseInt(e.target.value, 10) || MIN_WAGER)}
-                min={MIN_WAGER} max={safeXp} step={5}
-                style={{ flex: 1, textAlign: 'center', background: 'rgba(6,12,20,.8)', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#f0bf5c', padding: '8px 10px', fontFamily: 'Bebas Neue,sans-serif', fontSize: 26, letterSpacing: '.06em', outline: 0, clipPath: CHAMP_SM }}
-              />
-              <button onClick={stepUp} disabled={clampedWager >= safeXp}
-                style={{ width: 36, height: 36, background: 'rgba(6,12,20,.8)', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#f0bf5c', cursor: clampedWager >= safeXp ? 'not-allowed' : 'pointer', fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, opacity: clampedWager >= safeXp ? 0.4 : 1, clipPath: CHAMP_SM }}>+</button>
-              <button onClick={setMax}
-                style={{ background: 'transparent', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#aaa', padding: '8px 10px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', clipPath: CHAMP_SM }}>
-                Max
-              </button>
-            </div>
+          {/* Wager picker */}
+          <FieldLabel style={{ marginBottom: 8 }}>Wager amount</FieldLabel>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <button onClick={stepDown} disabled={clampedWager <= MIN_WAGER}
+              style={{ ...stepBtn, cursor: clampedWager <= MIN_WAGER ? 'not-allowed' : 'pointer', opacity: clampedWager <= MIN_WAGER ? 0.4 : 1 }}>−</button>
             <input
-              type="range" min={MIN_WAGER} max={safeXp} step={5} value={clampedWager}
-              onChange={(e) => setWager(parseInt(e.target.value, 10))}
-              style={{ width: '100%', accentColor: '#f0bf5c', marginBottom: 16 }}
+              type="number"
+              value={clampedWager}
+              onChange={(e) => setWager(parseInt(e.target.value, 10) || MIN_WAGER)}
+              min={MIN_WAGER} max={safeXp} step={5}
+              aria-label="Wager amount"
+              style={{ flex: 1, textAlign: 'center', background: 'rgba(6,12,20,.8)', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#f0bf5c', padding: '8px 10px', fontFamily: 'Bebas Neue,sans-serif', fontSize: 26, letterSpacing: '.06em', outline: 0, clipPath: CHAMP_SM }}
             />
+            <button onClick={stepUp} disabled={clampedWager >= safeXp}
+              style={{ ...stepBtn, cursor: clampedWager >= safeXp ? 'not-allowed' : 'pointer', opacity: clampedWager >= safeXp ? 0.4 : 1 }}>+</button>
+            <button onClick={setMax}
+              style={{ ...microLabel, background: 'transparent', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: color.textMuted, padding: '8px 10px', cursor: 'pointer', clipPath: CHAMP_SM }}>
+              Max
+            </button>
+          </div>
+          <input
+            type="range" min={MIN_WAGER} max={safeXp} step={5} value={clampedWager}
+            onChange={(e) => setWager(parseInt(e.target.value, 10))}
+            aria-label="Wager amount slider"
+            style={{ width: '100%', accentColor: '#f0bf5c', marginBottom: 16 }}
+          />
 
-            {/* Payoff preview */}
-            <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
-              <div style={{ flex: 1, padding: '10px 12px', background: 'rgba(95,194,138,.08)', border: '1px solid rgba(95,194,138,.3)', borderRadius: 0, textAlign: 'center', clipPath: CHAMP_SM }}>
-                <div style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#5fc28a', marginBottom: 4 }}>Each correct</div>
-                <div style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, letterSpacing: '.04em', color: '#5fc28a' }}>+{clampedWager} XP</div>
-              </div>
-              <div style={{ flex: 1, padding: '10px 12px', background: 'rgba(226,92,122,.08)', border: '1px solid rgba(226,92,122,.3)', borderRadius: 0, textAlign: 'center', clipPath: CHAMP_SM }}>
-                <div style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#e25c7a', marginBottom: 4 }}>Each wrong</div>
-                <div style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, letterSpacing: '.04em', color: '#e25c7a' }}>−{clampedWager} XP</div>
-              </div>
+          {/* Payoff preview */}
+          <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ flex: 1, padding: '10px 12px', background: 'rgba(95,194,138,.08)', border: '1px solid rgba(95,194,138,.3)', borderRadius: 0, textAlign: 'center', clipPath: CHAMP_SM }}>
+              <div style={{ ...microLabel, fontSize: 10, letterSpacing: '.16em', color: '#5fc28a', marginBottom: 4 }}>Each correct</div>
+              <div style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, letterSpacing: '.04em', color: '#5fc28a' }}>+{clampedWager} XP</div>
             </div>
-
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={onClose} className="wager-cancel-btn"
-                style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', clipPath: CHAMP_SM, transition: 'background .15s, border-color .15s, color .15s' }}>
-                Cancel
-              </button>
-              <button onClick={() => onConfirm(clampedWager)}
-                style={{ flex: 1.4, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '11px', cursor: 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', clipPath: CHAMP_SM, filter: 'drop-shadow(0 0 10px rgba(240,191,92,.35))' }}>
-                Begin Quest
-              </button>
+            <div style={{ flex: 1, padding: '10px 12px', background: 'rgba(226,92,122,.08)', border: '1px solid rgba(226,92,122,.3)', borderRadius: 0, textAlign: 'center', clipPath: CHAMP_SM }}>
+              <div style={{ ...microLabel, fontSize: 10, letterSpacing: '.16em', color: '#e25c7a', marginBottom: 4 }}>Each wrong</div>
+              <div style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 22, letterSpacing: '.04em', color: '#e25c7a' }}>−{clampedWager} XP</div>
             </div>
-          </>
-        )}
+          </div>
 
-        <p style={{ margin: '20px 0 0', fontSize: 11, lineHeight: 1.6, color: 'rgba(200,185,122,.35)', textAlign: 'center' }}>
-          Each correct answer earns XP · each wrong answer costs XP
-        </p>
-      </div>
-    </div>
+          <ModalActions>
+            <ModalButton onClick={onClose}>Cancel</ModalButton>
+            <ModalButton variant="primary" flex={1.4} onClick={() => onConfirm(clampedWager)}>
+              Begin Quest
+            </ModalButton>
+          </ModalActions>
+        </>
+      )}
+    </Modal>
   );
 }
 
@@ -650,23 +517,14 @@ export default function Activity() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: aiCollapsed ? '1fr 44px' : '1fr 320px', height: '100vh', fontFamily: 'Manrope,sans-serif', background: BG, color: '#d7e4f1', overflow: 'hidden' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
         .wiz-font-bebas { font-family:'Bebas Neue',sans-serif; }
-        .wiz-font-space { font-family:'Space Grotesk',sans-serif; }
-        .slope-content::-webkit-scrollbar { width:6px; }
-        .slope-content::-webkit-scrollbar-thumb { background:rgba(180,160,100,.2); border-radius: 0; }
-        .slope-panel { position:relative; background:${BG2}; border:1px solid ${BORDER}; border-radius: 0; padding:28px 32px 40px; margin-bottom:28px; }
-        .slope-panel::before { content:''; position:absolute; left:0; right:0; top:0; height:1px; background:linear-gradient(90deg,transparent,rgba(240,191,92,.5),transparent); border-radius: 0; }
-        .wiz-brand-mark { width:32px; height:32px; position:relative; background:conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
-        .wiz-brand-mark::after { content:''; position:absolute; inset:4px; background:${BG}; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
-        .wiz-brand-mark::before { content:''; position:absolute; inset:0; z-index:1; background:radial-gradient(circle at 50% 50%,#43e2d2 0 20%,transparent 22%); filter:drop-shadow(0 0 5px #43e2d2); }
-        .nav-link { background:none;border:0;border-bottom:1px solid transparent;cursor:pointer;color:#d2c5b1;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;transition:color .2s,border-color .2s; }
-        .nav-link:hover { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
-        .nav-link.active { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
+        .activity-scroll::-webkit-scrollbar { width:6px; }
+        .activity-scroll::-webkit-scrollbar-thumb { background:rgba(180,160,100,.2); border-radius: 0; }
+        .activity-panel { position:relative; background:${BG2}; border:1px solid ${BORDER}; border-radius: 0; padding:28px 32px 40px; margin-bottom:28px; }
+        .activity-panel::before { content:''; position:absolute; left:0; right:0; top:0; height:1px; background:linear-gradient(90deg,transparent,rgba(240,191,92,.5),transparent); border-radius: 0; }
 
-        /* ── Play button (Slope-style gold, full nav-height, with sheen + shimmer) ── */
+        /* ── Play button (gold, fills the nav height, with sheen + shimmer) ── */
         .act-play-btn { --c:20px;
-          align-self:stretch; margin:-18px 0;
           position:relative; overflow:hidden;
           display:flex; align-items:center; justify-content:center; gap:12px;
           padding:0 60px;
@@ -786,35 +644,27 @@ export default function Activity() {
       `}</style>
 
       <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', minWidth: 0, minHeight: 0 }}>
-        {/* Nav */}
-        <nav style={{ display: 'flex', alignItems: 'center', position: 'relative', padding: '22px 36px', borderBottom: '1px solid rgba(200,155,60,.10)', background: 'transparent', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <Link to="/activities" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none' }}>
-              <div className="wiz-brand-mark"/>
-              <span className="wiz-font-bebas" style={{ fontSize: 20, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
-            </Link>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Link to="/leaderboard" style={{ textDecoration: 'none' }}><button className="nav-link">Charts</button></Link>
-              <Link to="/create" style={{ textDecoration: 'none' }}><button className="nav-link">Create</button></Link>
-            </div>
-          </div>
-
-          <button className="act-play-btn" title="Test your understanding — wager XP to begin"
-            onClick={() => setShowWagerModal(true)}
-            style={{ position: 'absolute', left: '50vw', transform: 'translateX(-50%)', top: 0, bottom: 0, height: 'auto', margin: 0 }}>
-            Play
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
-              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>
-            </svg>
-          </button>
-
-          <div style={{ marginLeft: 'auto' }}>
-            <AuthButton />
-          </div>
-        </nav>
+        <TopNav
+          brandTo="/activities"
+          links={[
+            { to: '/activities', label: 'Activities' },
+            { to: '/leaderboard', label: 'Charts' },
+            { to: '/create', label: 'Create' },
+          ]}
+          center={
+            <button className="act-play-btn" title="Test your understanding — wager XP to begin"
+              onClick={() => setShowWagerModal(true)}>
+              Play
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>
+              </svg>
+            </button>
+          }
+          right={<AuthButton />}
+        />
 
         {/* Content */}
-        <div className="slope-content" style={{ overflowY: 'auto', padding: '48px 64px 80px' }}>
+        <div className="activity-scroll" style={{ overflowY: 'auto', padding: '48px 64px 80px' }}>
           <div className="wiz-rise" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, marginBottom: 12 }}>
             <h1 className="wiz-font-bebas" style={{ fontSize: 56, lineHeight: 1, letterSpacing: '.06em', color: '#d7e4f1', margin: 0, flex: 1, minWidth: 0 }}>
               {activity.title}
@@ -890,7 +740,7 @@ export default function Activity() {
           )}
 
           {/* Activity Panel — GeoGebra applet (graph + sliders) */}
-          <section className="slope-panel wiz-rise wiz-rise-d2" style={{ maxWidth: aiCollapsed ? 'calc(100vw - 320px - 128px)' : 'none' }}>
+          <section className="activity-panel wiz-rise wiz-rise-d2" style={{ maxWidth: aiCollapsed ? 'calc(100vw - 320px - 128px)' : 'none' }}>
             <div style={{ background: BG3, border: `1px solid ${BORDER}`, borderRadius: 0, height: 600, overflow: 'hidden' }}>
               <GeoGebraView commands={activity.commands} settings={activity.settings} geogebraXML={activity.geogebraXML} />
             </div>

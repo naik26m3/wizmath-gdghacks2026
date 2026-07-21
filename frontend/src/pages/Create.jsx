@@ -1,8 +1,12 @@
 ﻿import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { publishActivity, getActivity } from '@/lib/activities';
 import { useAuth } from '@/lib/AuthContext';
 import AuthButton from '@/components/wizmath/AuthButton';
+import ActivityMetaFields from '@/components/wizmath/ActivityMetaFields';
+import {
+  TopNav, Modal, ModalActions, ModalButton, ModalError,
+} from '@/components/wizmath/hextech';
 
 const BG = '#010A13';
 const BG2 = '#111d26';
@@ -281,13 +285,10 @@ function AIChatPanel({ onCommands, getCurrentCommands, collapsed, onToggle }) {
 }
 
 // ─── Publish Modal ───────────────────────────────────────────────────────────
-const CHAMP_SM = 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)';
-
 function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleSubmit = async () => {
     if (!title.trim()) {
@@ -302,162 +303,34 @@ function PublishModal({ onClose, onPublish, onAutoGenerate, isPublishing }) {
     }
   };
 
-  const handleAutoGenerate = async () => {
-    if (!title.trim()) {
-      setError('Enter a title first — that helps the AI write a good description.');
-      return;
-    }
-    setError('');
-    setIsGenerating(true);
-    try {
-      const generated = await onAutoGenerate(title.trim(), description.trim());
-      if (generated) setDescription(generated);
-    } catch (e) {
-      setError(`Auto-generate failed: ${e.message || 'try again'}`);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(1,8,16,0.55)',
-        backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        animation: 'publishBackdropIn .22s ease',
-      }}
+    <Modal
+      onClose={onClose}
+      label="Publish activity"
+      glyph="publish"
+      size="form"
+      title="PUBLISH"
+      titleAccent="ACTIVITY"
+      subtitle="Share your interactive on the Activities page so others can explore it."
     >
-      <style>{`
-        @keyframes publishBackdropIn { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes publishCardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        .pub-close-btn:hover { border-color: rgba(240,191,92,.5) !important; color: #f0bf5c !important; }
-        .pub-cancel-btn:hover { background: rgba(255,255,255,.04) !important; border-color: rgba(200,155,60,.45) !important; color: #d7e4f1 !important; }
-      `}</style>
+      <ActivityMetaFields
+        title={title} onTitleChange={setTitle}
+        description={description} onDescriptionChange={setDescription}
+        onAutoGenerate={onAutoGenerate}
+        onError={setError}
+        onSubmitShortcut={handleSubmit}
+        disabled={isPublishing}
+      />
 
-      <div
-        role="dialog" aria-modal="true" aria-label="Publish activity"
-        onClick={e => e.stopPropagation()}
-        style={{
-          position: 'relative',
-          width: 480, maxWidth: 'calc(100vw - 32px)',
-          background: 'rgba(6,12,20,0.94)',
-          border: '1px solid rgba(240,191,92,0.28)',
-          borderRadius: 4,
-          padding: '36px 40px 28px',
-          boxShadow: '0 0 0 1px rgba(67,226,210,0.06) inset, 0 8px 48px rgba(0,0,0,.7), 0 0 80px rgba(67,226,210,0.04)',
-          fontFamily: 'Manrope,system-ui,sans-serif',
-          color: '#c8b97a',
-          animation: 'publishCardIn .22s ease',
-        }}
-      >
-        {/* Corner accents */}
-        <div style={{ position: 'absolute', top: -1, left: -1, width: 14, height: 14, borderTop: '1px solid rgba(240,191,92,.5)', borderLeft: '1px solid rgba(240,191,92,.5)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: -1, right: -1, width: 14, height: 14, borderBottom: '1px solid rgba(240,191,92,.5)', borderRight: '1px solid rgba(240,191,92,.5)', pointerEvents: 'none' }} />
+      <ModalError>{error}</ModalError>
 
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="pub-close-btn"
-          aria-label="Close"
-          style={{
-            position: 'absolute', top: 10, right: 10,
-            width: 28, height: 28, borderRadius: '50%',
-            background: 'transparent', border: '1px solid rgba(240,191,92,.15)',
-            color: 'rgba(200,185,122,.5)', fontSize: 18, lineHeight: 1, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'border-color .15s, color .15s',
-          }}
-        >&times;</button>
-
-        {/* Hex brand mark */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-          <svg width="56" height="64" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <filter id="pubGlow" x="-30%" y="-30%" width="160%" height="160%">
-                <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#f0bf5c" floodOpacity="0.6"/>
-              </filter>
-            </defs>
-            <polygon points="28,2 54,16 54,48 28,62 2,48 2,16" fill="none" stroke="#f0bf5c" strokeWidth="1.5" opacity=".8"/>
-            <polygon points="28,8 48,19.5 48,44.5 28,56 8,44.5 8,19.5" fill="none" stroke="rgba(240,191,92,.25)" strokeWidth="1"/>
-            <path d="M28 24 L28 40 M20 32 L28 24 L36 32" stroke="#f0bf5c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" filter="url(#pubGlow)"/>
-          </svg>
-        </div>
-
-        <h2 style={{
-          fontFamily: 'Bebas Neue,Space Grotesk,sans-serif',
-          fontSize: 26, fontWeight: 400, letterSpacing: '.12em',
-          color: '#c8b97a', margin: '0 0 6px', lineHeight: 1.2, textAlign: 'center',
-        }}>
-          PUBLISH <span style={{ color: '#f0bf5c' }}>ACTIVITY</span>
-        </h2>
-        <p style={{ fontSize: 13, lineHeight: 1.6, color: 'rgba(200,185,122,.55)', margin: '0 0 24px', textAlign: 'center' }}>
-          Share your interactive on the Activities page so others can explore it.
-        </p>
-
-        <label style={{ display: 'block', fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#888', marginBottom: 6 }}>Title *</label>
-        <input
-          autoFocus
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-          placeholder="e.g. Movable circle with sliders"
-          maxLength={80}
-          style={{ width: '100%', background: 'rgba(6,12,20,.8)', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 14, outline: 0, marginBottom: 16, boxSizing: 'border-box', clipPath: CHAMP_SM }}
-        />
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <label style={{ fontFamily: 'Space Grotesk,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#888' }}>Description</label>
-          <button
-            type="button"
-            onClick={handleAutoGenerate}
-            disabled={isGenerating || isPublishing}
-            title="Let Arcane write a description from your title"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: isGenerating ? 'rgba(67,226,210,.06)' : 'transparent',
-              border: '1px solid rgba(67,226,210,.35)',
-              borderRadius: 0, color: '#43e2d2', padding: '4px 10px',
-              cursor: (isGenerating || isPublishing) ? 'not-allowed' : 'pointer',
-              fontFamily: 'Space Grotesk,sans-serif',
-              fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase',
-              opacity: (isGenerating || isPublishing) ? 0.6 : 1,
-              transition: 'background .15s, border-color .15s',
-            }}
-            onMouseEnter={(e) => { if (!isGenerating && !isPublishing) { e.currentTarget.style.background = 'rgba(67,226,210,.08)'; e.currentTarget.style.borderColor = 'rgba(67,226,210,.6)'; } }}
-            onMouseLeave={(e) => { if (!isGenerating && !isPublishing) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(67,226,210,.35)'; } }}
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
-            {isGenerating ? 'Generating…' : 'Auto-Generate'}
-          </button>
-        </div>
-        <textarea
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          placeholder="What does this activity teach? — type a quick hint then click Auto-Generate, or leave blank for the AI to write from scratch."
-          maxLength={3500}
-          rows={8}
-          style={{ width: '100%', background: 'rgba(6,12,20,.8)', border: '1px solid rgba(240,191,92,.2)', borderRadius: 0, color: '#d7e4f1', padding: '10px 12px', fontFamily: 'Manrope,sans-serif', fontSize: 13, lineHeight: '20px', outline: 0, marginBottom: 8, boxSizing: 'border-box', resize: 'vertical' }}
-        />
-
-        {error && (
-          <div style={{ color: '#e25c7a', fontSize: 12, fontFamily: 'Manrope,sans-serif', margin: '8px 0' }}>⚠ {error}</div>
-        )}
-
-        <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-          <button onClick={onClose} disabled={isPublishing} className="pub-cancel-btn"
-            style={{ flex: 1, background: 'transparent', border: '1px solid rgba(200,155,60,.25)', borderRadius: 0, color: '#aaa', padding: '11px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', clipPath: CHAMP_SM, opacity: isPublishing ? 0.5 : 1, transition: 'background .15s, border-color .15s, color .15s' }}>
-            Cancel
-          </button>
-          <button onClick={handleSubmit} disabled={isPublishing}
-            style={{ flex: 1.4, background: 'linear-gradient(180deg,#f0bf5c,#c89b3c)', border: 0, borderRadius: 0, color: '#1a1a1a', padding: '11px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontFamily: 'Space Grotesk,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', clipPath: CHAMP_SM, opacity: isPublishing ? 0.7 : 1, filter: 'drop-shadow(0 0 10px rgba(240,191,92,.35))' }}>
-            {isPublishing ? 'Publishing…' : 'Publish'}
-          </button>
-        </div>
-      </div>
-    </div>
+      <ModalActions>
+        <ModalButton onClick={onClose} disabled={isPublishing}>Cancel</ModalButton>
+        <ModalButton variant="primary" flex={1.4} onClick={handleSubmit} disabled={isPublishing}>
+          {isPublishing ? 'Publishing…' : 'Publish'}
+        </ModalButton>
+      </ModalActions>
+    </Modal>
   );
 }
 
@@ -469,7 +342,6 @@ export default function Create() {
   const activityIdToLoad = searchParams.get('id');
 
   const [aiOpen, setAiOpen] = useState(true);
-  const [commands, setCommands] = useState(/** @type {string[]} */ ([]));
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [loadStatus, setLoadStatus] = useState(activityIdToLoad ? 'loading' : 'idle');
@@ -502,24 +374,16 @@ export default function Create() {
       try { api.setGridVisible(settings.showGrid); } catch (e) { console.warn('setGridVisible failed', e); }
     }
 
-    const applied = [];
+    // The canvas is the source of truth — getLiveCommands() reads it back on
+    // demand, so there's no command list to mirror into React state here.
     for (const cmd of cmds) {
       try {
         const ok = api.evalCommand(cmd);
         console.log('[GeoGebra] evalCommand', JSON.stringify(cmd), '→', ok);
-        if (ok !== false) applied.push(cmd);
       } catch (e) {
         console.warn('[GeoGebra] threw on:', cmd, e);
       }
     }
-
-    setCommands(applied);
-  };
-
-  const handleClearCommands = () => {
-    const api = apiRef.current;
-    if (api) try { api.reset(); } catch {}
-    setCommands([]);
   };
 
   // Load an existing activity from Firestore when /create?id=xxx
@@ -547,7 +411,6 @@ export default function Create() {
         if (typeof activity.geogebraXML === 'string' && activity.geogebraXML.length > 0 && api?.setXML) {
           try {
             api.setXML(activity.geogebraXML);
-            setCommands(getLiveCommands());
           } catch (e) {
             console.warn('[Create] setXML failed on load, falling back to commands:', e);
             handleApplyCommands(activity.commands || [], activity.settings || {});
@@ -563,7 +426,7 @@ export default function Create() {
     };
     tryLoad();
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [activityIdToLoad]);
 
   const handleAutoGenerateDescription = async (titleArg, hintArg) => {
@@ -762,15 +625,8 @@ export default function Create() {
   return (
     <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', height: '100vh', width: '100vw', fontFamily: 'Manrope,sans-serif', background: BG, color: '#d7e4f1', overflow: 'hidden' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
         @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-        .wiz-brand-mark { width:34px; height:34px; position:relative; background:conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); box-shadow:0 0 16px rgba(240,191,92,.25); }
-        .wiz-brand-mark::after { content:''; position:absolute; inset:4px; background:${BG}; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
-        .wiz-brand-mark::before { content:''; position:absolute; inset:0; z-index:1; background:radial-gradient(circle at 50% 50%,#43e2d2 0 20%,transparent 22%); filter:drop-shadow(0 0 5px #43e2d2); }
         .wiz-font-bebas { font-family:'Bebas Neue',sans-serif; }
-        .nav-link { background:none;border:0;border-bottom:1px solid transparent;cursor:pointer;color:#d2c5b1;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;transition:color .2s,border-color .2s; }
-        .nav-link:hover { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
-        .nav-link.active { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
         .publish-btn { position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:8px; background:linear-gradient(105deg,#6b4a0e 0%,#c89b3c 18%,#f0bf5c 38%,#fff4c2 50%,#f0bf5c 62%,#c89b3c 82%,#6b4a0e 100%); background-size:220% 100%; border:none; border-radius:0; color:#010A13; padding:10px 18px; cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px); filter:drop-shadow(0 0 6px rgba(240,191,92,.4)); transition:filter .3s, background-position .5s; }
         .publish-btn::before { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg,rgba(255,255,220,.28) 0%,rgba(255,255,220,.06) 50%,transparent 100%); }
         .publish-btn::after { content:''; position:absolute; top:-10%; left:-80%; width:40%; height:120%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent); transform:skewX(-8deg); transition:none; }
@@ -779,32 +635,30 @@ export default function Create() {
         .publish-btn:active { filter:drop-shadow(0 0 6px rgba(240,191,92,.8)); }
       `}</style>
 
-      {/* Header */}
-      <header className="wiz-rise" style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '22px 36px', borderBottom: '1px solid rgba(200,155,60,.10)', background: 'transparent', flexShrink: 0 }}>
-        <Link to="/activities" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none' }}>
-          <div className="wiz-brand-mark"/>
-          <span className="wiz-font-bebas" style={{ fontSize: 20, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: '#f0bf5c' }}>.</span>DEV</span>
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Link to="/leaderboard" style={{ textDecoration: 'none' }}><button className="nav-link">Charts</button></Link>
-          <button className="nav-link active">Create</button>
-        </div>
-
-        {loadStatus === 'loading' && (
-          <span style={{ color: '#888', fontSize: 11, fontFamily: 'Space Grotesk,sans-serif', letterSpacing: '.12em', textTransform: 'uppercase' }}>Loading activity…</span>
-        )}
-        {loadStatus === 'not-found' && (
-          <span style={{ color: '#e25c7a', fontSize: 11, fontFamily: 'Space Grotesk,sans-serif', letterSpacing: '.12em', textTransform: 'uppercase' }}>Activity not found</span>
-        )}
-
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={() => setShowPublishModal(true)} className="publish-btn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-            Publish
-          </button>
-          <AuthButton />
-        </div>
-      </header>
+      <TopNav
+        brandTo="/activities"
+        links={[
+          { to: '/activities', label: 'Activities' },
+          { to: '/leaderboard', label: 'Charts' },
+          { to: '/create', label: 'Create', active: true },
+        ]}
+        fill={
+          loadStatus === 'loading' ? (
+            <span style={{ color: '#9b8f7d', fontSize: 11, fontFamily: 'Space Grotesk,sans-serif', letterSpacing: '.12em', textTransform: 'uppercase' }}>Loading activity…</span>
+          ) : loadStatus === 'not-found' ? (
+            <span style={{ color: '#e25c7a', fontSize: 11, fontFamily: 'Space Grotesk,sans-serif', letterSpacing: '.12em', textTransform: 'uppercase' }}>Activity not found</span>
+          ) : null
+        }
+        right={
+          <>
+            <button onClick={() => setShowPublishModal(true)} className="publish-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+              Publish
+            </button>
+            <AuthButton />
+          </>
+        }
+      />
 
       {showPublishModal && (
         <PublishModal

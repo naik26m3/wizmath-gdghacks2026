@@ -21,7 +21,14 @@ export default function Home() {
       <ParticleField />
 
       <div className="relative z-[2] flex flex-col h-screen overflow-hidden">
-        <TopNav right={<AuthButton />} />
+        <TopNav
+          links={[
+            { to: '/activities', label: 'Activities' },
+            { to: '/leaderboard', label: 'Charts' },
+            { to: '/create', label: 'Create' },
+          ]}
+          right={<AuthButton />}
+        />
 
         {/* Hero */}
         <section className="relative flex-1 min-h-0 flex flex-col items-center justify-center text-center w-full max-w-[1200px] mx-auto px-6 pt-3 pb-4 overflow-hidden">
