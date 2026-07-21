@@ -1,34 +1,50 @@
 import { Link } from 'react-router-dom';
 import BrandMark from './BrandMark';
 import BrandWordmark from './BrandWordmark';
+import { NAV_HEIGHT, color } from './tokens';
 
-// Top navigation bar — shared header across every page.
+// The shared header. Every page renders this — previously each page hand-rolled
+// its own <nav>, which is how they ended up at four different heights with two
+// different logo sizes.
 //
-// Props:
-//   links     : [{ to, label, active? }]    — primary nav links (rendered between brand and right slot)
-//   right     : ReactNode                   — right-aligned slot (auth button, search, etc.)
-//   brandTo   : string  (default '/')       — where the wordmark links to
-export default function TopNav({ links = [], right, brandTo = '/' }) {
+// Height is fixed (NAV_HEIGHT) rather than derived from padding, so the bar
+// can't grow when AuthButton swaps between its loading / signed-out /
+// signed-in shapes.
+//
+// Slots:
+//   links   : [{ to, label, active?, onClick? }] — primary nav
+//   fill    : ReactNode  — stretches in the free space after the links (search)
+//   center  : ReactNode  — absolutely centred *within the nav*, not the
+//                          viewport, so it stays centred when a sidebar
+//                          changes the column width
+//   right   : ReactNode  — trailing actions (publish / exit / auth)
+export default function TopNav({ links = [], fill, center, right, brandTo = '/', style }) {
   return (
-    <nav className="relative z-10 flex items-center gap-6 px-9 py-5 border-b border-[rgba(200,155,60,.10)]">
-      <Link to={brandTo} className="flex items-center gap-3.5 no-underline">
+    <nav
+      className="hx-topnav"
+      style={{
+        position: 'relative', zIndex: 10,
+        display: 'flex', alignItems: 'center', gap: 24,
+        height: NAV_HEIGHT, flexShrink: 0,
+        padding: '0 36px',
+        borderBottom: `1px solid ${color.borderFaint}`,
+        background: 'transparent',
+        ...style,
+      }}
+    >
+      <Link to={brandTo} style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none', flexShrink: 0 }}>
         <BrandMark />
         <BrandWordmark />
       </Link>
 
       {links.length > 0 && (
-        <div className="flex items-center gap-1">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
           {links.map((l) => (
             <Link
-              key={l.to}
+              key={l.to ?? l.label}
               to={l.to}
-              className={
-                'font-mono text-[12px] font-semibold uppercase tracking-wide-5 ' +
-                'px-3.5 py-2.5 border-b transition-colors no-underline ' +
-                (l.active
-                  ? 'text-hextech-gold border-[rgba(240,191,92,.5)]'
-                  : 'text-hextech-text-variant border-transparent hover:text-hextech-gold hover:border-[rgba(240,191,92,.5)]')
-              }
+              onClick={l.onClick}
+              className={`hx-nav-link${l.active ? ' is-active' : ''}`}
             >
               {l.label}
             </Link>
@@ -36,7 +52,21 @@ export default function TopNav({ links = [], right, brandTo = '/' }) {
         </div>
       )}
 
-      <div className="ml-auto">{right}</div>
+      {fill}
+
+      {center && (
+        <div style={{
+          position: 'absolute', left: '50%', top: 0, bottom: 0,
+          transform: 'translateX(-50%)',
+          display: 'flex', alignItems: 'stretch',
+        }}>
+          {center}
+        </div>
+      )}
+
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+        {right}
+      </div>
     </nav>
   );
 }

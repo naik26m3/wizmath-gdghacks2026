@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useRef, useState } from 'react';
 import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { getActivity } from '@/lib/activities';
+import { TopNav } from '@/components/wizmath/hextech';
 import { useAuth } from '@/lib/AuthContext';
 import { awardXp } from '@/lib/userProfile';
 
@@ -479,30 +480,22 @@ export default function Play() {
   return (
     <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', height: '100vh', width: '100vw', fontFamily: 'Manrope,sans-serif', background: BG, color: '#d7e4f1', overflow: 'hidden' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-        .play-brand-mark { width:34px; height:34px; position:relative; background:conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); box-shadow:0 0 16px rgba(240,191,92,.25); }
-        .play-brand-mark::after { content:''; position:absolute; inset:4px; background:${BG}; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
-        .play-brand-mark::before { content:''; position:absolute; inset:0; z-index:1; background:radial-gradient(circle at 50% 50%,#43e2d2 0 20%,transparent 22%); filter:drop-shadow(0 0 5px #43e2d2); }
         .wiz-font-bebas { font-family:'Bebas Neue',sans-serif; }
-        .play-nav-link { background:none;border:0;border-bottom:1px solid transparent;cursor:pointer;color:#d2c5b1;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;transition:color .2s,border-color .2s; }
-        .play-nav-link:hover { color:#f0bf5c; border-bottom-color:rgba(240,191,92,.5); }
       `}</style>
 
-      {/* Header */}
-      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '22px 36px', borderBottom: '1px solid rgba(200,155,60,.10)', background: 'transparent', flexShrink: 0 }}>
-        <Link to="/activities" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none' }}>
-          <div className="play-brand-mark"/>
-          <span className="wiz-font-bebas" style={{ fontSize: 20, letterSpacing: '.18em', color: '#d7e4f1' }}>ARCANEMATH<span style={{ color: GOLD }}>.</span>DEV</span>
-        </Link>
-        <Link to={id ? `/activity/${id}` : '/activities'} style={{ textDecoration: 'none' }}>
-          <button style={btnExit}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(240,191,92,.45)'; e.currentTarget.style.color = '#d7e4f1'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = '#aaa'; }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-            Exit
-          </button>
-        </Link>
-      </header>
+      <TopNav
+        brandTo="/activities"
+        right={
+          <Link to={id ? `/activity/${id}` : '/activities'} style={{ textDecoration: 'none' }}>
+            <button style={btnExit}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(240,191,92,.45)'; e.currentTarget.style.color = '#d7e4f1'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = '#aaa'; }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+              Exit
+            </button>
+          </Link>
+        }
+      />
 
       {/* Body: GeoGebra | Question */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: 0, overflow: 'hidden' }}>

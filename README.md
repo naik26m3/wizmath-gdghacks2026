@@ -46,9 +46,11 @@ students can play, ask follow-up questions, and earn XP for completing them.
 - **XP and leaderboards** — playing and creating activities earns XP and
   levels; the **Leaderboard** page ranks contributors with **Top Creators**
   and **Top Students** tabs.
-- **Hextech UI** — custom League-of-Legends-inspired component set
-  (BrandMark, GoldButton, GhostButton, ParticleField, TopNav, etc.)
-  layered on top of Tailwind.
+- **Hextech UI** — custom League-of-Legends-inspired design system
+  (`Modal`, `TopNav`, `Sigil`, `BrandMark`, `GoldButton`, `ParticleField`, …)
+  layered on top of Tailwind, with shared tokens for the palette, the
+  chamfered corner shapes, and the fixed header height. Every dialog in the
+  app is one `<Modal>`, and every page header is one `<TopNav>`.
 
 ## Tech stack
 
@@ -140,9 +142,21 @@ backend/
   firestore.rules           # Author-only write rules
 frontend/
   src/
-    pages/                  # Home, Create, Activity, Activities, Leaderboard, SignIn, ...
+    pages/                  # Home, Activities, Create, Activity, Play, Leaderboard, NotFound
     components/wizmath/     # Feature components (AskAISidebar, StarButton, AuthButton, ...)
-    components/wizmath/hextech/  # Hextech UI kit
+    components/wizmath/hextech/  # Design system: Modal, TopNav, Sigil, BrandMark, tokens, ...
     lib/                    # firebase, activities, xp, leaderboard, userProfile, AuthContext
-    api/                    # backend client
+    index.css               # Theme tokens + the CSS the utilities can't express
 ```
+
+### Routes
+
+| Path                  | Page                                             |
+| --------------------- | ------------------------------------------------ |
+| `/`                   | Landing / hero                                    |
+| `/activities`         | Browse and search published activities            |
+| `/create`             | Prompt-to-construction author view                |
+| `/activity/:id`       | Play an activity, with the in-page AI tutor       |
+| `/activity/:id/play`  | Challenge questions, with XP wagering             |
+| `/leaderboard`        | Top Creators / Top Students                       |
+| `/signin`             | Legacy redirect — opens the sign-in modal         |

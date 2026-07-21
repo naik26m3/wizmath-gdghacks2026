@@ -4,6 +4,7 @@ import { collection, query, orderBy, limit as fbLimit, getDocs } from 'firebase/
 import { listActivities } from '@/lib/activities';
 import { db, isFirebaseConfigured } from '@/lib/firebase';
 import AuthButton from '@/components/wizmath/AuthButton';
+import { TopNav } from '@/components/wizmath/hextech';
 import { useAuth } from '@/lib/AuthContext';
 
 const BG = '#010A13';
@@ -432,7 +433,6 @@ export default function Leaderboard() {
   return (
     <div style={{ minHeight: '100vh', background: BG, color: '#d7e4f1', fontFamily: 'Manrope,sans-serif', position: 'relative', overflow: 'hidden' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
         .lb-wrap::before {
           content:""; position: fixed; inset: 0;
           background:
@@ -440,9 +440,6 @@ export default function Leaderboard() {
             radial-gradient(900px 600px at 50% 110%, rgba(240,191,92,.05), transparent 60%);
           pointer-events:none; z-index: 0;
         }
-        .lb-brand-mark { width:34px; height:34px; position:relative; background:conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); box-shadow:0 0 16px rgba(240,191,92,.25); }
-        .lb-brand-mark::after { content:''; position:absolute; inset:4px; background:${BG}; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
-        .lb-brand-mark::before { content:''; position:absolute; inset:0; z-index:1; background:radial-gradient(circle at 50% 50%,#43e2d2 0 20%,transparent 22%); filter:drop-shadow(0 0 5px #43e2d2); }
         .lb-board {
           position: relative;
           background: linear-gradient(180deg, ${BG2}, ${BG3});
@@ -466,10 +463,6 @@ export default function Leaderboard() {
           clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
           display:inline-flex; align-items:center; justify-content:center;
         }
-        .nav-link { background:none; border:0; border-bottom:1px solid transparent; cursor:pointer; color:#d2c5b1; font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; padding:10px 14px; transition:color .2s,border-color .2s; }
-        .nav-link:hover { color:${GOLD}; border-bottom-color:rgba(240,191,92,.5); }
-        .nav-link.active { color:${GOLD}; border-bottom-color:rgba(240,191,92,.5); }
-
         /* ── Animations ── */
         @keyframes lb-rise {
           0%   { opacity: 0; transform: translateY(28px); }
@@ -511,20 +504,16 @@ export default function Leaderboard() {
 
       <Particles />
 
-      {/* Nav */}
-      <nav style={{ display:'flex', alignItems:'center', gap:24, padding:'22px 36px', borderBottom:'1px solid rgba(200,155,60,.10)', background:'transparent', position:'relative', zIndex:2 }}>
-        <Link to="/activities" style={{ display:'flex', alignItems:'center', gap:14, textDecoration:'none' }}>
-          <div className="lb-brand-mark"/>
-          <span style={{ fontFamily:'Bebas Neue,sans-serif', fontSize:20, letterSpacing:'.18em', color:'#d7e4f1' }}>ARCANEMATH<span style={{ color:GOLD }}>.</span>DEV</span>
-        </Link>
-        <div style={{ display:'flex', alignItems:'center', gap:4 }}>
-          <button className="nav-link active">Charts</button>
-          <Link to="/create" style={{ textDecoration:'none' }}><button className="nav-link">Create</button></Link>
-        </div>
-        <div style={{ marginLeft:'auto' }}>
-          <AuthButton />
-        </div>
-      </nav>
+      <TopNav
+        brandTo="/activities"
+        style={{ zIndex: 2 }}
+        links={[
+          { to: '/activities', label: 'Activities' },
+          { to: '/leaderboard', label: 'Charts', active: true },
+          { to: '/create', label: 'Create' },
+        ]}
+        right={<AuthButton />}
+      />
 
       <div className="lb-wrap" style={{ maxWidth: 1080, margin: '0 auto', padding: '50px 40px 80px', position: 'relative', zIndex: 1 }}>
         {/* Title */}

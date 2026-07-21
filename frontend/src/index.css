@@ -5,78 +5,40 @@
 @tailwind utilities;
 
 @layer base {
+  /* Hextech is a single dark theme — these map Tailwind's semantic utilities
+     (bg-background, border-border, …) onto the palette. They used to hold
+     shadcn's light defaults, with `.dark` as a byte-for-byte copy, so
+     `bg-card` resolved to white on a #010A13 page. */
   :root {
-    --font-heading: 'Fredoka', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --font-heading: 'Bebas Neue', sans-serif;
+    --font-body: 'Manrope', system-ui, sans-serif;
 
-    --background: 210 20% 97%;
-    --foreground: 222 24% 12%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 24% 12%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 24% 12%;
-    --primary: 142 65% 38%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 16% 93%;
-    --secondary-foreground: 222 24% 20%;
-    --muted: 210 16% 93%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 38 90% 52%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 214 16% 88%;
-    --input: 214 16% 88%;
-    --ring: 142 65% 38%;
-    --chart-1: 142 65% 38%;
-    --chart-2: 38 90% 52%;
-    --chart-3: 262 72% 58%;
-    --chart-4: 190 80% 42%;
-    --chart-5: 350 72% 55%;
-    --radius: 0.75rem;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 24% 12%;
-    --sidebar-primary: 142 65% 38%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 16% 93%;
-    --sidebar-accent-foreground: 222 24% 20%;
-    --sidebar-border: 214 16% 88%;
-    --sidebar-ring: 142 65% 38%;
-  }
-
-  .dark {
-    --background: 210 20% 97%;
-    --foreground: 222 24% 12%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 24% 12%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 24% 12%;
-    --primary: 142 65% 38%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 16% 93%;
-    --secondary-foreground: 222 24% 20%;
-    --muted: 210 16% 93%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 38 90% 52%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 214 16% 88%;
-    --input: 214 16% 88%;
-    --ring: 142 65% 38%;
-    --chart-1: 142 65% 38%;
-    --chart-2: 38 90% 52%;
-    --chart-3: 262 72% 58%;
-    --chart-4: 190 80% 42%;
-    --chart-5: 350 72% 55%;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 24% 12%;
-    --sidebar-primary: 142 65% 38%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 16% 93%;
-    --sidebar-accent-foreground: 222 24% 20%;
-    --sidebar-border: 214 16% 88%;
-    --sidebar-ring: 142 65% 38%;
+    --background: 205 90% 4%;      /* #010A13 void   */
+    --foreground: 208 46% 90%;     /* #d7e4f1 text   */
+    --card: 202 39% 11%;           /* #111d26        */
+    --card-foreground: 208 46% 90%;
+    --popover: 202 39% 11%;
+    --popover-foreground: 208 46% 90%;
+    --primary: 41 84% 65%;         /* #f0bf5c gold   */
+    --primary-foreground: 40 100% 5%;
+    --secondary: 210 63% 10%;      /* #091428        */
+    --secondary-foreground: 208 46% 90%;
+    --muted: 210 63% 10%;
+    --muted-foreground: 38 11% 55%;/* #9b8f7d outline*/
+    --accent: 174 72% 57%;         /* #43e2d2 teal   */
+    --accent-foreground: 176 100% 8%;
+    --destructive: 345 71% 63%;    /* #e25c7a        */
+    --destructive-foreground: 0 0% 100%;
+    --border: 41 55% 20%;
+    --input: 41 55% 20%;
+    --ring: 41 84% 65%;
+    --chart-1: 41 84% 65%;
+    --chart-2: 174 72% 57%;
+    --chart-3: 203 92% 77%;
+    --chart-4: 146 44% 56%;
+    --chart-5: 345 71% 63%;
+    /* Hextech corners are chamfered, never rounded. */
+    --radius: 0rem;
   }
 }
 
@@ -118,16 +80,24 @@
    conic-gradients, pseudo-element layering, complex clip-paths.
    ────────────────────────────────────────────────────────────────────────── */
 
-/* The brand mark: hex with conic gold rim and teal core gem */
+/* The brand mark: hex with conic gold rim and teal core gem.
+   Sized by <BrandMark>, which supplies --rim-x / --rim-y and a box whose
+   height is width × 2/√3 — the only ratio at which this clip-path is a
+   regular hexagon. The rim insets differ per axis for the same reason: a
+   uniform `inset` scales the inner hex non-uniformly and the gold reads
+   thicker on the flat sides than at the points.
+   The glow is a drop-shadow filter, not box-shadow — clip-path would clip a
+   box-shadow away entirely (which is why the old one never rendered). */
 .hx-brand-mark {
-  width: 34px; height: 34px; position: relative;
+  position: relative;
   background: conic-gradient(from 30deg, #c89b3c, #f0bf5c 25%, #ffdea4 50%, #f0bf5c 75%, #c89b3c);
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-  box-shadow: 0 0 18px rgba(240,191,92,.25);
+  filter: drop-shadow(0 0 7px rgba(240,191,92,.35));
   flex-shrink: 0;
 }
 .hx-brand-mark::after {
-  content: ""; position: absolute; inset: 4px;
+  content: ""; position: absolute;
+  inset: var(--rim-y, 4.6px) var(--rim-x, 4px);
   background: #010A13;
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
 }
@@ -135,6 +105,105 @@
   content: ""; position: absolute; inset: 0; z-index: 1;
   background: radial-gradient(circle at 50% 50%, #43e2d2 0 20%, transparent 22%);
   filter: drop-shadow(0 0 6px #43e2d2);
+}
+
+/* ── Shared header ────────────────────────────────────────────────────────── */
+.hx-nav-link {
+  display: inline-flex; align-items: center;
+  background: none; border: 0; border-bottom: 1px solid transparent;
+  cursor: pointer; text-decoration: none; color: #d2c5b1;
+  font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase;
+  padding: 10px 14px;
+  transition: color .2s, border-color .2s;
+}
+.hx-nav-link:hover,
+.hx-nav-link.is-active { color: #f0bf5c; border-bottom-color: rgba(240,191,92,.5); }
+
+/* The `center` slot is absolutely centred on the bar, so on narrow viewports
+   the links are what give way — not the page's primary action. */
+@media (max-width: 900px) {
+  .hx-topnav .hx-nav-link { display: none; }
+}
+
+/* ── Shared dialog chrome (see components/wizmath/hextech/Modal.jsx) ──────── */
+@keyframes hxModalBackdropIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes hxModalCardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hx-modal-backdrop { animation: hxModalBackdropIn .22s ease; }
+.hx-modal-card     { animation: hxModalCardIn .22s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .hx-modal-backdrop, .hx-modal-card { animation: none; }
+}
+
+.hx-modal-close {
+  position: absolute; top: 10px; right: 10px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: transparent; border: 1px solid rgba(240,191,92,.15);
+  color: rgba(200,185,122,.5);
+  font-size: 18px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s, color .15s;
+}
+.hx-modal-close:hover { border-color: rgba(240,191,92,.5); color: #f0bf5c; }
+
+.hx-modal-btn-ghost:not(:disabled):hover {
+  background: rgba(255,255,255,.04);
+  border-color: rgba(200,155,60,.45);
+  color: #d7e4f1;
+}
+
+/* ── Auth control (nav) ──────────────────────────────────────────────────── */
+.hx-authbtn-signin {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; border: 1px solid rgba(240,191,92,.5); border-radius: 0;
+  color: #f0bf5c; padding: 0 18px; cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600;
+  letter-spacing: .16em; text-transform: uppercase;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  transition: background .2s, color .2s;
+}
+.hx-authbtn-signin:hover { background: #f0bf5c; color: #1a1100; }
+
+.hx-authbtn-signout {
+  width: 100%; text-align: left; background: transparent;
+  border: 1px solid rgba(226,92,122,.25); border-radius: 0;
+  color: #e25c7a; padding: 9px 12px; cursor: pointer; margin-top: 6px;
+  font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  transition: background .2s, border-color .2s;
+}
+.hx-authbtn-signout:hover { background: rgba(226,92,122,.12); border-color: rgba(226,92,122,.55); }
+
+/* "Auto-Generate" — teal secondary action inside the publish/edit dialogs. */
+.hx-autogen-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid rgba(67,226,210,.35); border-radius: 0;
+  color: #43e2d2; padding: 4px 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  transition: background .15s, border-color .15s;
+}
+.hx-autogen-btn:not(:disabled):hover {
+  background: rgba(67,226,210,.08);
+  border-color: rgba(67,226,210,.6);
+}
+
+/* Google's sign-in button keeps its own brand styling by design. */
+.hx-google-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 12px 20px;
+  background: #fff; color: #3c4043;
+  border: 1px solid #dadce0; border-radius: 4px;
+  font-family: Manrope, sans-serif; font-size: 15px; font-weight: 500; letter-spacing: .01em;
+  transition: box-shadow .15s, background .15s;
+}
+.hx-google-btn:not(:disabled):hover {
+  background: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
 }
 
 /* Hex clip — for avatars, badges, mini-crests */
