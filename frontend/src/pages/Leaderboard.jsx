@@ -153,14 +153,17 @@ function PodiumCard({ rank, row, isCreator, isSelf, animDelay = 0 }) {
           background: BG2,
           clipPath: HEX_CLIP,
         }}/>
-        {/* Photo or initial */}
+        {/* Photo or initial.
+            The photo needs a wrapper: <img> is a *replaced* element, so with
+            `width: auto` the absolute-positioning equations fall back to its
+            intrinsic pixel size and ignore right/bottom — it renders at the
+            source image's dimensions instead of filling the inset box. A div
+            stretches correctly, and the image fills it at 100%. */}
         {photo ? (
-          <img src={photo} alt={name} referrerPolicy="no-referrer"
-            style={{
-              position: 'absolute', inset: hexInset(6),
-              objectFit: 'cover',
-              clipPath: HEX_CLIP,
-            }}/>
+          <div style={{ position: 'absolute', inset: hexInset(6), clipPath: HEX_CLIP }}>
+            <img src={photo} alt={name} referrerPolicy="no-referrer"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
+          </div>
         ) : (
           <div style={{
             position: 'absolute', inset: hexInset(6),
