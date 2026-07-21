@@ -40,6 +40,26 @@ export const chamfer = (c = 12) =>
 export const chamferTLBR = (c = 8) =>
   `polygon(${c}px 0, 100% 0, 100% calc(100% - ${c}px), calc(100% - ${c}px) 100%, 0 100%, 0 ${c}px)`;
 
+// ── Hexagon geometry ────────────────────────────────────────────────────────
+// The pointy-top clip-path `polygon(50% 0, 100% 25%, 100% 75%, 50% 100%,
+// 0 75%, 0 25%)` is only a *regular* hexagon when height = width × 2/√3.
+// Sizing one into a square box — which every hexagon in this app used to do —
+// squashes it ~13% vertically.
+export const HEX_RATIO = 2 / Math.sqrt(3); // ≈ 1.1547
+
+/** The pointy-top hexagon clip-path (the CSS class `.hx-hex` is the same shape). */
+export const HEX_CLIP = 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)';
+
+/** Box for a regular hexagon of a given height. Spread onto the style object. */
+export const hexBox = (height) => ({ width: height / HEX_RATIO, height });
+
+/**
+ * Inset for a child clipped to the same hexagon, producing a rim of uniform
+ * visual width `w`. A plain `inset: Npx` scales the inner hexagon unevenly and
+ * reads thicker on the flat left/right edges than at the top/bottom points.
+ */
+export const hexInset = (w) => `${(w * HEX_RATIO).toFixed(2)}px ${w}px`;
+
 // Single source of truth for the header. Fixed rather than padding-derived so
 // the bar can't change height between auth states or across pages.
 export const NAV_HEIGHT = 76;

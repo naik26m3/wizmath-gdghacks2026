@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { HEX_RATIO } from './BrandMark';
+import { HEX_RATIO } from './tokens';
 
 // The hex sigil that crowns every modal — a double hexagon frame with a
 // swappable glyph at its core. Shares its geometry with BrandMark so the
@@ -45,18 +45,19 @@ const GLYPHS = {
   ),
   edit: (glow) => (
     <path
-      d="M22 40 L22.8 35.6 L34.6 23.8 A2.6 2.6 0 0 1 38.2 27.4 L26.4 39.2 Z M32.4 26 L36 29.6"
+      d="M19.9 40 L20.7 35.6 L32.5 23.8 A2.6 2.6 0 0 1 36.1 27.4 L24.3 39.2 Z M30.3 26 L33.9 29.6"
       stroke={GOLD} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
       fill="none" filter={glow}
     />
   ),
+  // Lid, handle, tapered bin — three strokes, no interior slots. Slot lines at
+  // this scale sit ~4px apart at 1.8px wide and smear into a blob.
   danger: (glow) => (
-    <>
-      <path
-        d="M28 23 L28 34" stroke={DANGER} strokeWidth="2.6" strokeLinecap="round" filter={glow}
-      />
-      <circle cx="28" cy="40" r="1.8" fill={DANGER} filter={glow} />
-    </>
+    <path
+      d="M19.5 26.5 L36.5 26.5 M24 26.5 L24 23.5 L32 23.5 L32 26.5 M22 26.5 L23.4 40.5 L32.6 40.5 L34 26.5"
+      stroke={DANGER} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+      fill="none" filter={glow}
+    />
   ),
 };
 
