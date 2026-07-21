@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useRef, useState } from 'react';
 import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { getActivity } from '@/lib/activities';
-import { TopNav } from '@/components/wizmath/hextech';
+import { BrandMark, TopNav } from '@/components/wizmath/hextech';
 import { useAuth } from '@/lib/AuthContext';
 import { awardXp } from '@/lib/userProfile';
 
@@ -163,9 +163,9 @@ function LoadingScreen({ activity }) {
       <style>{`
         @keyframes lb-pulse { 0%,100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(67,226,210,.55)); } 50% { transform: scale(1.08); filter: drop-shadow(0 0 22px rgba(67,226,210,.95)); } }
         @keyframes lb-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .lb-hex { width: 70px; height: 70px; position: relative; background: conic-gradient(from 30deg,#c89b3c,#f0bf5c 25%,#ffdea4 50%,#f0bf5c 75%,#c89b3c); clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); animation: lb-pulse 2s ease-in-out infinite; }
-        .lb-hex::after { content:''; position:absolute; inset:7px; background:${BG}; clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
-        .lb-hex::before { content:''; position:absolute; inset:0; z-index:1; background:radial-gradient(circle at 50% 50%,${TEAL} 0 22%,transparent 24%); }
+        /* Wraps <BrandMark> — the mark itself is the shared component, so this
+           only supplies the conjuring pulse. */
+        .lb-conjure { display: inline-flex; animation: lb-pulse 2s ease-in-out infinite; }
         .lb-orbit { position: absolute; width: 4px; height: 4px; border-radius: 0; background: ${GOLD}; box-shadow: 0 0 8px ${GOLD}; }
         .lb-dot { display: inline-block; width: 6px; height: 6px; margin: 0 3px; background: ${TEAL}; border-radius: 0; animation: lb-bounce 1s infinite; }
         @keyframes lb-bounce { 0%,100% { transform: translateY(0); opacity: .4; } 50% { transform: translateY(-6px); opacity: 1; } }
@@ -179,7 +179,9 @@ function LoadingScreen({ activity }) {
         <div style={{ position: 'absolute', inset: 0, animation: 'lb-orbit 6s linear infinite reverse' }}>
           <div className="lb-orbit" style={{ left: 0, top: '50%', marginTop: -2, background: TEAL, boxShadow: `0 0 8px ${TEAL}` }} />
         </div>
-        <div className="lb-hex" />
+        <div className="lb-conjure">
+          <BrandMark size={76} rim={6} />
+        </div>
       </div>
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontFamily: 'Bebas Neue,sans-serif', fontSize: 26, letterSpacing: '.18em', color: '#d7e4f1' }}>

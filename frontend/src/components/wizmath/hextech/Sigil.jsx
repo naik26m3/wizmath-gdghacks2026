@@ -45,18 +45,21 @@ const GLYPHS = {
   ),
   edit: (glow) => (
     <path
-      d="M22 40 L22.8 35.6 L34.6 23.8 A2.6 2.6 0 0 1 38.2 27.4 L26.4 39.2 Z M32.4 26 L36 29.6"
+      d="M19.9 40 L20.7 35.6 L32.5 23.8 A2.6 2.6 0 0 1 36.1 27.4 L24.3 39.2 Z M30.3 26 L33.9 29.6"
       stroke={GOLD} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
       fill="none" filter={glow}
     />
   ),
   danger: (glow) => (
-    <>
-      <path
-        d="M28 23 L28 34" stroke={DANGER} strokeWidth="2.6" strokeLinecap="round" filter={glow}
-      />
-      <circle cx="28" cy="40" r="1.8" fill={DANGER} filter={glow} />
-    </>
+    <path
+      d="M20 26 L36 26
+         M24.5 26 L24.5 23.5 L31.5 23.5 L31.5 26
+         M22.5 26 L23.7 40.5 L32.3 40.5 L33.5 26
+         M26 30 L26.3 36.5
+         M30 30 L29.7 36.5"
+      stroke={DANGER} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+      fill="none" filter={glow}
+    />
   ),
 };
 
