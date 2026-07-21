@@ -32,7 +32,6 @@ export default function Modal({
   titleAccent,
   subtitle,
   footnote,
-  size = 'compact',
   tone = 'gold',
   label,
   children,
@@ -91,7 +90,7 @@ export default function Modal({
         onClick={(e) => e.stopPropagation()}
         style={{
           position: 'relative',
-          width: MODAL_WIDTH[size] ?? MODAL_WIDTH.compact,
+          width: MODAL_WIDTH,
           maxWidth: '100%', maxHeight: 'calc(100vh - 32px)',
           overflowY: 'auto',
           background: color.card,

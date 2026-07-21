@@ -44,12 +44,11 @@ export const chamferTLBR = (c = 8) =>
 // the bar can't change height between auth states or across pages.
 export const NAV_HEIGHT = 76;
 
-// Two dialog widths, not five. `compact` is for a prompt or a confirmation,
-// `form` for anything with labelled inputs.
-export const MODAL_WIDTH = {
-  compact: 440,
-  form: 480,
-};
+// One dialog width. Every popup in the app is the same card, so a form-bearing
+// dialog is not allowed to be wider than a confirmation — 440 leaves 360px of
+// content inside the 40px side padding, which fits the title input and the
+// description textarea comfortably.
+export const MODAL_WIDTH = 440;
 
 export const font = {
   display: "'Bebas Neue', 'Space Grotesk', sans-serif",

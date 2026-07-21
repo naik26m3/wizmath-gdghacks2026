@@ -53,7 +53,6 @@ function EditActivityModal({ activity, onClose, onSave, isSaving }) {
       onClose={onClose}
       label="Edit activity"
       glyph="edit"
-      size="form"
       title="EDIT"
       titleAccent="ACTIVITY"
       subtitle="Update the title and description students see on this page."
@@ -88,7 +87,6 @@ function DeleteConfirmModal({ title, onCancel, onConfirm, isDeleting }) {
       label="Delete activity"
       glyph="danger"
       tone="danger"
-      size="compact"
       title="DELETE"
       titleAccent="ACTIVITY?"
       footnote="The activity, its star count, and any references to it will be permanently removed."
@@ -148,7 +146,6 @@ function WagerModal({ open, onClose, onConfirm, isSignedIn, currentXp, onSignIn 
       onClose={onClose}
       label="Wager your XP"
       glyph="gem"
-      size="compact"
       title="WAGER YOUR"
       titleAccent="XP"
       subtitle={
